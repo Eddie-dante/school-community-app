@@ -29,7 +29,7 @@ def generate_school_code():
     return 'SCH' + ''.join(random.choices(chars, k=6))
 
 def generate_teacher_code(teacher_name):
-    """Generate teacher code with name"""
+    """Generate teacher code with name - PERMANENT, NEVER EXPIRES"""
     # Clean name and take first 4 letters
     name_part = ''.join(c for c in teacher_name.split()[0][:4].upper() if c.isalnum())
     random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
@@ -64,6 +64,8 @@ def save_all_schools(schools):
 
 def load_school_data(school_code, filename, default):
     """Load data for specific school"""
+    if not school_code:
+        return default
     filepath = DATA_DIR / f"{school_code}_{filename}"
     if filepath.exists():
         try:
@@ -75,8 +77,9 @@ def load_school_data(school_code, filename, default):
 
 def save_school_data(school_code, filename, data):
     """Save data for specific school"""
-    with open(DATA_DIR / f"{school_code}_{filename}", 'w') as f:
-        json.dump(data, f, indent=2)
+    if school_code:
+        with open(DATA_DIR / f"{school_code}_{filename}", 'w') as f:
+            json.dump(data, f, indent=2)
 
 # ============ SESSION STATE ============
 if 'user' not in st.session_state:
@@ -297,12 +300,13 @@ if st.session_state.page == 'welcome':
             **Write it down or copy it now!**
             """)
     
-    # ---------- TAB 3: TEACHER LOGIN ----------
+    # ---------- TAB 3: TEACHER LOGIN (PERMANENT CODES) ----------
     with tab3:
         st.markdown("""
         ### 👨‍🏫 Teacher Login
         
         Enter your **School Code** and **Teacher Code** to access your account.
+        **Teacher codes are PERMANENT and NEVER EXPIRE.**
         """)
         
         col1, col2 = st.columns([1, 1])
@@ -315,7 +319,7 @@ if st.session_state.page == 'welcome':
                                           help="Get this from your school administrator")
                 
                 teacher_code = st.text_input("🔑 Teacher Code", placeholder="e.g., TCH-JOHN4K9M", 
-                                           help="Your personalized teacher registration code")
+                                           help="Your permanent teacher code from admin - NEVER EXPIRES")
                 
                 st.markdown("---")
                 st.markdown("#### 👤 Your Information")
@@ -342,27 +346,46 @@ if st.session_state.page == 'welcome':
                             # Load teacher codes for this school
                             teachers_data = load_school_data(school_code, "teachers.json", [])
                             
-                            # Verify teacher code - PERMANENT, NEVER EXPIRES
-valid_code = False
-teacher_record = None
-
-for t in teachers_data:
-    if t['code'] == teacher_code and t['status'] == 'active':  # <-- ACTIVE, NOT PENDING
-        valid_code = True
-        teacher_record = t
-        # DON'T change status - keep it active for others to use
-        # Just record who used it
-        if 'used_by_list' not in t:
-            t['used_by_list'] = []
-        
-        t['used_by_list'].append({
-            "email": email,
-            "name": fullname,
-            "date": datetime.now().strftime("%Y-%m-%d %H:%M")
-        })
-        t['last_used'] = datetime.now().strftime("%Y-%m-%d %H:%M")
-        t['last_used_by'] = email
-        break
+                            # VERIFY TEACHER CODE - PERMANENT, NEVER EXPIRES
+                            valid_code = False
+                            teacher_record = None
+                            
+                            for t in teachers_data:
+                                if t['code'] == teacher_code and t['status'] == 'active':  # ACTIVE FOREVER
+                                    valid_code = True
+                                    teacher_record = t
+                                    
+                                    # Initialize used_by_list if not exists
+                                    if 'used_by_list' not in t:
+                                        t['used_by_list'] = []
+                                    
+                                    # Add this teacher to the list of users
+                                    t['used_by_list'].append({
+                                        "email": email,
+                                        "name": fullname,
+                                        "date": datetime.now().strftime("%Y-%m-%d %H:%M")
+                                    })
+                                    
+                                    # Update last used info
+                                    t['last_used'] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                                    t['last_used_by'] = email
+                                    
+                                    # Keep status ACTIVE - never change to used/expired
+                                    t['status'] = 'active'
+                                    break
+                            
+                            if not valid_code:
+                                st.error("❌ Invalid teacher code! Please check with your administrator.")
+                                st.stop()
+                            
+                            # Load users
+                            users = load_school_data(school_code, "users.json", [])
+                            
+                            # Check if email exists
+                            if any(u['email'] == email for u in users):
+                                st.error("❌ This email is already registered!")
+                                st.stop()
+                            
                             # Create teacher user
                             new_user = {
                                 "user_id": generate_id("USR"),
@@ -377,6 +400,7 @@ for t in teachers_data:
                                 "joined": datetime.now().strftime("%Y-%m-%d"),
                                 "status": "active",
                                 "school_code": school_code,
+                                "teacher_code_used": teacher_code,
                                 "classes": [],
                                 "groups": []
                             }
@@ -394,6 +418,7 @@ for t in teachers_data:
                             st.session_state.user = new_user
                             st.session_state.page = 'school_dashboard'
                             st.success(f"✅ Welcome, {fullname}! You are now registered as a teacher.")
+                            st.info("ℹ️ This teacher code is PERMANENT and can be used by other teachers too.")
                             st.rerun()
                         else:
                             st.error("❌ School not found! Check your school code.")
@@ -402,9 +427,10 @@ for t in teachers_data:
             st.markdown("""
             ### 📋 How to Register as Teacher
             
-            **1. Get Your Teacher Code**
-            - School administrator will give you a **personalized code**
+            **1. Get Your Permanent Teacher Code**
+            - School administrator gives you a **code that NEVER expires**
             - Format: `TCH-YOURNAME4K9M`
+            - **Same code works for ALL teachers in your department**
             
             **2. Fill the Form**
             - Enter your school code
@@ -418,7 +444,8 @@ for t in teachers_data:
             - Grade students
             
             ### ⚠️ Important
-            Each teacher code can only be used **ONCE**.
+            Teacher codes are **PERMANENT** and **NEVER EXPIRE**.
+            One code can be used by **multiple teachers**.
             Keep your login credentials safe!
             """)
     
@@ -570,6 +597,7 @@ for t in teachers_data:
             - Join study groups
             - View homework and grades
             """)
+
 # ----- SCHOOL DASHBOARD -----
 elif st.session_state.page == 'school_dashboard' and st.session_state.current_school and st.session_state.user:
     school = st.session_state.current_school
@@ -664,8 +692,11 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
             ]
             
             # Count pending requests for teacher
-            teacher_pending = len([r for r in class_requests if r['status'] == 'pending' and r.get('class_name') in [c['name'] for c in classes if c.get('teacher') == user['email']]]) + \
-                            len([r for r in group_requests if r['status'] == 'pending' and r.get('group_name') in [g['name'] for g in groups if g.get('leader') == user['email']]])
+            my_classes = [c['name'] for c in classes if c.get('teacher') == user['email']]
+            my_groups = [g['name'] for g in groups if g.get('leader') == user['email']]
+            
+            teacher_pending = len([r for r in class_requests if r['status'] == 'pending' and r.get('class_name') in my_classes]) + \
+                            len([r for r in group_requests if r['status'] == 'pending' and r.get('group_name') in my_groups])
             
             if teacher_pending > 0:
                 menu_options[5] = f"✅ Approve Requests ({teacher_pending})"
@@ -834,25 +865,26 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
             else:
                 st.info("No announcements yet")
         
-        # ---------- MANAGE TEACHERS ----------
+        # ---------- MANAGE TEACHERS (PERMANENT CODES) ----------
         elif menu == "👥 Manage Teachers":
-            st.title("👨‍🏫 Teacher Management")
+            st.title("👨‍🏫 Teacher Management - PERMANENT CODES")
+            st.success("✅ Teacher codes are PERMANENT and NEVER EXPIRE. One code can be used by multiple teachers.")
             
-            tab1, tab2, tab3 = st.tabs(["➕ Generate Teacher Codes", "✅ Active Teachers", "⏳ Pending Codes"])
+            tab1, tab2, tab3 = st.tabs(["➕ Generate PERMANENT Codes", "✅ Active Teachers", "⏳ Code Usage History"])
             
             with tab1:
-                st.subheader("Generate Teacher Registration Codes")
-                st.markdown("Each teacher gets a **unique code** with their name")
+                st.subheader("Generate PERMANENT Teacher Codes")
+                st.info("ℹ️ These codes NEVER expire and can be used by MULTIPLE teachers.")
                 
                 with st.form("generate_teacher"):
-                    teacher_name = st.text_input("Teacher Full Name", placeholder="e.g., John Smith")
-                    teacher_email = st.text_input("Teacher Email (Optional)", placeholder="teacher@school.edu")
+                    teacher_name = st.text_input("Department/Code Name", placeholder="e.g., Mathematics Department or John Smith")
+                    teacher_email = st.text_input("Department Email (Optional)", placeholder="math@school.edu")
                     teacher_department = st.selectbox(
                         "Department",
-                        ["Mathematics", "Science", "English", "History", "Computer Science", "Physical Education", "Arts", "Other"]
+                        ["Mathematics", "Science", "English", "History", "Computer Science", "Physical Education", "Arts", "Administration", "Other"]
                     )
                     
-                    if st.form_submit_button("🔑 Generate Teacher Code", use_container_width=True):
+                    if st.form_submit_button("🔑 Generate PERMANENT Teacher Code", use_container_width=True):
                         if teacher_name:
                             teacher_code = generate_teacher_code(teacher_name)
                             
@@ -864,36 +896,43 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                                 "department": teacher_department,
                                 "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
                                 "created_by": user['email'],
-                                "status": "pending",
+                                "status": "active",  # ACTIVE FOREVER, NEVER EXPIRES
                                 "used_by": None,
                                 "used_by_name": None,
-                                "activated_date": None
+                                "used_by_list": [],  # Track multiple teachers
+                                "activated_date": None,
+                                "is_permanent": True,  # PERMANENT CODE
+                                "can_be_reused": True  # CAN BE USED BY MULTIPLE TEACHERS
                             })
                             
                             save_school_data(school_code, "teachers.json", teachers_data)
-                            st.success(f"✅ Teacher code generated: **{teacher_code}**")
+                            st.success(f"✅ PERMANENT teacher code generated: **{teacher_code}**")
+                            st.info("ℹ️ This code NEVER expires. Share it with ALL teachers in this department!")
                             st.rerun()
                 
                 st.divider()
-                st.subheader("📋 Recently Generated Codes")
-                pending_codes = [t for t in teachers_data if t['status'] == 'pending'][-5:]
-                if pending_codes:
-                    for t in pending_codes:
+                st.subheader("📋 Recently Generated PERMANENT Codes")
+                permanent_codes = [t for t in teachers_data if t['status'] == 'active'][-5:]
+                if permanent_codes:
+                    for t in permanent_codes:
                         with st.container(border=True):
                             col1, col2, col3 = st.columns([2, 2, 1])
                             with col1:
                                 st.markdown(f"**{t['name']}**")
                                 st.markdown(f"Dept: {t.get('department', 'N/A')}")
+                                st.markdown("**PERMANENT** ✅")
                             with col2:
                                 st.code(t['code'])
+                                used_count = len(t.get('used_by_list', []))
+                                st.caption(f"Used by: {used_count} teacher(s)")
                                 st.caption(f"Created: {t['created'][:16]}")
                             with col3:
-                                if st.button("❌", key=f"del_pending_{t['id']}"):
+                                if st.button("🗑️", key=f"del_perm_{t['id']}"):
                                     teachers_data.remove(t)
                                     save_school_data(school_code, "teachers.json", teachers_data)
                                     st.rerun()
                 else:
-                    st.info("No pending teacher codes")
+                    st.info("No permanent teacher codes generated yet")
             
             with tab2:
                 st.subheader("✅ Active Teachers")
@@ -902,43 +941,34 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                 teacher_users = [u for u in users if u['role'] == 'teacher']
                 
                 if active_teachers or teacher_users:
-                    # Show from teacher codes
+                    # Show teacher codes
                     for t in active_teachers:
                         with st.container(border=True):
                             col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
                             with col1:
-                                st.markdown(f"**{t.get('used_by_name', t['name'])}**")
-                                st.markdown(f"📧 {t.get('used_by', 'N/A')}")
+                                st.markdown(f"**{t['name']}**")
+                                st.markdown(f"Dept: {t.get('department', 'N/A')}")
                             with col2:
-                                st.markdown(f"**Department:** {t.get('department', 'N/A')}")
-                                st.markdown(f"**Joined:** {t.get('activated_date', 'N/A')[:10] if t.get('activated_date') else 'N/A'}")
+                                st.markdown(f"**PERMANENT CODE** ✅")
+                                st.markdown(f"Never expires")
                             with col3:
-                                st.markdown(f"**Code:** `{t['code']}`")
+                                st.code(t['code'])
+                                if t.get('used_by_list'):
+                                    st.caption(f"Used by: {len(t['used_by_list'])} teacher(s)")
+                                    # Show last used
+                                    if t.get('last_used_by'):
+                                        st.caption(f"Last: {t['last_used_by']}")
+                                else:
+                                    st.caption("Not used yet")
                             with col4:
-                                if st.button("🗑️", key=f"del_teacher_{t['id']}"):
-                                    # Remove from teachers data
+                                if st.button("🗑️", key=f"del_teacher_code_{t['id']}"):
                                     teachers_data.remove(t)
                                     save_school_data(school_code, "teachers.json", teachers_data)
-                                    
-                                    # Remove from users
-                                    for u in users:
-                                        if u['email'] == t.get('used_by'):
-                                            users.remove(u)
-                                            break
-                                    save_school_data(school_code, "users.json", users)
-                                    
-                                    # Update stats
-                                    school['stats']['teachers'] -= 1
-                                    all_schools = load_all_schools()
-                                    all_schools[school_code] = school
-                                    save_all_schools(all_schools)
-                                    
-                                    st.success(f"✅ Teacher removed")
                                     st.rerun()
                     
-                    # Show from users table (if any not in teacher codes)
+                    # Show teacher users
                     for u in teacher_users:
-                        if not any(t.get('used_by') == u['email'] for t in active_teachers):
+                        if not any(t.get('last_used_by') == u['email'] for t in active_teachers):
                             with st.container(border=True):
                                 col1, col2, col3 = st.columns([2, 2, 1])
                                 with col1:
@@ -946,6 +976,8 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                                     st.markdown(f"📧 {u['email']}")
                                 with col2:
                                     st.markdown(f"**Joined:** {u['joined']}")
+                                    if u.get('teacher_code_used'):
+                                        st.caption(f"Code: {u['teacher_code_used']}")
                                 with col3:
                                     if st.button("🗑️", key=f"del_teacher_user_{u['user_id']}"):
                                         users.remove(u)
@@ -959,26 +991,21 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                     st.info("No active teachers yet")
             
             with tab3:
-                st.subheader("⏳ Pending Teacher Codes")
-                pending_codes = [t for t in teachers_data if t['status'] == 'pending']
+                st.subheader("📋 Teacher Code Usage History")
                 
-                if pending_codes:
-                    for t in pending_codes:
-                        with st.container(border=True):
-                            col1, col2, col3 = st.columns([2, 2, 1])
-                            with col1:
-                                st.markdown(f"**{t['name']}**")
-                                st.markdown(f"Dept: {t.get('department', 'N/A')}")
-                            with col2:
-                                st.code(t['code'])
-                                st.caption(f"Created: {t['created'][:16]}")
-                            with col3:
-                                if st.button("❌ Delete", key=f"del_pending_admin_{t['id']}"):
-                                    teachers_data.remove(t)
-                                    save_school_data(school_code, "teachers.json", teachers_data)
-                                    st.rerun()
+                codes_with_usage = [t for t in teachers_data if t.get('used_by_list')]
+                
+                if codes_with_usage:
+                    for t in codes_with_usage:
+                        with st.expander(f"📊 {t['code']} - {t['name']}"):
+                            st.markdown(f"**Department:** {t.get('department', 'N/A')}")
+                            st.markdown(f"**Created:** {t['created']}")
+                            st.markdown(f"**Total Teachers Used:** {len(t.get('used_by_list', []))}")
+                            st.markdown("**Teachers who used this code:**")
+                            for teacher in t.get('used_by_list', []):
+                                st.markdown(f"- **{teacher['name']}** ({teacher['email']}) - {teacher['date']}")
                 else:
-                    st.info("No pending teacher codes")
+                    st.info("No teacher codes have been used yet")
         
         # ---------- MANAGE CLASSES ----------
         elif menu == "📚 Manage Classes":
@@ -997,14 +1024,16 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                     # Get active teachers
                     active_teachers_list = []
                     for t in teachers_data:
-                        if t['status'] == 'active' and t.get('used_by'):
-                            teacher_user = next((u for u in users if u['email'] == t['used_by']), None)
-                            if teacher_user:
-                                display_name = f"{teacher_user['fullname']} ({t['used_by']})"
-                                active_teachers_list.append({"display": display_name, "email": t['used_by']})
+                        if t['status'] == 'active' and t.get('used_by_list'):
+                            for teacher_use in t.get('used_by_list', []):
+                                teacher_email = teacher_use['email']
+                                teacher_user = next((u for u in users if u['email'] == teacher_email), None)
+                                if teacher_user:
+                                    display_name = f"{teacher_user['fullname']} ({teacher_email})"
+                                    active_teachers_list.append({"display": display_name, "email": teacher_email})
                     
                     for u in users:
-                        if u['role'] == 'teacher' and u['email'] not in [t['used_by'] for t in teachers_data if t.get('used_by')]:
+                        if u['role'] == 'teacher' and not any(t.get('last_used_by') == u['email'] for t in teachers_data):
                             active_teachers_list.append({"display": f"{u['fullname']} ({u['email']})", "email": u['email']})
                     
                     if active_teachers_list:
@@ -1113,7 +1142,7 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                                 if student_classes:
                                     st.caption(", ".join(student_classes[:2]))
                             with col4:
-                                if st.button("🗑️ Delete", key=f"del_student_{s['user_id']}"):
+                                if st.button("🗑️", key=f"del_student_{s['user_id']}"):
                                     # Remove from users
                                     users.remove(s)
                                     save_school_data(school_code, "users.json", users)
@@ -1223,7 +1252,7 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                                 "created_by_name": user['fullname'],
                                 "created": datetime.now().strftime("%Y-%m-%d"),
                                 "max_members": max_members,
-                                "members": [leader_email],  # Leader is first member
+                                "members": [leader_email],
                                 "pending_requests": [],
                                 "status": "active"
                             }
@@ -1364,16 +1393,17 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
         elif menu == "🔑 Generate Codes":
             st.title("🔑 Code Generation Center")
             
-            tab1, tab2, tab3 = st.tabs(["👨‍🏫 Teacher Codes", "📚 Class Codes", "👥 Group Codes"])
+            tab1, tab2, tab3 = st.tabs(["👨‍🏫 PERMANENT Teacher Codes", "📚 Class Codes", "👥 Group Codes"])
             
             with tab1:
-                st.subheader("Generate Teacher Registration Codes")
+                st.subheader("Generate PERMANENT Teacher Codes")
+                st.success("✅ These codes NEVER expire and can be used by MULTIPLE teachers!")
                 
                 with st.form("gen_teacher_codes"):
-                    teacher_name = st.text_input("Teacher Full Name")
-                    teacher_dept = st.selectbox("Department", ["Mathematics", "Science", "English", "History", "Computer Science", "Other"])
+                    teacher_name = st.text_input("Department/Code Name", placeholder="e.g., Mathematics Department")
+                    teacher_dept = st.selectbox("Department", ["Mathematics", "Science", "English", "History", "Computer Science", "Administration", "Other"])
                     
-                    if st.form_submit_button("🔑 Generate Code", use_container_width=True):
+                    if st.form_submit_button("🔑 Generate PERMANENT Code", use_container_width=True):
                         if teacher_name:
                             teacher_code = generate_teacher_code(teacher_name)
                             
@@ -1383,13 +1413,14 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                                 "code": teacher_code,
                                 "department": teacher_dept,
                                 "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                                "status": "pending",
-                                "used_by": None,
-                                "used_by_name": None
+                                "status": "active",
+                                "used_by_list": [],
+                                "is_permanent": True,
+                                "can_be_reused": True
                             })
                             
                             save_school_data(school_code, "teachers.json", teachers_data)
-                            st.success(f"✅ Code generated: **{teacher_code}**")
+                            st.success(f"✅ PERMANENT code generated: **{teacher_code}**")
                             st.rerun()
             
             with tab2:
@@ -2375,3 +2406,12 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                         user['bio'] = bio
                         st.success("✅ Profile updated!")
                         st.rerun()
+
+# ----- FALLBACK -----
+else:
+    st.error("Something went wrong. Please refresh the page.")
+    if st.button("Start Over"):
+        st.session_state.school = None
+        st.session_state.user = None
+        st.session_state.page = 'welcome'
+        st.rerun()
