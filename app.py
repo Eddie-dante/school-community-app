@@ -94,153 +94,401 @@ if 'menu_index' not in st.session_state:
 if st.session_state.page == 'welcome':
     st.title("🏫 Multi-School Community System")
     
-    col1, col2 = st.columns(2)
+    tab1, tab2, tab3 = st.tabs(["👑 Create School", "👨‍🏫 Teacher Login", "👨‍🎓 Student Login"])
     
-    with col1:
-        st.markdown("""
-        ### 👑 Create New School
+    # ---------- TAB 1: CREATE SCHOOL (ADMIN) ----------
+    with tab1:
+        col1, col2 = st.columns([1.5, 1])
         
-        Start your own school community.
-        You become the **Administrator**.
-        """)
-        
-        with st.form("create_new_school"):
-            school_name = st.text_input("🏫 School Name", placeholder="e.g., Springfield High School")
-            admin_fullname = st.text_input("👤 Your Full Name", placeholder="e.g., Dr. Sarah Johnson")
-            admin_email = st.text_input("📧 Your Email", placeholder="admin@school.edu")
-            admin_password = st.text_input("🔐 Create Password", type="password")
-            confirm_password = st.text_input("🔐 Confirm Password", type="password")
+        with col1:
+            st.markdown("""
+            ### 👑 Create New School
             
-            col1_1, col1_2 = st.columns(2)
-            with col1_1:
-                city = st.text_input("City", placeholder="Springfield")
-            with col1_2:
-                state = st.text_input("State", placeholder="IL")
+            Start your own school community.
+            You become the **Administrator**.
+            """)
             
-            school_motto = st.text_input("✨ School Motto", placeholder="Excellence Through Community")
-            
-            if st.form_submit_button("🚀 CREATE SCHOOL", use_container_width=True):
-                if not school_name or not admin_email or not admin_password:
-                    st.error("❌ Please fill all required fields")
-                elif admin_password != confirm_password:
-                    st.error("❌ Passwords do not match")
-                else:
-                    # Load all schools
-                    all_schools = load_all_schools()
-                    
-                    # Generate unique school code
-                    school_code = generate_school_code()
-                    while school_code in all_schools:
-                        school_code = generate_school_code()
-                    
-                    # Create school
-                    new_school = {
-                        "code": school_code,
-                        "name": school_name,
-                        "city": city,
-                        "state": state,
-                        "motto": school_motto,
-                        "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                        "created_by": admin_email,
-                        "admin_name": admin_fullname,
-                        "admin_email": admin_email,
-                        "stats": {
-                            "students": 0,
-                            "teachers": 0,
-                            "classes": 0,
-                            "groups": 0,
-                            "pending_requests": 0
-                        }
-                    }
-                    
-                    all_schools[school_code] = new_school
-                    save_all_schools(all_schools)
-                    
-                    # Create admin user
-                    users = [{
-                        "user_id": generate_id("USR"),
-                        "email": admin_email,
-                        "fullname": admin_fullname,
-                        "password": hashlib.sha256(admin_password.encode()).hexdigest(),
-                        "role": "admin",
-                        "title": "School Administrator",
-                        "profile_pic": None,
-                        "bio": "School Founder",
-                        "phone": "",
-                        "joined": datetime.now().strftime("%Y-%m-%d"),
-                        "status": "active",
-                        "school_code": school_code
-                    }]
-                    save_school_data(school_code, "users.json", users)
-                    
-                    # Initialize all school data
-                    save_school_data(school_code, "teachers.json", [])
-                    save_school_data(school_code, "students.json", [])
-                    save_school_data(school_code, "classes.json", [])
-                    save_school_data(school_code, "groups.json", [])
-                    save_school_data(school_code, "announcements.json", [])
-                    save_school_data(school_code, "assignments.json", [])
-                    save_school_data(school_code, "resources.json", [])
-                    save_school_data(school_code, "events.json", [])
-                    save_school_data(school_code, "discussions.json", [])
-                    save_school_data(school_code, "grades.json", [])
-                    save_school_data(school_code, "class_requests.json", [])
-                    save_school_data(school_code, "group_requests.json", [])
-                    
-                    st.session_state.current_school = new_school
-                    st.session_state.user = users[0]
-                    st.session_state.page = 'school_dashboard'
-                    st.success(f"✅ School created! Your school code is: **{school_code}**")
-                    st.rerun()
-    
-    with col2:
-        st.markdown("""
-        ### 🔑 Login to School
-        
-        Already have a school account?
-        """)
-        
-        with st.form("login_to_school"):
-            login_email = st.text_input("Email")
-            login_password = st.text_input("Password", type="password")
-            school_code_input = st.text_input("School Code", placeholder="e.g., SCHABC123")
-            
-            if st.form_submit_button("🔐 LOGIN", use_container_width=True):
-                all_schools = load_all_schools()
+            with st.form("create_new_school"):
+                school_name = st.text_input("🏫 School Name", placeholder="e.g., Springfield High School")
+                admin_fullname = st.text_input("👤 Your Full Name", placeholder="e.g., Dr. Sarah Johnson")
+                admin_email = st.text_input("📧 Your Email", placeholder="admin@school.edu")
+                admin_password = st.text_input("🔐 Create Password", type="password")
+                confirm_password = st.text_input("🔐 Confirm Password", type="password")
                 
-                if school_code_input in all_schools:
-                    school = all_schools[school_code_input]
-                    users = load_school_data(school_code_input, "users.json", [])
-                    
-                    hashed_pw = hashlib.sha256(login_password.encode()).hexdigest()
-                    found_user = None
-                    
-                    for u in users:
-                        if u['email'] == login_email and u['password'] == hashed_pw:
-                            found_user = u
-                            break
-                    
-                    if found_user:
-                        st.session_state.current_school = school
-                        st.session_state.user = found_user
-                        st.session_state.page = 'school_dashboard'
-                        st.success(f"✅ Welcome back, {found_user['fullname']}!")
-                        st.rerun()
+                col1_1, col1_2 = st.columns(2)
+                with col1_1:
+                    city = st.text_input("City", placeholder="Springfield")
+                with col1_2:
+                    state = st.text_input("State", placeholder="IL")
+                
+                school_motto = st.text_input("✨ School Motto", placeholder="Excellence Through Community")
+                
+                if st.form_submit_button("🚀 CREATE SCHOOL", use_container_width=True):
+                    if not school_name or not admin_email or not admin_password:
+                        st.error("❌ Please fill all required fields")
+                    elif admin_password != confirm_password:
+                        st.error("❌ Passwords do not match")
                     else:
-                        st.error("❌ Invalid email or password")
-                else:
-                    st.error("❌ School not found")
+                        # Load all schools
+                        all_schools = load_all_schools()
+                        
+                        # Generate unique school code
+                        school_code = generate_school_code()
+                        while school_code in all_schools:
+                            school_code = generate_school_code()
+                        
+                        # Create school
+                        new_school = {
+                            "code": school_code,
+                            "name": school_name,
+                            "city": city,
+                            "state": state,
+                            "motto": school_motto,
+                            "created": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                            "created_by": admin_email,
+                            "admin_name": admin_fullname,
+                            "admin_email": admin_email,
+                            "stats": {
+                                "students": 0,
+                                "teachers": 0,
+                                "classes": 0,
+                                "groups": 0,
+                                "pending_requests": 0
+                            }
+                        }
+                        
+                        all_schools[school_code] = new_school
+                        save_all_schools(all_schools)
+                        
+                        # Create admin user
+                        users = [{
+                            "user_id": generate_id("USR"),
+                            "email": admin_email,
+                            "fullname": admin_fullname,
+                            "password": hashlib.sha256(admin_password.encode()).hexdigest(),
+                            "role": "admin",
+                            "title": "School Administrator",
+                            "profile_pic": None,
+                            "bio": "School Founder",
+                            "phone": "",
+                            "joined": datetime.now().strftime("%Y-%m-%d"),
+                            "status": "active",
+                            "school_code": school_code
+                        }]
+                        save_school_data(school_code, "users.json", users)
+                        
+                        # Initialize all school data
+                        save_school_data(school_code, "teachers.json", [])
+                        save_school_data(school_code, "students.json", [])
+                        save_school_data(school_code, "classes.json", [])
+                        save_school_data(school_code, "groups.json", [])
+                        save_school_data(school_code, "announcements.json", [])
+                        save_school_data(school_code, "assignments.json", [])
+                        save_school_data(school_code, "resources.json", [])
+                        save_school_data(school_code, "events.json", [])
+                        save_school_data(school_code, "discussions.json", [])
+                        save_school_data(school_code, "grades.json", [])
+                        save_school_data(school_code, "class_requests.json", [])
+                        save_school_data(school_code, "group_requests.json", [])
+                        
+                        st.session_state.current_school = new_school
+                        st.session_state.user = users[0]
+                        st.session_state.page = 'school_dashboard'
+                        st.success(f"✅ School created! Your school code is: **{school_code}**")
+                        st.rerun()
         
-        st.markdown("---")
-        st.markdown("### 📋 Available Schools")
-        all_schools = load_all_schools()
-        if all_schools:
-            for code, school in list(all_schools.items())[:5]:
-                st.markdown(f"**{school['name']}** - `{code}`")
-                st.caption(f"Location: {school.get('city', 'N/A')}, {school.get('state', 'N/A')}")
-        else:
-            st.info("No schools yet. Create the first one!")
-
+        with col2:
+            st.markdown("""
+            ### 📋 School Code Format
+            
+            Your school will receive a unique code like:
+            `SCH7K9M2B4`
+            
+            ### 👑 Admin Access Only
+            
+            This tab is for **SCHOOL FOUNDERS** only.
+            
+            Teachers and Students should use the tabs above.
+            """)
+    
+    # ---------- TAB 2: TEACHER LOGIN ----------
+    with tab2:
+        st.markdown("""
+        ### 👨‍🏫 Teacher Login
+        
+        Enter your **School Code** and **Teacher Code** to access your account.
+        """)
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            with st.form("teacher_login_form"):
+                st.markdown("#### 🔐 Login with Teacher Code")
+                
+                school_code = st.text_input("🏫 School Code", placeholder="e.g., SCHABC123", 
+                                          help="Get this from your school administrator")
+                
+                teacher_code = st.text_input("🔑 Teacher Code", placeholder="e.g., TCH-JOHN4K9M", 
+                                           help="Your personalized teacher registration code")
+                
+                st.markdown("---")
+                st.markdown("#### 👤 Your Information")
+                
+                fullname = st.text_input("📝 Your Full Name", placeholder="e.g., John Smith")
+                email = st.text_input("📧 Your Email", placeholder="teacher@school.edu")
+                password = st.text_input("🔐 Create Password", type="password")
+                confirm_password = st.text_input("🔐 Confirm Password", type="password")
+                
+                submitted = st.form_submit_button("✅ REGISTER AS TEACHER", use_container_width=True)
+                
+                if submitted:
+                    if not school_code or not teacher_code or not fullname or not email or not password:
+                        st.error("❌ Please fill all fields")
+                    elif password != confirm_password:
+                        st.error("❌ Passwords do not match")
+                    else:
+                        # Check if school exists
+                        all_schools = load_all_schools()
+                        
+                        if school_code in all_schools:
+                            school = all_schools[school_code]
+                            
+                            # Load teacher codes for this school
+                            teachers_data = load_school_data(school_code, "teachers.json", [])
+                            
+                            # Verify teacher code
+                            valid_code = False
+                            teacher_record = None
+                            
+                            for t in teachers_data:
+                                if t['code'] == teacher_code and t['status'] == 'pending':
+                                    valid_code = True
+                                    teacher_record = t
+                                    t['status'] = 'active'
+                                    t['used_by'] = email
+                                    t['used_by_name'] = fullname
+                                    t['activated_date'] = datetime.now().strftime("%Y-%m-%d %H:%M")
+                                    break
+                            
+                            if not valid_code:
+                                st.error("❌ Invalid or expired teacher code!")
+                                st.stop()
+                            
+                            # Load users
+                            users = load_school_data(school_code, "users.json", [])
+                            
+                            # Check if email exists
+                            if any(u['email'] == email for u in users):
+                                st.error("❌ This email is already registered!")
+                                st.stop()
+                            
+                            # Create teacher user
+                            new_user = {
+                                "user_id": generate_id("USR"),
+                                "email": email,
+                                "fullname": fullname,
+                                "password": hashlib.sha256(password.encode()).hexdigest(),
+                                "role": "teacher",
+                                "title": f"Teacher - {teacher_record.get('department', 'General')}",
+                                "profile_pic": None,
+                                "bio": "",
+                                "phone": "",
+                                "joined": datetime.now().strftime("%Y-%m-%d"),
+                                "status": "active",
+                                "school_code": school_code,
+                                "classes": [],
+                                "groups": []
+                            }
+                            
+                            users.append(new_user)
+                            save_school_data(school_code, "users.json", users)
+                            save_school_data(school_code, "teachers.json", teachers_data)
+                            
+                            # Update school stats
+                            school['stats']['teachers'] = school['stats'].get('teachers', 0) + 1
+                            all_schools[school_code] = school
+                            save_all_schools(all_schools)
+                            
+                            st.session_state.current_school = school
+                            st.session_state.user = new_user
+                            st.session_state.page = 'school_dashboard'
+                            st.success(f"✅ Welcome, {fullname}! You are now registered as a teacher.")
+                            st.rerun()
+                        else:
+                            st.error("❌ School not found! Check your school code.")
+        
+        with col2:
+            st.markdown("""
+            ### 📋 How to Register as Teacher
+            
+            **1. Get Your Teacher Code**
+            - School administrator will give you a **personalized code**
+            - Format: `TCH-YOURNAME4K9M`
+            
+            **2. Fill the Form**
+            - Enter your school code
+            - Enter your teacher code
+            - Create your account
+            
+            **3. Start Teaching**
+            - Access your classes
+            - Post announcements
+            - Create assignments
+            - Grade students
+            
+            ### ⚠️ Important
+            Each teacher code can only be used **ONCE**.
+            Keep your login credentials safe!
+            """)
+    
+    # ---------- TAB 3: STUDENT LOGIN ----------
+    with tab3:
+        st.markdown("""
+        ### 👨‍🎓 Student Login
+        
+        Enter your **School Code** to join or login.
+        """)
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            tab_login, tab_register = st.tabs(["🔐 Login", "🆕 New Student"])
+            
+            with tab_login:
+                with st.form("student_login_form"):
+                    st.markdown("#### Existing Student Login")
+                    
+                    school_code = st.text_input("🏫 School Code", placeholder="e.g., SCHABC123", 
+                                              help="Get this from your school administrator", key="student_login_school")
+                    
+                    email = st.text_input("📧 Email", placeholder="student@example.com", key="student_login_email")
+                    password = st.text_input("🔐 Password", type="password", key="student_login_password")
+                    
+                    if st.form_submit_button("🔐 LOGIN", use_container_width=True):
+                        if not school_code or not email or not password:
+                            st.error("❌ Please fill all fields")
+                        else:
+                            # Check if school exists
+                            all_schools = load_all_schools()
+                            
+                            if school_code in all_schools:
+                                school = all_schools[school_code]
+                                
+                                # Load users
+                                users = load_school_data(school_code, "users.json", [])
+                                
+                                # Check credentials
+                                hashed_pw = hashlib.sha256(password.encode()).hexdigest()
+                                found_user = None
+                                
+                                for u in users:
+                                    if u['email'] == email and u['password'] == hashed_pw and u['role'] == 'student':
+                                        found_user = u
+                                        break
+                                
+                                if found_user:
+                                    st.session_state.current_school = school
+                                    st.session_state.user = found_user
+                                    st.session_state.page = 'school_dashboard'
+                                    st.success(f"✅ Welcome back, {found_user['fullname']}!")
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Invalid email or password")
+                            else:
+                                st.error("❌ School not found! Check your school code.")
+            
+            with tab_register:
+                with st.form("student_register_form"):
+                    st.markdown("#### New Student Registration")
+                    
+                    school_code = st.text_input("🏫 School Code", placeholder="e.g., SCHABC123", 
+                                              help="Get this from your school administrator", key="student_register_school")
+                    
+                    st.markdown("---")
+                    st.markdown("#### 👤 Your Information")
+                    
+                    fullname = st.text_input("📝 Your Full Name", placeholder="e.g., John Smith", key="student_reg_name")
+                    email = st.text_input("📧 Your Email", placeholder="student@example.com", key="student_reg_email")
+                    password = st.text_input("🔐 Create Password", type="password", key="student_reg_pass")
+                    confirm_password = st.text_input("🔐 Confirm Password", type="password", key="student_reg_confirm")
+                    
+                    if st.form_submit_button("✅ REGISTER AS STUDENT", use_container_width=True):
+                        if not school_code or not fullname or not email or not password:
+                            st.error("❌ Please fill all fields")
+                        elif password != confirm_password:
+                            st.error("❌ Passwords do not match")
+                        else:
+                            # Check if school exists
+                            all_schools = load_all_schools()
+                            
+                            if school_code in all_schools:
+                                school = all_schools[school_code]
+                                
+                                # Load users
+                                users = load_school_data(school_code, "users.json", [])
+                                
+                                # Check if email exists
+                                if any(u['email'] == email for u in users):
+                                    st.error("❌ This email is already registered!")
+                                else:
+                                    # Create student user
+                                    new_user = {
+                                        "user_id": generate_id("USR"),
+                                        "email": email,
+                                        "fullname": fullname,
+                                        "password": hashlib.sha256(password.encode()).hexdigest(),
+                                        "role": "student",
+                                        "profile_pic": None,
+                                        "bio": "",
+                                        "phone": "",
+                                        "joined": datetime.now().strftime("%Y-%m-%d"),
+                                        "status": "active",
+                                        "school_code": school_code,
+                                        "classes": [],
+                                        "groups": []
+                                    }
+                                    
+                                    users.append(new_user)
+                                    save_school_data(school_code, "users.json", users)
+                                    
+                                    # Update school stats
+                                    school['stats']['students'] = school['stats'].get('students', 0) + 1
+                                    all_schools[school_code] = school
+                                    save_all_schools(all_schools)
+                                    
+                                    st.session_state.current_school = school
+                                    st.session_state.user = new_user
+                                    st.session_state.page = 'school_dashboard'
+                                    st.success(f"✅ Welcome, {fullname}! Your account has been created.")
+                                    st.rerun()
+                            else:
+                                st.error("❌ School not found! Check your school code.")
+        
+        with col2:
+            st.markdown("""
+            ### 📋 How to Join as Student
+            
+            **1. Get Your School Code**
+            - Ask your teacher or administrator
+            - Format: `SCH7K9M2B4`
+            
+            **2. Choose Your Path**
+            
+            **🔐 Existing Student:**
+            - Login with your email and password
+            
+            **🆕 New Student:**
+            - Register with your full name
+            - Create your account
+            - Start joining classes!
+            
+            ### 🎯 After Registration
+            
+            - Browse available classes
+            - Request to join classes
+            - Join study groups
+            - View homework and grades
+            """)
 # ----- SCHOOL DASHBOARD -----
 elif st.session_state.page == 'school_dashboard' and st.session_state.current_school and st.session_state.user:
     school = st.session_state.current_school
