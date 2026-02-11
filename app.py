@@ -94,10 +94,89 @@ if 'menu_index' not in st.session_state:
 if st.session_state.page == 'welcome':
     st.title("🏫 Multi-School Community System")
     
-    tab1, tab2, tab3 = st.tabs(["👑 Create School", "👨‍🏫 Teacher Login", "👨‍🎓 Student Login"])
+    tab1, tab2, tab3, tab4 = st.tabs(["👑 Admin Login", "🏫 Create School", "👨‍🏫 Teacher Login", "👨‍🎓 Student Login"])
     
-    # ---------- TAB 1: CREATE SCHOOL (ADMIN) ----------
+    # ---------- TAB 1: ADMIN LOGIN ----------
     with tab1:
+        st.markdown("""
+        ### 👑 Administrator Login
+        
+        Login to manage your existing school.
+        """)
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            with st.form("admin_login_form"):
+                st.markdown("#### 🔐 School Admin Access")
+                
+                school_code = st.text_input("🏫 School Code", placeholder="e.g., SCHABC123", 
+                                          help="Your school's unique code")
+                
+                admin_email = st.text_input("📧 Admin Email", placeholder="admin@school.edu")
+                admin_password = st.text_input("🔐 Password", type="password")
+                
+                if st.form_submit_button("🔑 LOGIN AS ADMIN", use_container_width=True):
+                    if not school_code or not admin_email or not admin_password:
+                        st.error("❌ Please fill all fields")
+                    else:
+                        # Check if school exists
+                        all_schools = load_all_schools()
+                        
+                        if school_code in all_schools:
+                            school = all_schools[school_code]
+                            
+                            # Verify it's the admin
+                            if school['admin_email'] == admin_email:
+                                # Load users
+                                users = load_school_data(school_code, "users.json", [])
+                                
+                                # Find admin user
+                                hashed_pw = hashlib.sha256(admin_password.encode()).hexdigest()
+                                admin_user = None
+                                
+                                for u in users:
+                                    if u['email'] == admin_email and u['password'] == hashed_pw and u['role'] == 'admin':
+                                        admin_user = u
+                                        break
+                                
+                                if admin_user:
+                                    st.session_state.current_school = school
+                                    st.session_state.user = admin_user
+                                    st.session_state.page = 'school_dashboard'
+                                    st.success(f"✅ Welcome back, {admin_user['fullname']}!")
+                                    st.rerun()
+                                else:
+                                    st.error("❌ Invalid admin password")
+                            else:
+                                st.error("❌ This email is not the school administrator")
+                        else:
+                            st.error("❌ School not found! Check your school code.")
+        
+        with col2:
+            st.markdown("""
+            ### 📋 Admin Access Only
+            
+            This login is for **SCHOOL ADMINISTRATORS** only.
+            
+            **You are the admin if:**
+            - You created the school
+            - You have the admin email
+            - You manage teachers and classes
+            
+            **Don't have a school?**
+            Go to the **Create School** tab to start your own school community.
+            """)
+            
+            st.info("""
+            **Demo Admin Login:**
+            - School Code: Your school code
+            - Email: The email you used to create the school
+            - Password: The password you set
+            """)
+    
+    # ---------- TAB 2: CREATE SCHOOL ----------
+    with tab2:
         col1, col2 = st.columns([1.5, 1])
         
         with col1:
@@ -109,19 +188,19 @@ if st.session_state.page == 'welcome':
             """)
             
             with st.form("create_new_school"):
-                school_name = st.text_input("🏫 School Name", placeholder="e.g., Springfield High School")
-                admin_fullname = st.text_input("👤 Your Full Name", placeholder="e.g., Dr. Sarah Johnson")
-                admin_email = st.text_input("📧 Your Email", placeholder="admin@school.edu")
+                school_name = st.text_input("🏫 School Name", placeholder="e.g., Nqatho Sec Sch")
+                admin_fullname = st.text_input("👤 Your Full Name", placeholder="e.g., Wanjiku Edwin Guchu")
+                admin_email = st.text_input("📧 Your Email", placeholder="eddiegucci08@gmail.com")
                 admin_password = st.text_input("🔐 Create Password", type="password")
                 confirm_password = st.text_input("🔐 Confirm Password", type="password")
                 
                 col1_1, col1_2 = st.columns(2)
                 with col1_1:
-                    city = st.text_input("City", placeholder="Springfield")
+                    city = st.text_input("City", placeholder="Nairobi")
                 with col1_2:
-                    state = st.text_input("State", placeholder="IL")
+                    state = st.text_input("State/Province", placeholder="Nairobi")
                 
-                school_motto = st.text_input("✨ School Motto", placeholder="Excellence Through Community")
+                school_motto = st.text_input("✨ School Motto", placeholder="DTS")
                 
                 if st.form_submit_button("🚀 CREATE SCHOOL", use_container_width=True):
                     if not school_name or not admin_email or not admin_password:
@@ -199,20 +278,27 @@ if st.session_state.page == 'welcome':
         
         with col2:
             st.markdown("""
-            ### 📋 School Code Format
+            ### 📋 Your School Credentials
             
-            Your school will receive a unique code like:
-            `SCH7K9M2B4`
+            **After creation, you will receive:**
             
-            ### 👑 Admin Access Only
+            ```
+            🔑 SCHOOL CODE: SCH7K9M2B4
+            👑 ADMIN EMAIL: your@email.com
+            ```
             
-            This tab is for **SCHOOL FOUNDERS** only.
+            ### 🎯 Save This Code!
             
-            Teachers and Students should use the tabs above.
+            You will need your school code to:
+            - Login as admin
+            - Give to teachers
+            - Give to students
+            
+            **Write it down or copy it now!**
             """)
     
-    # ---------- TAB 2: TEACHER LOGIN ----------
-    with tab2:
+    # ---------- TAB 3: TEACHER LOGIN ----------
+    with tab3:
         st.markdown("""
         ### 👨‍🏫 Teacher Login
         
@@ -225,7 +311,7 @@ if st.session_state.page == 'welcome':
             with st.form("teacher_login_form"):
                 st.markdown("#### 🔐 Login with Teacher Code")
                 
-                school_code = st.text_input("🏫 School Code", placeholder="e.g., SCHABC123", 
+                school_code = st.text_input("🏫 School Code", placeholder="e.g., SCH7K9M2B4", 
                                           help="Get this from your school administrator")
                 
                 teacher_code = st.text_input("🔑 Teacher Code", placeholder="e.g., TCH-JOHN4K9M", 
@@ -341,8 +427,8 @@ if st.session_state.page == 'welcome':
             Keep your login credentials safe!
             """)
     
-    # ---------- TAB 3: STUDENT LOGIN ----------
-    with tab3:
+    # ---------- TAB 4: STUDENT LOGIN ----------
+    with tab4:
         st.markdown("""
         ### 👨‍🎓 Student Login
         
@@ -358,7 +444,7 @@ if st.session_state.page == 'welcome':
                 with st.form("student_login_form"):
                     st.markdown("#### Existing Student Login")
                     
-                    school_code = st.text_input("🏫 School Code", placeholder="e.g., SCHABC123", 
+                    school_code = st.text_input("🏫 School Code", placeholder="e.g., SCH7K9M2B4", 
                                               help="Get this from your school administrator", key="student_login_school")
                     
                     email = st.text_input("📧 Email", placeholder="student@example.com", key="student_login_email")
@@ -401,7 +487,7 @@ if st.session_state.page == 'welcome':
                 with st.form("student_register_form"):
                     st.markdown("#### New Student Registration")
                     
-                    school_code = st.text_input("🏫 School Code", placeholder="e.g., SCHABC123", 
+                    school_code = st.text_input("🏫 School Code", placeholder="e.g., SCH7K9M2B4", 
                                               help="Get this from your school administrator", key="student_register_school")
                     
                     st.markdown("---")
