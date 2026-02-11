@@ -342,32 +342,27 @@ if st.session_state.page == 'welcome':
                             # Load teacher codes for this school
                             teachers_data = load_school_data(school_code, "teachers.json", [])
                             
-                            # Verify teacher code
-                            valid_code = False
-                            teacher_record = None
-                            
-                            for t in teachers_data:
-                                if t['code'] == teacher_code and t['status'] == 'pending':
-                                    valid_code = True
-                                    teacher_record = t
-                                    t['status'] = 'active'
-                                    t['used_by'] = email
-                                    t['used_by_name'] = fullname
-                                    t['activated_date'] = datetime.now().strftime("%Y-%m-%d %H:%M")
-                                    break
-                            
-                            if not valid_code:
-                                st.error("❌ Invalid or expired teacher code!")
-                                st.stop()
-                            
-                            # Load users
-                            users = load_school_data(school_code, "users.json", [])
-                            
-                            # Check if email exists
-                            if any(u['email'] == email for u in users):
-                                st.error("❌ This email is already registered!")
-                                st.stop()
-                            
+                            # Verify teacher code - PERMANENT, NEVER EXPIRES
+valid_code = False
+teacher_record = None
+
+for t in teachers_data:
+    if t['code'] == teacher_code and t['status'] == 'active':  # <-- ACTIVE, NOT PENDING
+        valid_code = True
+        teacher_record = t
+        # DON'T change status - keep it active for others to use
+        # Just record who used it
+        if 'used_by_list' not in t:
+            t['used_by_list'] = []
+        
+        t['used_by_list'].append({
+            "email": email,
+            "name": fullname,
+            "date": datetime.now().strftime("%Y-%m-%d %H:%M")
+        })
+        t['last_used'] = datetime.now().strftime("%Y-%m-%d %H:%M")
+        t['last_used_by'] = email
+        break
                             # Create teacher user
                             new_user = {
                                 "user_id": generate_id("USR"),
