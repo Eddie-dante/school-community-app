@@ -28,13 +28,6 @@ def generate_school_code():
     chars = string.ascii_uppercase + string.digits
     return 'SCH' + ''.join(random.choices(chars, k=6))
 
-def generate_teacher_code(teacher_name):
-    """Generate teacher code with name - PERMANENT, NEVER EXPIRES"""
-    # Clean name and take first 4 letters
-    name_part = ''.join(c for c in teacher_name.split()[0][:4].upper() if c.isalnum())
-    random_part = ''.join(random.choices(string.ascii_uppercase + string.digits, k=4))
-    return f"TCH-{name_part}{random_part}"
-
 def generate_class_code():
     """Generate class code"""
     return 'CLS' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
@@ -318,8 +311,8 @@ if st.session_state.page == 'welcome':
                 school_code = st.text_input("🏫 School Code", placeholder="e.g., SCH7K9M2B4", 
                                           help="Get this from your school administrator")
                 
-                teacher_code = st.text_input("🔑 Teacher Code", placeholder="e.g., TCH-JOHN4K9M", 
-                                           help="Your permanent teacher code from admin - NEVER EXPIRES")
+                teacher_code = st.text_input("🔑 Teacher Code", placeholder="e.g., MATH-DEPT, FORM1-2024, MR-JOHNSON", 
+                                           help="Your custom teacher code from admin - NEVER EXPIRES")
                 
                 st.markdown("---")
                 st.markdown("#### 👤 Your Information")
@@ -346,12 +339,12 @@ if st.session_state.page == 'welcome':
                             # Load teacher codes for this school
                             teachers_data = load_school_data(school_code, "teachers.json", [])
                             
-                            # VERIFY TEACHER CODE - PERMANENT, NEVER EXPIRES
+                            # VERIFY TEACHER CODE - ANY CUSTOM CODE, PERMANENT, NEVER EXPIRES
                             valid_code = False
                             teacher_record = None
                             
                             for t in teachers_data:
-                                if t['code'] == teacher_code and t['status'] == 'active':  # ACTIVE FOREVER
+                                if t['code'] == teacher_code.upper() and t['status'] == 'active':
                                     valid_code = True
                                     teacher_record = t
                                     
@@ -376,6 +369,7 @@ if st.session_state.page == 'welcome':
                             
                             if not valid_code:
                                 st.error("❌ Invalid teacher code! Please check with your administrator.")
+                                st.info("💡 Teacher codes are created by your administrator. They can be anything like: MATH-DEPT, FORM1-TEACHERS, MR-JOHNSON, etc.")
                                 st.stop()
                             
                             # Load users
@@ -400,7 +394,7 @@ if st.session_state.page == 'welcome':
                                 "joined": datetime.now().strftime("%Y-%m-%d"),
                                 "status": "active",
                                 "school_code": school_code,
-                                "teacher_code_used": teacher_code,
+                                "teacher_code_used": teacher_code.upper(),
                                 "classes": [],
                                 "groups": []
                             }
@@ -427,9 +421,9 @@ if st.session_state.page == 'welcome':
             st.markdown("""
             ### 📋 How to Register as Teacher
             
-            **1. Get Your Permanent Teacher Code**
-            - School administrator gives you a **code that NEVER expires**
-            - Format: `TCH-YOURNAME4K9M`
+            **1. Get Your Custom Teacher Code**
+            - School administrator gives you a **code they created**
+            - Examples: `MATH-DEPT`, `FORM1-2024`, `MR-JOHNSON`
             - **Same code works for ALL teachers in your department**
             
             **2. Fill the Form**
@@ -674,7 +668,7 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
             if pending_count > 0:
                 menu_options[6] = f"✅ Approval Requests ({pending_count})"
             
-            menu = st.radio("", menu_options, index=st.session_state.menu_index)
+            menu = st.radio("", menu_options, index=st.session_state.menu_index, key="admin_menu")
         
         # TEACHER MENU
         elif user['role'] == 'teacher':
@@ -701,7 +695,7 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
             if teacher_pending > 0:
                 menu_options[5] = f"✅ Approve Requests ({teacher_pending})"
             
-            menu = st.radio("", menu_options, index=st.session_state.menu_index)
+            menu = st.radio("", menu_options, index=st.session_state.menu_index, key="teacher_menu")
         
         # STUDENT MENU
         else:
@@ -716,7 +710,7 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                 "📊 My Grades",
                 "👤 My Profile"
             ]
-            menu = st.radio("", menu_options, index=st.session_state.menu_index)
+            menu = st.radio("", menu_options, index=st.session_state.menu_index, key="student_menu")
         
         st.markdown("---")
         
@@ -865,74 +859,148 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
             else:
                 st.info("No announcements yet")
         
-        # ---------- MANAGE TEACHERS (PERMANENT CODES) ----------
+        # ---------- MANAGE TEACHERS (CUSTOM CODES) ----------
         elif menu == "👥 Manage Teachers":
-            st.title("👨‍🏫 Teacher Management - PERMANENT CODES")
-            st.success("✅ Teacher codes are PERMANENT and NEVER EXPIRE. One code can be used by multiple teachers.")
+            st.title("👨‍🏫 Teacher Management - CUSTOM CODES")
+            st.success("✅ You can create ANY teacher code you want! Codes are PERMANENT and NEVER expire.")
             
-            tab1, tab2, tab3 = st.tabs(["➕ Generate PERMANENT Codes", "✅ Active Teachers", "⏳ Code Usage History"])
+            tab1, tab2, tab3 = st.tabs(["🔑 Create Custom Codes", "✅ Active Teachers", "📋 Code Usage History"])
             
             with tab1:
-                st.subheader("Generate PERMANENT Teacher Codes")
-                st.info("ℹ️ These codes NEVER expire and can be used by MULTIPLE teachers.")
+                st.subheader("🔑 Create Your Own Teacher Codes")
+                st.info("ℹ️ Create ANY code you want. These codes NEVER expire and can be used by MULTIPLE teachers.")
                 
-                with st.form("generate_teacher"):
-                    teacher_name = st.text_input("Department/Code Name", placeholder="e.g., Mathematics Department or John Smith")
-                    teacher_email = st.text_input("Department Email (Optional)", placeholder="math@school.edu")
-                    teacher_department = st.selectbox(
-                        "Department",
-                        ["Mathematics", "Science", "English", "History", "Computer Science", "Physical Education", "Arts", "Administration", "Other"]
-                    )
+                col1, col2 = st.columns([1, 1])
+                
+                with col1:
+                    with st.form("create_custom_teacher_code"):
+                        st.markdown("#### ✏️ Create Custom Code")
+                        
+                        code_name = st.text_input("📝 Code Name/Description", placeholder="e.g., Mathematics Department, Form 1 Teachers, John Smith")
+                        custom_code = st.text_input("🔑 Custom Teacher Code", placeholder="e.g., MATH-DEPT, FORM1-2024, MR-JOHNSON",
+                                                  help="Create any code you want! Use letters, numbers, and hyphens.")
+                        
+                        teacher_department = st.selectbox(
+                            "🏢 Department",
+                            ["Mathematics", "Science", "English", "History", "Computer Science", 
+                             "Physical Education", "Arts", "Administration", "Form 1", "Form 2", 
+                             "Form 3", "Form 4", "Board of Governors", "PTA", "Other"]
+                        )
+                        
+                        col_btn1, col_btn2 = st.columns(2)
+                        with col_btn1:
+                            submitted = st.form_submit_button("✅ CREATE CUSTOM CODE", use_container_width=True)
+                        
+                        if submitted:
+                            if not code_name:
+                                st.error("❌ Please enter a code name/description")
+                            elif not custom_code:
+                                st.error("❌ Please enter your custom code")
+                            else:
+                                # Check if code already exists
+                                code_exists = False
+                                for t in teachers_data:
+                                    if t['code'] == custom_code.upper():
+                                        code_exists = True
+                                        break
+                                
+                                if code_exists:
+                                    st.error(f"❌ Code '{custom_code.upper()}' already exists! Please choose another one.")
+                                else:
+                                    teachers_data.append({
+                                        "id": generate_id("TCH"),
+                                        "name": code_name,
+                                        "code": custom_code.upper(),
+                                        "department": teacher_department,
+                                        "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                                        "created_by": user['email'],
+                                        "status": "active",
+                                        "used_by": None,
+                                        "used_by_name": None,
+                                        "used_by_list": [],
+                                        "is_permanent": True,
+                                        "can_be_reused": True,
+                                        "is_custom": True
+                                    })
+                                    
+                                    save_school_data(school_code, "teachers.json", teachers_data)
+                                    st.success(f"✅ Custom teacher code created: **{custom_code.upper()}**")
+                                    st.info(f"ℹ️ This code is for: {code_name} | Department: {teacher_department}")
+                                    st.balloons()
+                                    st.rerun()
+                
+                with col2:
+                    st.markdown("""
+                    ### 📋 Code Creation Examples
                     
-                    if st.form_submit_button("🔑 Generate PERMANENT Teacher Code", use_container_width=True):
-                        if teacher_name:
-                            teacher_code = generate_teacher_code(teacher_name)
-                            
-                            teachers_data.append({
-                                "id": generate_id("TCH"),
-                                "name": teacher_name,
-                                "code": teacher_code,
-                                "email": teacher_email,
-                                "department": teacher_department,
-                                "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                                "created_by": user['email'],
-                                "status": "active",  # ACTIVE FOREVER, NEVER EXPIRES
-                                "used_by": None,
-                                "used_by_name": None,
-                                "used_by_list": [],  # Track multiple teachers
-                                "activated_date": None,
-                                "is_permanent": True,  # PERMANENT CODE
-                                "can_be_reused": True  # CAN BE USED BY MULTIPLE TEACHERS
-                            })
-                            
-                            save_school_data(school_code, "teachers.json", teachers_data)
-                            st.success(f"✅ PERMANENT teacher code generated: **{teacher_code}**")
-                            st.info("ℹ️ This code NEVER expires. Share it with ALL teachers in this department!")
-                            st.rerun()
+                    **You can create ANY code like:**
+                    
+                    ```
+                    📌 By Department:
+                    • MATH-DEPT
+                    • SCIENCE-2024
+                    • ENGLISH-TEAM
+                    • KISWAHILI
+                    
+                    📌 By Teacher Name:
+                    • MR-OTIENO
+                    • MS-AKINYI
+                    • DR-ODHIAMBO
+                    • MADAM-JANE
+                    
+                    📌 By Form/Class:
+                    • FORM1-2024
+                    • FORM2-TEACHERS
+                    • FORM4-CLASS
+                    • GRADUATE-2025
+                    
+                    📌 By Role:
+                    • HOD-MATHEMATICS
+                    • SENIOR-TEACHER
+                    • BOARD-MEMBER
+                    • PTA-CHAIR
+                    ```
+                    
+                    ### ✅ Benefits:
+                    - **Easy to remember** - Use department names
+                    - **Share with everyone** - One code for all math teachers
+                    - **Never expires** - Works forever
+                    - **Track usage** - See who used which code
+                    """)
                 
                 st.divider()
-                st.subheader("📋 Recently Generated PERMANENT Codes")
-                permanent_codes = [t for t in teachers_data if t['status'] == 'active'][-5:]
-                if permanent_codes:
-                    for t in permanent_codes:
+                
+                # Show existing custom codes
+                st.subheader("📋 Your Custom Teacher Codes")
+                custom_codes = [t for t in teachers_data if t.get('is_custom', False) or t['status'] == 'active']
+                
+                if custom_codes:
+                    for t in custom_codes:
                         with st.container(border=True):
-                            col1, col2, col3 = st.columns([2, 2, 1])
+                            col1, col2, col3, col4 = st.columns([2, 2, 2, 1])
                             with col1:
                                 st.markdown(f"**{t['name']}**")
                                 st.markdown(f"Dept: {t.get('department', 'N/A')}")
-                                st.markdown("**PERMANENT** ✅")
+                                if t.get('is_custom'):
+                                    st.markdown("**✨ CUSTOM CODE**")
                             with col2:
-                                st.code(t['code'])
-                                used_count = len(t.get('used_by_list', []))
-                                st.caption(f"Used by: {used_count} teacher(s)")
+                                st.code(t['code'], language=None)
                                 st.caption(f"Created: {t['created'][:16]}")
                             with col3:
-                                if st.button("🗑️", key=f"del_perm_{t['id']}"):
+                                used_count = len(t.get('used_by_list', []))
+                                st.markdown(f"**Used by:** {used_count} teacher(s)")
+                                if t.get('used_by_list'):
+                                    last_used = t['used_by_list'][-1]['date'][:16]
+                                    st.caption(f"Last used: {last_used}")
+                                else:
+                                    st.caption("Not used yet")
+                            with col4:
+                                if st.button("🗑️", key=f"del_custom_{t['id']}"):
                                     teachers_data.remove(t)
                                     save_school_data(school_code, "teachers.json", teachers_data)
                                     st.rerun()
                 else:
-                    st.info("No permanent teacher codes generated yet")
+                    st.info("No custom teacher codes created yet. Create your first one above!")
             
             with tab2:
                 st.subheader("✅ Active Teachers")
@@ -955,7 +1023,6 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                                 st.code(t['code'])
                                 if t.get('used_by_list'):
                                     st.caption(f"Used by: {len(t['used_by_list'])} teacher(s)")
-                                    # Show last used
                                     if t.get('last_used_by'):
                                         st.caption(f"Last: {t['last_used_by']}")
                                 else:
@@ -1042,7 +1109,7 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
                         teacher_email = next(t['email'] for t in active_teachers_list if t['display'] == selected_teacher)
                         teacher_name = selected_teacher.split("(")[0].strip()
                     else:
-                        st.warning("⚠️ No teachers available. Generate teacher codes first.")
+                        st.warning("⚠️ No teachers available. Create teacher codes first.")
                         teacher_email = None
                         teacher_name = None
                     
@@ -1393,35 +1460,43 @@ elif st.session_state.page == 'school_dashboard' and st.session_state.current_sc
         elif menu == "🔑 Generate Codes":
             st.title("🔑 Code Generation Center")
             
-            tab1, tab2, tab3 = st.tabs(["👨‍🏫 PERMANENT Teacher Codes", "📚 Class Codes", "👥 Group Codes"])
+            tab1, tab2, tab3 = st.tabs(["👨‍🏫 Custom Teacher Codes", "📚 Class Codes", "👥 Group Codes"])
             
             with tab1:
-                st.subheader("Generate PERMANENT Teacher Codes")
-                st.success("✅ These codes NEVER expire and can be used by MULTIPLE teachers!")
+                st.subheader("🔑 Create Custom Teacher Codes")
+                st.success("✅ Create ANY code you want! These codes NEVER expire.")
                 
-                with st.form("gen_teacher_codes"):
-                    teacher_name = st.text_input("Department/Code Name", placeholder="e.g., Mathematics Department")
+                with st.form("gen_custom_teacher_codes"):
+                    code_name = st.text_input("📝 Code Name/Description", placeholder="e.g., Mathematics Department")
+                    custom_code = st.text_input("🔑 Custom Teacher Code", placeholder="e.g., MATH-DEPT, FORM1-2024")
                     teacher_dept = st.selectbox("Department", ["Mathematics", "Science", "English", "History", "Computer Science", "Administration", "Other"])
                     
-                    if st.form_submit_button("🔑 Generate PERMANENT Code", use_container_width=True):
-                        if teacher_name:
-                            teacher_code = generate_teacher_code(teacher_name)
+                    if st.form_submit_button("✅ CREATE CUSTOM CODE", use_container_width=True):
+                        if code_name and custom_code:
+                            # Check if code already exists
+                            code_exists = False
+                            for t in teachers_data:
+                                if t['code'] == custom_code.upper():
+                                    code_exists = True
+                                    break
                             
-                            teachers_data.append({
-                                "id": generate_id("TCH"),
-                                "name": teacher_name,
-                                "code": teacher_code,
-                                "department": teacher_dept,
-                                "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
-                                "status": "active",
-                                "used_by_list": [],
-                                "is_permanent": True,
-                                "can_be_reused": True
-                            })
-                            
-                            save_school_data(school_code, "teachers.json", teachers_data)
-                            st.success(f"✅ PERMANENT code generated: **{teacher_code}**")
-                            st.rerun()
+                            if code_exists:
+                                st.error(f"❌ Code '{custom_code.upper()}' already exists!")
+                            else:
+                                teachers_data.append({
+                                    "id": generate_id("TCH"),
+                                    "name": code_name,
+                                    "code": custom_code.upper(),
+                                    "department": teacher_dept,
+                                    "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                                    "status": "active",
+                                    "used_by_list": [],
+                                    "is_permanent": True,
+                                    "is_custom": True
+                                })
+                                save_school_data(school_code, "teachers.json", teachers_data)
+                                st.success(f"✅ Custom code created: **{custom_code.upper()}**")
+                                st.rerun()
             
             with tab2:
                 st.subheader("Active Class Codes")
