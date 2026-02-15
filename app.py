@@ -17,6 +17,48 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
+# ============ KENYAN CURRICULUM DATA ============
+KENYAN_GRADES = [
+    "PP1 (Pre-Primary 1)",
+    "PP2 (Pre-Primary 2)",
+    "Grade 1",
+    "Grade 2", 
+    "Grade 3",
+    "Grade 4",
+    "Grade 5",
+    "Grade 6",
+    "Grade 7",
+    "Grade 8",
+    "Grade 9",
+    "Form 1",
+    "Form 2", 
+    "Form 3",
+    "Form 4"
+]
+
+KENYAN_SUBJECTS = [
+    "Mathematics",
+    "English",
+    "Kiswahili",
+    "Science",
+    "Social Studies",
+    "CRE",
+    "IRE",
+    "HRE",
+    "Agriculture",
+    "Home Science",
+    "Art & Craft",
+    "Music",
+    "Physical Education",
+    "Business Studies",
+    "Chemistry",
+    "Biology",
+    "Physics",
+    "History",
+    "Geography",
+    "Computer Studies"
+]
+
 # ============ FUNCTION TO GET BACKGROUND IMAGE ============
 def get_background_image():
     """Returns a stunning background image URL"""
@@ -71,7 +113,7 @@ st.markdown(f"""
         z-index: 2;
     }}
     
-    /* ============ SIDEBAR - PERMANENTLY OPEN ============ */
+    /* ============ SIDEBAR ============ */
     section[data-testid="stSidebar"] {{
         background: linear-gradient(135deg, rgba(75, 0, 130, 0.98), rgba(138, 43, 226, 0.98), rgba(255, 215, 0, 0.95)) !important;
         backdrop-filter: blur(15px) !important;
@@ -299,8 +341,57 @@ st.markdown(f"""
         font-size: 2rem !important;
     }}
     
-    /* White text boxes */
-    .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
+    /* ============ FIXED DROPDOWNS ============ */
+    .stSelectbox div[data-baseweb="select"] {{
+        background: WHITE !important;
+        border: 4px solid gold !important;
+        border-radius: 30px !important;
+        color: BLACK !important;
+    }}
+    
+    .stSelectbox div[data-baseweb="select"] > div {{
+        background: WHITE !important;
+        color: BLACK !important;
+        font-weight: 600 !important;
+        font-size: 1.2rem !important;
+        padding: 0.8rem 1rem !important;
+        border-radius: 30px !important;
+    }}
+    
+    .stSelectbox div[data-baseweb="select"]:hover {{
+        border-color: #4B0082 !important;
+        box-shadow: 0 0 30px gold !important;
+    }}
+    
+    /* Dropdown menu styling */
+    div[data-baseweb="menu"] {{
+        background: WHITE !important;
+        border: 4px solid gold !important;
+        border-radius: 20px !important;
+        padding: 0.5rem !important;
+    }}
+    
+    div[data-baseweb="menu"] li {{
+        color: BLACK !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+        padding: 0.8rem 1rem !important;
+        border-radius: 15px !important;
+        margin: 2px 0 !important;
+    }}
+    
+    div[data-baseweb="menu"] li:hover {{
+        background: rgba(255, 215, 0, 0.3) !important;
+    }}
+    
+    div[data-baseweb="menu"] li[aria-selected="true"] {{
+        background: linear-gradient(135deg, gold, #ffd700) !important;
+        color: #4B0082 !important;
+        font-weight: 800 !important;
+    }}
+    
+    /* Text inputs */
+    .stTextInput input, .stTextArea textarea, .stDateInput input {{
         background: WHITE !important;
         border: 4px solid gold !important;
         border-radius: 30px !important;
@@ -330,11 +421,6 @@ st.markdown(f"""
         font-size: 1.2rem !important;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
         margin-bottom: 0.8rem !important;
-    }}
-    
-    .stSelectbox div[data-baseweb="select"] > div {{
-        background: WHITE !important;
-        color: BLACK !important;
     }}
     
     /* Buttons */
@@ -1033,7 +1119,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 with st.form("create_teacher_code"):
                     name = st.text_input("📝 Code Name/Department", placeholder="e.g., Mathematics Department")
                     code = st.text_input("🔑 Custom Code", placeholder="e.g., MATH-DEPT, FORM1-2024")
-                    dept = st.selectbox("🏢 Department", ["Mathematics", "Science", "English", "History", "Computer Science", "Other"])
+                    dept = st.selectbox("🏢 Department", ["Mathematics", "Science", "English", "Kiswahili", "History", "Geography", "CRE", "Business", "Computer Science", "Other"])
                     if st.form_submit_button("✨ Generate Code", use_container_width=True):
                         if name and code:
                             if any(t['code'] == code.upper() for t in teachers_data):
@@ -1074,9 +1160,16 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             
             with tab1:
                 with st.form("create_class"):
-                    class_name = st.text_input("Class Name", placeholder="e.g., Mathematics 101")
-                    class_subject = st.text_input("Subject", placeholder="Mathematics")
-                    class_grade = st.selectbox("Grade Level", ["9", "10", "11", "12", "College"])
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        class_name = st.text_input("📝 Class Name", placeholder="e.g., Mathematics 101")
+                        class_subject = st.selectbox("📚 Subject", KENYAN_SUBJECTS)
+                        class_grade = st.selectbox("🎓 Grade/Form", KENYAN_GRADES)
+                    
+                    with col2:
+                        class_room = st.text_input("🏫 Room Number", placeholder="e.g., 201")
+                        class_schedule = st.text_input("⏰ Schedule", placeholder="e.g., Mon/Wed 10:00 AM")
+                        max_students = st.number_input("👥 Maximum Students", min_value=1, max_value=100, value=40)
                     
                     # Get active teachers
                     teacher_options = []
@@ -1086,17 +1179,13 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 teacher_options.append(f"{teacher_use['name']} ({teacher_use['email']})")
                     
                     if teacher_options:
-                        selected_teacher = st.selectbox("Assign Teacher", teacher_options)
+                        selected_teacher = st.selectbox("👨‍🏫 Assign Teacher", teacher_options)
                         teacher_email = selected_teacher.split('(')[1].rstrip(')')
                         teacher_name = selected_teacher.split('(')[0].strip()
                     else:
                         st.warning("⚠️ No teachers available. Create teacher codes first.")
                         teacher_email = None
                         teacher_name = None
-                    
-                    class_room = st.text_input("Room Number", placeholder="201")
-                    class_schedule = st.text_input("Schedule", placeholder="Mon/Wed 10:00 AM")
-                    max_students = st.number_input("Maximum Students", min_value=1, max_value=100, value=30)
                     
                     if st.form_submit_button("✅ Create Class", use_container_width=True):
                         if class_name and teacher_email:
@@ -1127,11 +1216,16 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             with tab2:
                 if classes:
                     for c in classes:
-                        with st.expander(f"📖 {c['name']} - {c['code']}"):
-                            st.write(f"**Teacher:** {c.get('teacher_name', c['teacher'])}")
-                            st.write(f"**Room:** {c.get('room', 'TBD')}")
-                            st.write(f"**Schedule:** {c.get('schedule', 'TBD')}")
-                            st.write(f"**Students:** {len(c.get('students', []))}/{c.get('max_students', 30)}")
+                        with st.expander(f"📖 {c['name']} - {c['code']} - {c['grade']}"):
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                st.write(f"**Subject:** {c.get('subject', 'N/A')}")
+                                st.write(f"**Teacher:** {c.get('teacher_name', c['teacher'])}")
+                                st.write(f"**Room:** {c.get('room', 'TBD')}")
+                            with col2:
+                                st.write(f"**Schedule:** {c.get('schedule', 'TBD')}")
+                                st.write(f"**Students:** {len(c.get('students', []))}/{c.get('max_students', 40)}")
+                                st.write(f"**Class Code:** `{c['code']}`")
                             if st.button("🗑️ Delete", key=f"del_class_{c['id']}"):
                                 classes.remove(c)
                                 save_school_data(school_code, "classes.json", classes)
@@ -1291,10 +1385,11 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             my_classes = [c for c in classes if c.get('teacher') == user['email']]
             if my_classes:
                 for c in my_classes:
-                    with st.expander(f"📖 {c['name']} - {c['code']}"):
+                    with st.expander(f"📖 {c['name']} - {c['code']} - {c['grade']}"):
+                        st.write(f"**Subject:** {c.get('subject', 'N/A')}")
                         st.write(f"**Room:** {c.get('room', 'TBD')}")
                         st.write(f"**Schedule:** {c.get('schedule', 'TBD')}")
-                        st.write(f"**Students:** {len(c.get('students', []))}/{c.get('max_students', 30)}")
+                        st.write(f"**Students:** {len(c.get('students', []))}/{c.get('max_students', 40)}")
                         if c.get('students'):
                             st.write("**Enrolled Students:**")
                             for student_email in c['students']:
@@ -1429,14 +1524,15 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         
         elif menu == "Browse Classes":
             st.markdown("<h1 style='text-align: center;'>📚 Available Classes</h1>", unsafe_allow_html=True)
-            available = [c for c in classes if user['email'] not in c.get('students', []) and len(c.get('students', [])) < c.get('max_students', 30)]
+            available = [c for c in classes if user['email'] not in c.get('students', []) and len(c.get('students', [])) < c.get('max_students', 40)]
             if available:
                 for c in available:
                     with st.container():
                         col1, col2 = st.columns([3, 1])
                         with col1:
-                            st.write(f"**{c['name']}**")
+                            st.write(f"**{c['name']}** - {c['grade']}")
                             st.write(f"👨‍🏫 {c.get('teacher_name', 'Unknown')} • {c.get('schedule', 'TBD')}")
+                            st.write(f"📚 {c.get('subject', 'N/A')}")
                         with col2:
                             if st.button("📝 Request", key=f"req_{c['code']}"):
                                 class_requests.append({
@@ -1465,6 +1561,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         with col1:
                             st.write(f"**{g['name']}**")
                             st.write(f"👥 Leader: {g.get('leader_name', 'Unknown')}")
+                            st.write(f"👥 Members: {len(g.get('members', []))}/{g.get('max_members', 10)}")
                         with col2:
                             if st.button("📝 Request", key=f"req_group_{g['code']}"):
                                 group_requests.append({
