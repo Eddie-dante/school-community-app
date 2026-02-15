@@ -32,7 +32,7 @@ def get_background_image():
     ]
     return random.choice(images)
 
-# ============ CUSTOM CSS - PERMANENT SIDEBAR ============
+# ============ CUSTOM CSS - NO ZOOM, PERMANENT SIDEBAR ============
 BG_IMAGE = get_background_image()
 
 st.markdown(f"""
@@ -44,19 +44,13 @@ st.markdown(f"""
         font-family: 'Poppins', sans-serif;
     }}
     
-    /* STUNNING BACKGROUND IMAGE */
+    /* STUNNING BACKGROUND IMAGE - NO ZOOM */
     .stApp {{
         background-image: url('{BG_IMAGE}');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
         background-repeat: no-repeat;
-        animation: zoom 30s infinite alternate;
-    }}
-    
-    @keyframes zoom {{
-        0% {{ transform: scale(1); }}
-        100% {{ transform: scale(1.1); }}
     }}
     
     /* Dark overlay */
