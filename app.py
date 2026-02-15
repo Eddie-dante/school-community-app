@@ -18,46 +18,82 @@ st.set_page_config(
 )
 
 # ============ KENYAN CURRICULUM DATA ============
-KENYAN_GRADES = [
-    "PP1 (Pre-Primary 1)",
-    "PP2 (Pre-Primary 2)",
-    "Grade 1",
-    "Grade 2", 
-    "Grade 3",
-    "Grade 4",
-    "Grade 5",
-    "Grade 6",
-    "Grade 7",
-    "Grade 8",
-    "Grade 9",
-    "Form 1",
-    "Form 2", 
-    "Form 3",
-    "Form 4"
-]
-
-KENYAN_SUBJECTS = [
+# Primary School (Grade 1-6) - 7 subjects
+PRIMARY_SUBJECTS = [
     "Mathematics",
     "English",
     "Kiswahili",
-    "Science",
+    "Science and Technology",
     "Social Studies",
-    "CRE",
-    "IRE",
-    "HRE",
+    "CRE / IRE / HRE",
     "Agriculture",
     "Home Science",
-    "Art & Craft",
+    "Art and Craft",
     "Music",
-    "Physical Education",
-    "Business Studies",
-    "Chemistry",
-    "Biology",
-    "Physics",
-    "History",
-    "Geography",
-    "Computer Studies"
+    "Physical Education"
 ]
+
+# Junior Secondary (Grade 7-9) - 12 subjects
+JUNIOR_SECONDARY_SUBJECTS = [
+    "Mathematics",
+    "English",
+    "Kiswahili",
+    "Integrated Science",
+    "Social Studies",
+    "CRE / IRE / HRE",
+    "Business Studies",
+    "Agriculture",
+    "Home Science",
+    "Computer Science",
+    "Pre-Technical Studies",
+    "Visual Arts",
+    "Performing Arts",
+    "Physical Education"
+]
+
+# Senior Secondary (Form 1-4) - 11 subjects (grouped)
+SENIOR_SECONDARY_SUBJECTS = {
+    "Mathematics": ["Mathematics"],
+    "English": ["English"],
+    "Kiswahili": ["Kiswahili"],
+    "Sciences": ["Biology", "Chemistry", "Physics", "General Science"],
+    "Humanities": ["History", "Geography", "CRE", "IRE", "HRE"],
+    "Technical": ["Computer Studies", "Business Studies", "Agriculture", "Home Science"],
+    "Languages": ["French", "German", "Arabic", "Sign Language"]
+}
+
+# Grade/Form list with subject counts
+KENYAN_GRADES = [
+    "Grade 1 (7 subjects)",
+    "Grade 2 (7 subjects)",
+    "Grade 3 (7 subjects)",
+    "Grade 4 (7 subjects)",
+    "Grade 5 (7 subjects)",
+    "Grade 6 (7 subjects)",
+    "Grade 7 (12 subjects)",
+    "Grade 8 (12 subjects)",
+    "Grade 9 (12 subjects)",
+    "Form 1 (11 subjects)",
+    "Form 2 (11 subjects)",
+    "Form 3 (11 subjects)",
+    "Form 4 (11 subjects)"
+]
+
+# ============ FUNCTION TO GET SUBJECTS BASED ON GRADE ============
+def get_subjects_for_grade(grade):
+    """Returns appropriate subjects based on grade level"""
+    if "Grade" in grade and any(str(i) in grade for i in range(1, 7)):
+        return PRIMARY_SUBJECTS
+    elif "Grade" in grade and any(str(i) in grade for i in range(7, 10)):
+        return JUNIOR_SECONDARY_SUBJECTS
+    elif "Form" in grade:
+        # Flatten senior secondary subjects
+        subjects = []
+        for category, subj_list in SENIOR_SECONDARY_SUBJECTS.items():
+            subjects.extend(subj_list)
+        return subjects
+    else:
+        return PRIMARY_SUBJECTS
 
 # ============ FUNCTION TO GET BACKGROUND IMAGE ============
 def get_background_image():
@@ -341,12 +377,11 @@ st.markdown(f"""
         font-size: 2rem !important;
     }}
     
-    /* ============ FIXED DROPDOWNS ============ */
+    /* ============ FIXED DROPDOWNS - BLACK TEXT ============ */
     .stSelectbox div[data-baseweb="select"] {{
         background: WHITE !important;
         border: 4px solid gold !important;
         border-radius: 30px !important;
-        color: BLACK !important;
     }}
     
     .stSelectbox div[data-baseweb="select"] > div {{
@@ -356,6 +391,12 @@ st.markdown(f"""
         font-size: 1.2rem !important;
         padding: 0.8rem 1rem !important;
         border-radius: 30px !important;
+    }}
+    
+    /* Selected value text - BLACK */
+    .stSelectbox div[data-baseweb="select"] span {{
+        color: BLACK !important;
+        font-weight: 600 !important;
     }}
     
     .stSelectbox div[data-baseweb="select"]:hover {{
@@ -382,6 +423,7 @@ st.markdown(f"""
     
     div[data-baseweb="menu"] li:hover {{
         background: rgba(255, 215, 0, 0.3) !important;
+        color: BLACK !important;
     }}
     
     div[data-baseweb="menu"] li[aria-selected="true"] {{
@@ -1163,8 +1205,10 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     col1, col2 = st.columns(2)
                     with col1:
                         class_name = st.text_input("📝 Class Name", placeholder="e.g., Mathematics 101")
-                        class_subject = st.selectbox("📚 Subject", KENYAN_SUBJECTS)
-                        class_grade = st.selectbox("🎓 Grade/Form", KENYAN_GRADES)
+                        grade = st.selectbox("🎓 Grade/Form", KENYAN_GRADES)
+                        # Get subjects based on selected grade
+                        available_subjects = get_subjects_for_grade(grade)
+                        subject = st.selectbox("📚 Main Subject", available_subjects)
                     
                     with col2:
                         class_room = st.text_input("🏫 Room Number", placeholder="e.g., 201")
@@ -1194,8 +1238,8 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 "id": generate_id("CLS"),
                                 "code": class_code,
                                 "name": class_name,
-                                "subject": class_subject,
-                                "grade": class_grade,
+                                "subject": subject,
+                                "grade": grade,
                                 "teacher": teacher_email,
                                 "teacher_name": teacher_name,
                                 "room": class_room,
