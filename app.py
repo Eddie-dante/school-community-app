@@ -17,7 +17,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ============ CUSTOM CSS - SOLID BACKGROUND WITH MAXIMUM VISIBILITY ============
+# ============ CUSTOM CSS - VIBRANT & BEAUTIFUL ============
 st.markdown("""
 <style>
     /* Import Google Font */
@@ -27,25 +27,28 @@ st.markdown("""
         font-family: 'Poppins', sans-serif;
     }
     
-    /* SOLID DARK BACKGROUND - NO TRANSPARENCY ISSUES */
+    /* VIBRANT GRADIENT BACKGROUND */
     .stApp {
-        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff6b6b 100%);
         min-height: 100vh;
     }
     
-    /* MAIN CONTENT AREA - SOLID BACKGROUND */
+    /* MAIN CONTENT AREA - GLASS EFFECT */
     .main > div {
-        background: rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 30px;
         padding: 2rem;
         margin: 1rem;
-        border: 2px solid gold;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     }
     
-    /* ============ SIDEBAR - ULTRA VISIBLE ============ */
+    /* ============ SIDEBAR - VIBRANT PURPLE ============ */
     section[data-testid="stSidebar"] {
-        background: linear-gradient(135deg, #0f3460, #1a1a2e, #16213e) !important;
-        border-right: 4px solid gold !important;
+        background: linear-gradient(135deg, #4834d4 0%, #686de0 50%, #7ed6df 100%) !important;
+        border-right: 4px solid #f9ca24 !important;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.3) !important;
     }
     
     section[data-testid="stSidebar"] > div {
@@ -53,7 +56,7 @@ st.markdown("""
         padding: 1.5rem 1rem !important;
     }
     
-    /* ALL SIDEBAR TEXT - MAX VISIBILITY */
+    /* SIDEBAR TEXT - BRIGHT AND BEAUTIFUL */
     section[data-testid="stSidebar"] .stMarkdown,
     section[data-testid="stSidebar"] .stRadio label,
     section[data-testid="stSidebar"] p,
@@ -61,151 +64,174 @@ st.markdown("""
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3,
     section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] div,
-    section[data-testid="stSidebar"] .st-emotion-cache-16idsys p,
-    section[data-testid="stSidebar"] .st-emotion-cache-1dj0hjr,
-    section[data-testid="stSidebar"] .st-emotion-cache-1v0mbdj {
+    section[data-testid="stSidebar"] div {
         color: WHITE !important;
-        font-weight: 700 !important;
-        font-size: 1rem !important;
-        text-shadow: 2px 2px 4px BLACK !important;
+        font-weight: 600 !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
     }
     
-    /* Sidebar radio buttons */
+    /* SIDEBAR RADIO BUTTONS - BEAUTIFUL CARDS */
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {
-        background: rgba(255, 255, 255, 0.15) !important;
-        border-radius: 15px !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
+        border-radius: 20px !important;
         padding: 1rem !important;
-        border: 2px solid gold !important;
+        border: 2px solid #f9ca24 !important;
     }
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
-        background: rgba(0, 0, 0, 0.5) !important;
-        border-radius: 10px !important;
-        padding: 12px !important;
-        margin: 5px 0 !important;
-        border: 1px solid gold !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        border-radius: 15px !important;
+        padding: 12px 18px !important;
+        margin: 8px 0 !important;
+        border: 2px solid transparent !important;
+        transition: all 0.3s ease !important;
         color: WHITE !important;
         font-weight: 600 !important;
     }
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
-        background: rgba(255, 215, 0, 0.3) !important;
-        border-color: white !important;
+        background: rgba(249, 202, 36, 0.3) !important;
+        border-color: #f9ca24 !important;
+        transform: translateX(5px) !important;
     }
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {
-        background: gold !important;
-        color: BLACK !important;
-        font-weight: 800 !important;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
         border: 2px solid white !important;
+        color: #4834d4 !important;
+        font-weight: 800 !important;
+        box-shadow: 0 0 20px #f9ca24 !important;
     }
     
-    /* Sidebar button */
+    /* SIDEBAR BUTTON */
     section[data-testid="stSidebar"] .stButton button {
-        background: gold !important;
-        color: BLACK !important;
-        border: 2px solid white !important;
-        border-radius: 10px !important;
-        padding: 12px !important;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
+        color: #4834d4 !important;
+        border: 3px solid white !important;
+        border-radius: 50px !important;
+        padding: 12px 24px !important;
         font-weight: 800 !important;
         font-size: 1.1rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        transition: all 0.3s ease !important;
     }
     
-    /* School header */
+    section[data-testid="stSidebar"] .stButton button:hover {
+        transform: scale(1.05) !important;
+        box-shadow: 0 8px 25px #f9ca24 !important;
+    }
+    
+    /* SCHOOL HEADER - VIBRANT */
     .school-header {
-        background: rgba(0, 0, 0, 0.7);
-        border: 3px solid gold;
-        border-radius: 20px;
-        padding: 20px;
+        background: linear-gradient(135deg, rgba(72, 52, 212, 0.9), rgba(126, 214, 223, 0.9));
+        backdrop-filter: blur(10px);
+        border: 4px solid #f9ca24;
+        border-radius: 30px;
+        padding: 25px;
         margin-bottom: 20px;
         text-align: center;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        animation: glow 3s infinite;
+    }
+    
+    @keyframes glow {
+        0%, 100% { box-shadow: 0 0 30px #f9ca24; }
+        50% { box-shadow: 0 0 50px #7ed6df; }
     }
     
     .school-header h2 {
         color: WHITE !important;
-        font-size: 1.8rem;
+        font-size: 2rem;
         font-weight: 800;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         margin: 0;
     }
     
     .school-code {
-        background: rgba(0, 0, 0, 0.8);
-        padding: 10px;
-        border-radius: 10px;
-        margin-top: 10px;
-        border: 2px solid gold;
+        background: rgba(0, 0, 0, 0.4);
+        padding: 12px;
+        border-radius: 50px;
+        margin-top: 15px;
+        border: 2px solid #f9ca24;
     }
     
     .school-code code {
-        color: gold !important;
-        font-size: 1.2rem;
+        color: #f9ca24 !important;
+        font-size: 1.3rem;
         font-weight: 700;
+        background: transparent !important;
     }
     
-    /* Profile card */
+    /* PROFILE CARD */
     .profile-card {
-        background: rgba(0, 0, 0, 0.7);
-        border: 3px solid gold;
-        border-radius: 20px;
-        padding: 15px;
+        background: linear-gradient(135deg, rgba(72, 52, 212, 0.8), rgba(126, 214, 223, 0.8));
+        backdrop-filter: blur(10px);
+        border: 3px solid #f9ca24;
+        border-radius: 25px;
+        padding: 20px;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
         gap: 15px;
     }
     
-    /* ============ MAIN CONTENT - MAX VISIBILITY ============ */
-    /* ALL TEXT WHITE WITH BLACK BACKGROUND */
-    h1, h2, h3, h4, h5, h6,
-    p, span, div, label,
-    .stMarkdown, .stText, 
-    .stMarkdown p, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {
+    .profile-card h1 {
         color: WHITE !important;
-        font-weight: 500 !important;
+        font-size: 3rem;
+        margin: 0;
     }
     
-    /* Headers extra bold */
+    /* ============ MAIN CONTENT - VIBRANT ============ */
+    /* HEADERS - BEAUTIFUL GRADIENT */
     h1 {
-        font-size: 2.5rem !important;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d, #7ed6df, #686de0);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 3rem !important;
         font-weight: 800 !important;
         text-align: center;
-        color: gold !important;
-        text-shadow: 2px 2px 4px black;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        animation: title-glow 3s infinite;
     }
     
-    h2 {
-        font-size: 2rem !important;
-        font-weight: 700 !important;
-        color: gold !important;
+    @keyframes title-glow {
+        0%, 100% { filter: drop-shadow(0 0 20px #f9ca24); }
+        50% { filter: drop-shadow(0 0 40px #7ed6df); }
     }
     
-    h3 {
-        font-size: 1.5rem !important;
-        font-weight: 600 !important;
-    }
-    
-    /* FORM ELEMENTS - COMPLETELY VISIBLE */
-    .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {
+    h2, h3 {
         color: WHITE !important;
         font-weight: 700 !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    /* FORM ELEMENTS - BEAUTIFUL */
+    .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {
+        color: WHITE !important;
+        font-weight: 600 !important;
         font-size: 1.1rem !important;
-        margin-bottom: 0.5rem !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
     }
     
     .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {
-        background: rgba(0, 0, 0, 0.8) !important;
-        border: 3px solid gold !important;
-        border-radius: 10px !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
+        border: 3px solid #f9ca24 !important;
+        border-radius: 15px !important;
         color: WHITE !important;
         font-weight: 500 !important;
         font-size: 1.1rem !important;
         padding: 0.8rem !important;
+        transition: all 0.3s ease !important;
     }
     
     .stTextInput input:focus, .stTextArea textarea:focus {
-        border-color: white !important;
-        box-shadow: 0 0 15px gold !important;
+        border-color: #7ed6df !important;
+        box-shadow: 0 0 25px #f9ca24 !important;
+        background: rgba(255, 255, 255, 0.3) !important;
     }
     
     /* Placeholder text */
@@ -214,32 +240,42 @@ st.markdown("""
         font-style: italic;
     }
     
-    /* Buttons */
+    /* BUTTONS - VIBRANT GRADIENT */
     .stButton button {
-        background: gold !important;
-        color: BLACK !important;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d, #7ed6df, #686de0) !important;
+        background-size: 300% 300% !important;
+        animation: gradient-shift 5s ease infinite !important;
+        color: #4834d4 !important;
         border: 3px solid white !important;
-        border-radius: 10px !important;
+        border-radius: 50px !important;
         padding: 0.8rem 2rem !important;
         font-weight: 800 !important;
         font-size: 1.2rem !important;
         text-transform: uppercase !important;
         letter-spacing: 1px !important;
-        width: 100%;
-        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    @keyframes gradient-shift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
     }
     
     .stButton button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 0 25px gold;
+        transform: scale(1.05) !important;
+        box-shadow: 0 8px 30px #f9ca24 !important;
+        border-color: #f9ca24 !important;
     }
     
-    /* Tabs */
+    /* TABS - BEAUTIFUL */
     .stTabs [data-baseweb="tab-list"] {
-        background: rgba(0, 0, 0, 0.8) !important;
-        border-radius: 10px !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
+        border-radius: 50px !important;
         padding: 0.5rem !important;
-        border: 2px solid gold !important;
+        border: 3px solid #f9ca24 !important;
     }
     
     .stTabs [data-baseweb="tab"] {
@@ -247,21 +283,30 @@ st.markdown("""
         font-weight: 600 !important;
         font-size: 1.1rem !important;
         padding: 0.8rem 2rem !important;
+        border-radius: 50px !important;
+        transition: all 0.3s ease !important;
     }
     
     .stTabs [aria-selected="true"] {
-        background: gold !important;
-        color: BLACK !important;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
+        color: #4834d4 !important;
         font-weight: 800 !important;
-        border-radius: 8px !important;
+        border: 2px solid white !important;
     }
     
-    /* Metrics */
+    /* METRICS - BEAUTIFUL CARDS */
     .stMetric {
-        background: rgba(0, 0, 0, 0.8) !important;
-        border: 3px solid gold !important;
-        border-radius: 15px !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
+        border: 3px solid #f9ca24 !important;
+        border-radius: 20px !important;
         padding: 1.5rem !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stMetric:hover {
+        transform: translateY(-5px) !important;
+        box-shadow: 0 10px 30px #f9ca24 !important;
     }
     
     .stMetric label {
@@ -270,26 +315,29 @@ st.markdown("""
     }
     
     .stMetric div {
-        color: gold !important;
+        color: #f9ca24 !important;
         font-size: 2.5rem !important;
         font-weight: 800 !important;
+        text-shadow: 0 0 15px #f9ca24 !important;
     }
     
-    /* Expanders */
+    /* EXPANDERS */
     .streamlit-expanderHeader {
-        background: rgba(0, 0, 0, 0.8) !important;
-        border: 2px solid gold !important;
-        border-radius: 10px !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
+        border: 3px solid #f9ca24 !important;
+        border-radius: 15px !important;
         color: WHITE !important;
         font-weight: 700 !important;
         font-size: 1.1rem !important;
     }
     
-    /* Alerts */
+    /* ALERTS - VIBRANT */
     .stAlert {
-        background: rgba(0, 0, 0, 0.9) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
         border-left: 6px solid !important;
-        border-radius: 10px !important;
+        border-radius: 15px !important;
         color: WHITE !important;
         font-weight: 600 !important;
     }
@@ -302,52 +350,72 @@ st.markdown("""
         border-left-color: #ff4757 !important;
     }
     
-    /* Dividers */
+    .stAlert-warning {
+        border-left-color: #f9ca24 !important;
+    }
+    
+    /* DIVIDERS - BEAUTIFUL */
     hr {
         border: none !important;
-        height: 3px !important;
-        background: linear-gradient(90deg, transparent, gold, white, gold, transparent) !important;
+        height: 4px !important;
+        background: linear-gradient(90deg, transparent, #f9ca24, #7ed6df, #686de0, #f9ca24, transparent) !important;
         margin: 2rem 0 !important;
     }
     
-    /* Code */
+    /* CODE */
     code {
-        background: rgba(0, 0, 0, 0.8) !important;
-        color: gold !important;
-        border: 2px solid gold !important;
-        border-radius: 8px !important;
+        background: rgba(0, 0, 0, 0.4) !important;
+        color: #f9ca24 !important;
+        border: 2px solid #f9ca24 !important;
+        border-radius: 10px !important;
         padding: 0.2rem 0.5rem !important;
         font-weight: 700 !important;
     }
     
-    /* Cards */
+    /* CARDS */
     .glass-card {
-        background: rgba(0, 0, 0, 0.8) !important;
-        border: 3px solid gold !important;
-        border-radius: 20px !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 4px solid #f9ca24 !important;
+        border-radius: 30px !important;
         padding: 2rem !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-5px) !important;
+        box-shadow: 0 15px 40px #f9ca24 !important;
     }
     
     .glass-card * {
         color: WHITE !important;
     }
     
-    /* Title */
+    /* TITLE */
     .radiant-title {
         text-align: center;
-        font-size: 4rem;
+        font-size: 4.5rem;
         font-weight: 900;
-        color: gold !important;
-        text-shadow: 4px 4px 8px black, 0 0 25px gold;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d, #7ed6df, #686de0, #ff6b6b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: title-float 3s infinite;
         margin-bottom: 0.5rem;
+        text-shadow: 0 0 30px rgba(249, 202, 36, 0.5);
+    }
+    
+    @keyframes title-float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
     }
     
     .radiant-subtitle {
         text-align: center;
         color: WHITE !important;
-        font-size: 1.8rem;
-        font-weight: 500;
-        text-shadow: 2px 2px 4px black;
+        font-size: 2rem;
+        font-weight: 400;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         margin-bottom: 2rem;
     }
     
@@ -425,7 +493,7 @@ if st.session_state.page == 'welcome':
     st.markdown('<p class="radiant-subtitle">Connect • Collaborate • Shine Together</p>', unsafe_allow_html=True)
     st.divider()
     
-    tab1, tab2, tab3, tab4 = st.tabs(["👑 Admin", "🏫 Create", "👨‍🏫 Teachers", "👨‍🎓 Students"])
+    tab1, tab2, tab3, tab4 = st.tabs(["👑 Admin Portal", "🏫 Create School", "👨‍🏫 Teacher Space", "👨‍🎓 Student World"])
     
     # TAB 1: ADMIN LOGIN
     with tab1:
@@ -433,12 +501,12 @@ if st.session_state.page == 'welcome':
         with col1:
             st.subheader("🔐 Admin Login")
             with st.form("admin_login"):
-                school = st.text_input("School Code", placeholder="Enter school code")
-                email = st.text_input("Email", placeholder="admin@school.edu")
-                pwd = st.text_input("Password", type="password", placeholder="••••••••")
-                if st.form_submit_button("Login", use_container_width=True):
+                school = st.text_input("🏫 School Code", placeholder="Enter your school code")
+                email = st.text_input("📧 Email", placeholder="admin@school.edu")
+                pwd = st.text_input("🔑 Password", type="password", placeholder="••••••••")
+                if st.form_submit_button("✨ Login Now ✨", use_container_width=True):
                     if not school or not email or not pwd:
-                        st.error("All fields required")
+                        st.error("Please fill all fields")
                     else:
                         schools = load_all_schools()
                         if school in schools:
@@ -452,17 +520,17 @@ if st.session_state.page == 'welcome':
                                         st.session_state.user = u
                                         st.session_state.page = 'dashboard'
                                         st.rerun()
-                                st.error("Wrong password")
+                                st.error("Invalid password")
                             else:
                                 st.error("Not admin email")
                         else:
                             st.error("School not found")
         with col2:
             st.markdown("""
-            <div style="background: rgba(0,0,0,0.8); border: 3px solid gold; border-radius: 20px; padding: 2rem; text-align: center;">
-                <h3 style="color: gold;">👑 Admin Powers</h3>
-                <p style="color: white;">Full control over your school</p>
-                <h1 style="font-size: 5rem; color: gold;">✨</h1>
+            <div class="glass-card" style="text-align: center;">
+                <h3 style="color: #f9ca24;">👑 Admin Powers</h3>
+                <p style="color: white;">Full control over your school community</p>
+                <h1 style="font-size: 5rem; color: #f9ca24;">✨</h1>
             </div>
             """, unsafe_allow_html=True)
     
@@ -470,18 +538,18 @@ if st.session_state.page == 'welcome':
     with tab2:
         col1, col2 = st.columns([1,1])
         with col1:
-            st.subheader("🚀 Create School")
+            st.subheader("🚀 Create New School")
             with st.form("create_school"):
-                name = st.text_input("School Name", placeholder="e.g., Nqatho Sec Sch")
-                admin = st.text_input("Your Full Name", placeholder="Wanjiku Edwin Guchu")
-                email = st.text_input("Your Email", placeholder="you@school.edu")
-                pwd = st.text_input("Password", type="password", placeholder="Create password")
-                confirm = st.text_input("Confirm Password", type="password", placeholder="Confirm password")
-                city = st.text_input("City", placeholder="Nairobi")
-                state = st.text_input("State", placeholder="Nairobi")
-                motto = st.text_input("Motto", placeholder="DTS")
+                name = st.text_input("🏫 School Name", placeholder="e.g., Nqatho Sec Sch")
+                admin = st.text_input("👤 Your Full Name", placeholder="Wanjiku Edwin Guchu")
+                email = st.text_input("📧 Your Email", placeholder="you@school.edu")
+                pwd = st.text_input("🔐 Password", type="password", placeholder="Create strong password")
+                confirm = st.text_input("🔐 Confirm Password", type="password", placeholder="Confirm password")
+                city = st.text_input("🏙️ City", placeholder="Nairobi")
+                state = st.text_input("🗺️ State", placeholder="Nairobi")
+                motto = st.text_input("✨ School Motto", placeholder="DTS")
                 
-                if st.form_submit_button("Create School", use_container_width=True):
+                if st.form_submit_button("🌟 Create School 🌟", use_container_width=True):
                     if not name or not email or not pwd:
                         st.error("Required fields missing")
                     elif pwd != confirm:
@@ -531,30 +599,30 @@ if st.session_state.page == 'welcome':
                         st.session_state.current_school = new
                         st.session_state.user = users[0]
                         st.session_state.page = 'dashboard'
-                        st.success(f"School created! Code: {code}")
+                        st.success(f"✨ School Created! Code: **{code}**")
                         st.rerun()
         with col2:
             st.markdown("""
-            <div style="background: rgba(0,0,0,0.8); border: 3px solid gold; border-radius: 20px; padding: 2rem; text-align: center;">
-                <h3 style="color: gold;">🎓 Begin Your Legacy</h3>
+            <div class="glass-card" style="text-align: center;">
+                <h3 style="color: #f9ca24;">🎓 Begin Your Legacy</h3>
                 <p style="color: white;">Start your own school community</p>
-                <h1 style="font-size: 5rem; color: gold;">🚀</h1>
+                <h1 style="font-size: 5rem; color: #f9ca24;">🚀</h1>
             </div>
             """, unsafe_allow_html=True)
     
     # TAB 3: TEACHER
     with tab3:
-        subtab1, subtab2 = st.tabs(["Login", "Register"])
+        subtab1, subtab2 = st.tabs(["🔐 Login", "📝 Register"])
         
         with subtab1:
             col1, col2 = st.columns([1,1])
             with col1:
                 st.subheader("👨‍🏫 Teacher Login")
                 with st.form("teacher_login"):
-                    school = st.text_input("School Code")
-                    email = st.text_input("Email")
-                    pwd = st.text_input("Password", type="password")
-                    if st.form_submit_button("Login", use_container_width=True):
+                    school = st.text_input("🏫 School Code")
+                    email = st.text_input("📧 Email")
+                    pwd = st.text_input("🔑 Password", type="password")
+                    if st.form_submit_button("✨ Login ✨", use_container_width=True):
                         if not school or not email or not pwd:
                             st.error("All fields required")
                         else:
@@ -574,10 +642,10 @@ if st.session_state.page == 'welcome':
                                 st.error("School not found")
             with col2:
                 st.markdown("""
-                <div style="background: rgba(0,0,0,0.8); border: 3px solid gold; border-radius: 20px; padding: 2rem; text-align: center;">
-                    <h3 style="color: gold;">📚 Your Classroom</h3>
+                <div class="glass-card" style="text-align: center;">
+                    <h3 style="color: #f9ca24;">📚 Your Classroom</h3>
                     <p style="color: white;">Login to manage classes</p>
-                    <h1 style="font-size: 5rem; color: gold;">🍎</h1>
+                    <h1 style="font-size: 5rem; color: #f9ca24;">🍎</h1>
                 </div>
                 """, unsafe_allow_html=True)
         
@@ -586,14 +654,14 @@ if st.session_state.page == 'welcome':
             with col1:
                 st.subheader("📝 New Teacher")
                 with st.form("teacher_register"):
-                    school = st.text_input("School Code", key="reg_school")
-                    teacher_code = st.text_input("Teacher Code", placeholder="e.g., MATH-DEPT")
-                    name = st.text_input("Full Name")
-                    email = st.text_input("Email", key="reg_email")
-                    pwd = st.text_input("Password", type="password", key="reg_pass")
-                    confirm = st.text_input("Confirm Password", type="password", key="reg_confirm")
+                    school = st.text_input("🏫 School Code", key="reg_school")
+                    teacher_code = st.text_input("🔑 Teacher Code", placeholder="e.g., MATH-DEPT")
+                    name = st.text_input("👤 Full Name")
+                    email = st.text_input("📧 Email", key="reg_email")
+                    pwd = st.text_input("🔐 Password", type="password", key="reg_pass")
+                    confirm = st.text_input("🔐 Confirm Password", type="password", key="reg_confirm")
                     
-                    if st.form_submit_button("Register", use_container_width=True):
+                    if st.form_submit_button("🌟 Register Now 🌟", use_container_width=True):
                         if not all([school, teacher_code, name, email, pwd]):
                             st.error("All fields required")
                         elif pwd != confirm:
@@ -648,32 +716,32 @@ if st.session_state.page == 'welcome':
                                 st.session_state.current_school = s
                                 st.session_state.user = new_user
                                 st.session_state.page = 'dashboard'
-                                st.success("Registration successful!")
+                                st.success("✨ Registration successful!")
                                 st.rerun()
                             else:
                                 st.error("School not found")
             with col2:
                 st.markdown("""
-                <div style="background: rgba(0,0,0,0.8); border: 3px solid gold; border-radius: 20px; padding: 2rem; text-align: center;">
-                    <h3 style="color: gold;">✨ Join as Teacher</h3>
+                <div class="glass-card" style="text-align: center;">
+                    <h3 style="color: #f9ca24;">✨ Join the Team</h3>
                     <p style="color: white;">Use your teacher code</p>
-                    <h1 style="font-size: 5rem; color: gold;">📝</h1>
+                    <h1 style="font-size: 5rem; color: #f9ca24;">📝</h1>
                 </div>
                 """, unsafe_allow_html=True)
     
     # TAB 4: STUDENT
     with tab4:
-        subtab1, subtab2 = st.tabs(["Login", "Register"])
+        subtab1, subtab2 = st.tabs(["🔐 Login", "📝 Register"])
         
         with subtab1:
             col1, col2 = st.columns([1,1])
             with col1:
                 st.subheader("👨‍🎓 Student Login")
                 with st.form("student_login"):
-                    school = st.text_input("School Code")
-                    email = st.text_input("Email")
-                    pwd = st.text_input("Password", type="password")
-                    if st.form_submit_button("Login", use_container_width=True):
+                    school = st.text_input("🏫 School Code")
+                    email = st.text_input("📧 Email")
+                    pwd = st.text_input("🔑 Password", type="password")
+                    if st.form_submit_button("✨ Login ✨", use_container_width=True):
                         if not school or not email or not pwd:
                             st.error("All fields required")
                         else:
@@ -693,10 +761,10 @@ if st.session_state.page == 'welcome':
                                 st.error("School not found")
             with col2:
                 st.markdown("""
-                <div style="background: rgba(0,0,0,0.8); border: 3px solid gold; border-radius: 20px; padding: 2rem; text-align: center;">
-                    <h3 style="color: gold;">📖 Your Learning Hub</h3>
+                <div class="glass-card" style="text-align: center;">
+                    <h3 style="color: #f9ca24;">📖 Your Learning Hub</h3>
                     <p style="color: white;">Access classes and homework</p>
-                    <h1 style="font-size: 5rem; color: gold;">📚</h1>
+                    <h1 style="font-size: 5rem; color: #f9ca24;">📚</h1>
                 </div>
                 """, unsafe_allow_html=True)
         
@@ -705,13 +773,13 @@ if st.session_state.page == 'welcome':
             with col1:
                 st.subheader("🆕 New Student")
                 with st.form("student_register"):
-                    school = st.text_input("School Code", key="stud_school")
-                    name = st.text_input("Full Name")
-                    email = st.text_input("Email", key="stud_email")
-                    pwd = st.text_input("Password", type="password", key="stud_pass")
-                    confirm = st.text_input("Confirm Password", type="password", key="stud_confirm")
+                    school = st.text_input("🏫 School Code", key="stud_school")
+                    name = st.text_input("👤 Full Name")
+                    email = st.text_input("📧 Email", key="stud_email")
+                    pwd = st.text_input("🔐 Password", type="password", key="stud_pass")
+                    confirm = st.text_input("🔐 Confirm Password", type="password", key="stud_confirm")
                     
-                    if st.form_submit_button("Register", use_container_width=True):
+                    if st.form_submit_button("🌟 Register Now 🌟", use_container_width=True):
                         if not all([school, name, email, pwd]):
                             st.error("All fields required")
                         elif pwd != confirm:
@@ -744,16 +812,16 @@ if st.session_state.page == 'welcome':
                                     st.session_state.current_school = s
                                     st.session_state.user = new_user
                                     st.session_state.page = 'dashboard'
-                                    st.success("Registration successful!")
+                                    st.success("✨ Registration successful!")
                                     st.rerun()
                             else:
                                 st.error("School not found")
             with col2:
                 st.markdown("""
-                <div style="background: rgba(0,0,0,0.8); border: 3px solid gold; border-radius: 20px; padding: 2rem; text-align: center;">
-                    <h3 style="color: gold;">🎓 Begin Your Journey</h3>
+                <div class="glass-card" style="text-align: center;">
+                    <h3 style="color: #f9ca24;">🎓 Begin Your Journey</h3>
                     <p style="color: white;">Join your school community</p>
-                    <h1 style="font-size: 5rem; color: gold;">🌟</h1>
+                    <h1 style="font-size: 5rem; color: #f9ca24;">🌟</h1>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -797,8 +865,8 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             st.markdown(f"<h1 style='font-size: 3rem; margin: 0;'>{emoji}</h1>", unsafe_allow_html=True)
         st.markdown(f"""
         <div style="color: white;">
-            <strong>{user['fullname']}</strong><br>
-            <span style="background: gold; color: black; padding: 2px 8px; border-radius: 10px;">{user['role'].upper()}</span><br>
+            <strong style="font-size: 1.2rem;">{user['fullname']}</strong><br>
+            <span style="background: #f9ca24; color: #4834d4; padding: 3px 12px; border-radius: 20px; font-weight: 700;">{user['role'].upper()}</span><br>
             <small>{user['email']}</small>
         </div>
         """, unsafe_allow_html=True)
@@ -814,7 +882,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         else:
             options = ["Dashboard", "Browse Classes", "Browse Groups", "Homework", "My Grades", "Profile"]
         
-        menu = st.radio("Menu", options, index=st.session_state.menu_index)
+        menu = st.radio("📌 Navigation", options, index=st.session_state.menu_index)
         st.divider()
         
         if st.button("🚪 Logout", use_container_width=True):
@@ -823,22 +891,125 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             st.session_state.page = 'welcome'
             st.rerun()
     
-    # MAIN CONTENT - Simplified for visibility
-    st.markdown(f"<h1>Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
-    
-    if user['role'] == 'admin' and menu == "Dashboard":
-        col1, col2, col3, col4 = st.columns(4)
-        col1.metric("Students", school['stats'].get('students',0))
-        col2.metric("Teachers", school['stats'].get('teachers',0))
-        col3.metric("Classes", school['stats'].get('classes',0))
-        col4.metric("Groups", school['stats'].get('groups',0))
+    # MAIN CONTENT
+    if user['role'] == 'admin':
+        if menu == "Dashboard":
+            st.markdown(f"<h1>👑 {school['name']} Dashboard</h1>", unsafe_allow_html=True)
+            col1, col2, col3, col4 = st.columns(4)
+            col1.metric("🎓 Students", school['stats'].get('students',0))
+            col2.metric("👨‍🏫 Teachers", school['stats'].get('teachers',0))
+            col3.metric("📚 Classes", school['stats'].get('classes',0))
+            col4.metric("👥 Groups", school['stats'].get('groups',0))
+            
+            pending = len([r for r in class_requests if r['status']=='pending']) + len([r for r in group_requests if r['status']=='pending'])
+            if pending:
+                st.warning(f"✨ {pending} pending requests")
+            else:
+                st.success("✨ All caught up!")
         
-        pending = len([r for r in class_requests if r['status']=='pending']) + len([r for r in group_requests if r['status']=='pending'])
-        if pending:
-            st.warning(f"{pending} pending requests")
+        elif menu == "Teachers":
+            st.markdown("<h1>👨‍🏫 Teacher Management</h1>", unsafe_allow_html=True)
+            tab1, tab2 = st.tabs(["✨ Create Codes", "👥 Active Teachers"])
+            
+            with tab1:
+                with st.form("create_code"):
+                    name = st.text_input("Code Name", placeholder="e.g., Mathematics Department")
+                    code = st.text_input("Custom Code", placeholder="e.g., MATH-DEPT")
+                    dept = st.selectbox("Department", ["Math","Science","English","History","Other"])
+                    if st.form_submit_button("✨ Create Code", use_container_width=True):
+                        if name and code:
+                            if any(t['code']==code.upper() for t in teachers_data):
+                                st.error("Code exists")
+                            else:
+                                teachers_data.append({
+                                    "id": generate_id("TCH"),
+                                    "name": name,
+                                    "code": code.upper(),
+                                    "department": dept,
+                                    "created": datetime.now().strftime("%Y-%m-%d"),
+                                    "status": "active",
+                                    "used_by_list": []
+                                })
+                                save_school_data(school_code, "teachers.json", teachers_data)
+                                st.success(f"Code {code.upper()} created!")
+                                st.rerun()
+            
+            with tab2:
+                for t in teachers_data:
+                    with st.expander(f"{t['name']} - `{t['code']}`"):
+                        st.write(f"Used by: {len(t.get('used_by_list',[]))} teachers")
+        
+        elif menu == "Approvals":
+            st.markdown("<h1>✅ Admin Approvals</h1>", unsafe_allow_html=True)
+            for req in [r for r in class_requests if r['status']=='pending']:
+                col1,col2,col3 = st.columns([2,2,1])
+                col1.write(req['student_name'])
+                col2.write(req['class_name'])
+                if col3.button("Approve", key=f"app_{req['id']}"):
+                    for c in classes:
+                        if c['name'] == req['class_name']:
+                            c['students'].append(req['student_email'])
+                    req['status'] = 'approved'
+                    save_school_data(school_code, "classes.json", classes)
+                    save_school_data(school_code, "class_requests.json", class_requests)
+                    st.rerun()
+        
+        elif menu == "Profile":
+            st.markdown("<h1>👤 My Profile</h1>", unsafe_allow_html=True)
+            col1,col2 = st.columns([1,2])
+            with col1:
+                if user.get('profile_pic'):
+                    st.image(user['profile_pic'], width=150)
+                else:
+                    st.markdown("<h1 style='font-size: 5rem;'>👑</h1>", unsafe_allow_html=True)
+                pic = st.file_uploader("Upload Photo", type=['png','jpg','jpeg'])
+                if pic:
+                    img = Image.open(pic)
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    b64 = base64.b64encode(buffered.getvalue()).decode()
+                    for u in users:
+                        if u['email'] == user['email']:
+                            u['profile_pic'] = f"data:image/png;base64,{b64}"
+                    save_school_data(school_code, "users.json", users)
+                    user['profile_pic'] = f"data:image/png;base64,{b64}"
+                    st.rerun()
+            with col2:
+                with st.form("profile_edit"):
+                    name = st.text_input("Full Name", user['fullname'])
+                    phone = st.text_input("Phone", user.get('phone',''))
+                    bio = st.text_area("Bio", user.get('bio',''))
+                    if st.form_submit_button("✨ Update Profile", use_container_width=True):
+                        for u in users:
+                            if u['email'] == user['email']:
+                                u['fullname'] = name
+                                u['phone'] = phone
+                                u['bio'] = bio
+                        save_school_data(school_code, "users.json", users)
+                        user.update({'fullname':name,'phone':phone,'bio':bio})
+                        st.success("Profile updated!")
+                        st.rerun()
+    
+    elif user['role'] == 'teacher':
+        if menu == "Dashboard":
+            st.markdown(f"<h1>👨‍🏫 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
+            my_classes = [c for c in classes if c.get('teacher') == user['email']]
+            col1,col2,col3 = st.columns(3)
+            col1.metric("My Classes", len(my_classes))
+            col2.metric("My Groups", len([g for g in groups if g.get('leader')==user['email']]))
+            col3.metric("Assignments", len([a for a in assignments if a.get('teacher')==user['email']]))
+    
+    else:  # student
+        if menu == "Dashboard":
+            st.markdown(f"<h1>👨‍🎓 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
+            my_classes = [c for c in classes if user['email'] in c.get('students',[])]
+            col1,col2,col3 = st.columns(3)
+            col1.metric("My Classes", len(my_classes))
+            col2.metric("My Groups", len([g for g in groups if user['email'] in g.get('members',[])]))
+            col3.metric("Assignments", len([a for a in assignments if a['class'] in [c['name'] for c in my_classes]]))
 
 else:
     st.error("Something went wrong")
-    if st.button("Restart"):
+    if st.button("🔄 Restart"):
         st.session_state.page = 'welcome'
         st.rerun()
