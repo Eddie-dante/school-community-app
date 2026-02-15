@@ -32,7 +32,7 @@ def get_background_image():
     ]
     return random.choice(images)
 
-# ============ CUSTOM CSS - NO ZOOM, PERMANENT SIDEBAR ============
+# ============ CUSTOM CSS ============
 BG_IMAGE = get_background_image()
 
 st.markdown(f"""
@@ -44,7 +44,7 @@ st.markdown(f"""
         font-family: 'Poppins', sans-serif;
     }}
     
-    /* STUNNING BACKGROUND IMAGE - NO ZOOM */
+    /* STUNNING BACKGROUND IMAGE */
     .stApp {{
         background-image: url('{BG_IMAGE}');
         background-size: cover;
@@ -71,7 +71,7 @@ st.markdown(f"""
         z-index: 2;
     }}
     
-    /* ============ SIDEBAR - PERMANENTLY OPEN & NEVER COLLAPSIBLE ============ */
+    /* ============ SIDEBAR - PERMANENTLY OPEN ============ */
     section[data-testid="stSidebar"] {{
         background: linear-gradient(135deg, rgba(75, 0, 130, 0.98), rgba(138, 43, 226, 0.98), rgba(255, 215, 0, 0.95)) !important;
         backdrop-filter: blur(15px) !important;
@@ -116,7 +116,7 @@ st.markdown(f"""
         width: 100% !important;
     }}
     
-    /* Sidebar text - white & bold */
+    /* Sidebar text */
     section[data-testid="stSidebar"] .stMarkdown,
     section[data-testid="stSidebar"] .stRadio label,
     section[data-testid="stSidebar"] p,
@@ -299,7 +299,7 @@ st.markdown(f"""
         font-size: 2rem !important;
     }}
     
-    /* White text boxes with black text */
+    /* White text boxes */
     .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
         background: WHITE !important;
         border: 4px solid gold !important;
@@ -334,10 +334,6 @@ st.markdown(f"""
     
     .stSelectbox div[data-baseweb="select"] > div {{
         background: WHITE !important;
-        color: BLACK !important;
-    }}
-    
-    .stDateInput input {{
         color: BLACK !important;
     }}
     
@@ -995,6 +991,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             options = ["Dashboard", "Browse Classes", "Browse Groups", "Homework", "My Grades", "Profile"]
         
         menu = st.radio("Navigation", options, index=st.session_state.menu_index, label_visibility="collapsed")
+        st.session_state.menu_index = options.index(menu)
         
         st.divider()
         
@@ -1005,13 +1002,545 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             st.rerun()
     
     # ============ MAIN CONTENT ============
-    if user['role'] == 'admin' and menu == "Dashboard":
-        st.markdown(f"<h1 style='text-align: center;'>👑 {school['name']} Dashboard</h1>", unsafe_allow_html=True)
-        col1,col2,col3,col4 = st.columns(4)
-        col1.metric("Students", school['stats'].get('students',0))
-        col2.metric("Teachers", school['stats'].get('teachers',0))
-        col3.metric("Classes", school['stats'].get('classes',0))
-        col4.metric("Groups", school['stats'].get('groups',0))
+    
+    # ----- ADMIN SECTION -----
+    if user['role'] == 'admin':
+        if menu == "Dashboard":
+            st.markdown(f"<h1 style='text-align: center;'>👑 {school['name']} Dashboard</h1>", unsafe_allow_html=True)
+            col1,col2,col3,col4 = st.columns(4)
+            with col1:
+                st.metric("Students", school['stats'].get('students',0))
+            with col2:
+                st.metric("Teachers", school['stats'].get('teachers',0))
+            with col3:
+                st.metric("Classes", school['stats'].get('classes',0))
+            with col4:
+                st.metric("Groups", school['stats'].get('groups',0))
+            
+            st.divider()
+            
+            pending = len([r for r in class_requests if r['status']=='pending']) + len([r for r in group_requests if r['status']=='pending'])
+            if pending > 0:
+                st.warning(f"📌 {pending} pending requests await your approval")
+            else:
+                st.success("✅ All caught up! No pending requests")
+        
+        elif menu == "Teachers":
+            st.markdown("<h1 style='text-align: center;'>👨‍🏫 Teacher Management</h1>", unsafe_allow_html=True)
+            tab1, tab2 = st.tabs(["✨ Create Teacher Code", "👥 Active Teachers"])
+            
+            with tab1:
+                with st.form("create_teacher_code"):
+                    name = st.text_input("📝 Code Name/Department", placeholder="e.g., Mathematics Department")
+                    code = st.text_input("🔑 Custom Code", placeholder="e.g., MATH-DEPT, FORM1-2024")
+                    dept = st.selectbox("🏢 Department", ["Mathematics", "Science", "English", "History", "Computer Science", "Other"])
+                    if st.form_submit_button("✨ Generate Code", use_container_width=True):
+                        if name and code:
+                            if any(t['code'] == code.upper() for t in teachers_data):
+                                st.error("❌ Code already exists!")
+                            else:
+                                teachers_data.append({
+                                    "id": generate_id("TCH"),
+                                    "name": name,
+                                    "code": code.upper(),
+                                    "department": dept,
+                                    "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                                    "created_by": user['email'],
+                                    "status": "active",
+                                    "used_by_list": []
+                                })
+                                save_school_data(school_code, "teachers.json", teachers_data)
+                                st.success(f"✅ Code {code.upper()} created successfully!")
+                                st.rerun()
+            
+            with tab2:
+                active_teachers = [t for t in teachers_data if t['status'] == 'active']
+                if active_teachers:
+                    for t in active_teachers:
+                        with st.expander(f"📌 {t['name']} - `{t['code']}`"):
+                            st.write(f"**Department:** {t['department']}")
+                            st.write(f"**Created:** {t['created']}")
+                            st.write(f"**Used by:** {len(t.get('used_by_list', []))} teachers")
+                            if t.get('used_by_list'):
+                                st.write("**Teachers registered with this code:**")
+                                for teacher in t['used_by_list']:
+                                    st.write(f"- {teacher['name']} ({teacher['email']}) on {teacher['date']}")
+                else:
+                    st.info("No teacher codes created yet")
+        
+        elif menu == "Classes":
+            st.markdown("<h1 style='text-align: center;'>📚 Class Management</h1>", unsafe_allow_html=True)
+            tab1, tab2 = st.tabs(["➕ Create Class", "📋 All Classes"])
+            
+            with tab1:
+                with st.form("create_class"):
+                    class_name = st.text_input("Class Name", placeholder="e.g., Mathematics 101")
+                    class_subject = st.text_input("Subject", placeholder="Mathematics")
+                    class_grade = st.selectbox("Grade Level", ["9", "10", "11", "12", "College"])
+                    
+                    # Get active teachers
+                    teacher_options = []
+                    for t in teachers_data:
+                        if t['status'] == 'active' and t.get('used_by_list'):
+                            for teacher_use in t['used_by_list']:
+                                teacher_options.append(f"{teacher_use['name']} ({teacher_use['email']})")
+                    
+                    if teacher_options:
+                        selected_teacher = st.selectbox("Assign Teacher", teacher_options)
+                        teacher_email = selected_teacher.split('(')[1].rstrip(')')
+                        teacher_name = selected_teacher.split('(')[0].strip()
+                    else:
+                        st.warning("⚠️ No teachers available. Create teacher codes first.")
+                        teacher_email = None
+                        teacher_name = None
+                    
+                    class_room = st.text_input("Room Number", placeholder="201")
+                    class_schedule = st.text_input("Schedule", placeholder="Mon/Wed 10:00 AM")
+                    max_students = st.number_input("Maximum Students", min_value=1, max_value=100, value=30)
+                    
+                    if st.form_submit_button("✅ Create Class", use_container_width=True):
+                        if class_name and teacher_email:
+                            class_code = generate_class_code()
+                            classes.append({
+                                "id": generate_id("CLS"),
+                                "code": class_code,
+                                "name": class_name,
+                                "subject": class_subject,
+                                "grade": class_grade,
+                                "teacher": teacher_email,
+                                "teacher_name": teacher_name,
+                                "room": class_room,
+                                "schedule": class_schedule,
+                                "max_students": max_students,
+                                "students": [],
+                                "created": datetime.now().strftime("%Y-%m-%d"),
+                                "status": "active"
+                            })
+                            save_school_data(school_code, "classes.json", classes)
+                            school['stats']['classes'] += 1
+                            all_schools = load_all_schools()
+                            all_schools[school_code] = school
+                            save_all_schools(all_schools)
+                            st.success(f"✅ Class created! Code: {class_code}")
+                            st.rerun()
+            
+            with tab2:
+                if classes:
+                    for c in classes:
+                        with st.expander(f"📖 {c['name']} - {c['code']}"):
+                            st.write(f"**Teacher:** {c.get('teacher_name', c['teacher'])}")
+                            st.write(f"**Room:** {c.get('room', 'TBD')}")
+                            st.write(f"**Schedule:** {c.get('schedule', 'TBD')}")
+                            st.write(f"**Students:** {len(c.get('students', []))}/{c.get('max_students', 30)}")
+                            if st.button("🗑️ Delete", key=f"del_class_{c['id']}"):
+                                classes.remove(c)
+                                save_school_data(school_code, "classes.json", classes)
+                                school['stats']['classes'] -= 1
+                                all_schools = load_all_schools()
+                                all_schools[school_code] = school
+                                save_all_schools(all_schools)
+                                st.rerun()
+                else:
+                    st.info("No classes created yet")
+        
+        elif menu == "Students":
+            st.markdown("<h1 style='text-align: center;'>👨‍🎓 Student Management</h1>", unsafe_allow_html=True)
+            students = [u for u in users if u['role'] == 'student']
+            if students:
+                for s in students:
+                    with st.container():
+                        col1, col2, col3 = st.columns([3, 3, 1])
+                        with col1:
+                            st.write(f"**{s['fullname']}**")
+                        with col2:
+                            st.write(f"📧 {s['email']}")
+                        with col3:
+                            if st.button("🗑️", key=f"del_student_{s['user_id']}"):
+                                users.remove(s)
+                                save_school_data(school_code, "users.json", users)
+                                school['stats']['students'] -= 1
+                                all_schools = load_all_schools()
+                                all_schools[school_code] = school
+                                save_all_schools(all_schools)
+                                st.rerun()
+                        st.divider()
+            else:
+                st.info("No students enrolled yet")
+        
+        elif menu == "Groups":
+            st.markdown("<h1 style='text-align: center;'>👥 Group Management</h1>", unsafe_allow_html=True)
+            if groups:
+                for g in groups:
+                    with st.expander(f"👥 {g['name']} - {g['code']}"):
+                        st.write(f"**Leader:** {g.get('leader_name', 'Unknown')}")
+                        st.write(f"**Members:** {len(g.get('members', []))}/{g.get('max_members', 10)}")
+                        if st.button("🗑️ Delete", key=f"del_group_{g['id']}"):
+                            groups.remove(g)
+                            save_school_data(school_code, "groups.json", groups)
+                            school['stats']['groups'] -= 1
+                            all_schools = load_all_schools()
+                            all_schools[school_code] = school
+                            save_all_schools(all_schools)
+                            st.rerun()
+            else:
+                st.info("No groups created yet")
+        
+        elif menu == "Approvals":
+            st.markdown("<h1 style='text-align: center;'>✅ Pending Approvals</h1>", unsafe_allow_html=True)
+            tab1, tab2 = st.tabs(["📚 Class Requests", "👥 Group Requests"])
+            
+            with tab1:
+                pending_classes = [r for r in class_requests if r['status'] == 'pending']
+                if pending_classes:
+                    for req in pending_classes:
+                        with st.container():
+                            col1, col2, col3 = st.columns([2, 2, 2])
+                            with col1:
+                                st.write(f"**{req['student_name']}**")
+                            with col2:
+                                st.write(f"📚 {req['class_name']}")
+                            with col3:
+                                if st.button("✅ Approve", key=f"app_class_{req['id']}"):
+                                    for c in classes:
+                                        if c['name'] == req['class_name']:
+                                            c['students'].append(req['student_email'])
+                                    req['status'] = 'approved'
+                                    save_school_data(school_code, "classes.json", classes)
+                                    save_school_data(school_code, "class_requests.json", class_requests)
+                                    st.rerun()
+                            st.divider()
+                else:
+                    st.info("No pending class requests")
+            
+            with tab2:
+                pending_groups = [r for r in group_requests if r['status'] == 'pending']
+                if pending_groups:
+                    for req in pending_groups:
+                        with st.container():
+                            col1, col2, col3 = st.columns([2, 2, 2])
+                            with col1:
+                                st.write(f"**{req['student_name']}**")
+                            with col2:
+                                st.write(f"👥 {req['group_name']}")
+                            with col3:
+                                if st.button("✅ Approve", key=f"app_group_{req['id']}"):
+                                    for g in groups:
+                                        if g['name'] == req['group_name']:
+                                            g['members'].append(req['student_email'])
+                                    req['status'] = 'approved'
+                                    save_school_data(school_code, "groups.json", groups)
+                                    save_school_data(school_code, "group_requests.json", group_requests)
+                                    st.rerun()
+                            st.divider()
+                else:
+                    st.info("No pending group requests")
+        
+        elif menu == "Profile":
+            st.markdown("<h1 style='text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                if user.get('profile_pic'):
+                    st.image(user['profile_pic'], width=150)
+                else:
+                    st.markdown("<h1 style='font-size: 5rem; text-align: center;'>👑</h1>", unsafe_allow_html=True)
+                pic = st.file_uploader("📸 Upload Photo", type=['png', 'jpg', 'jpeg'])
+                if pic:
+                    img = Image.open(pic)
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    b64 = base64.b64encode(buffered.getvalue()).decode()
+                    for u in users:
+                        if u['email'] == user['email']:
+                            u['profile_pic'] = f"data:image/png;base64,{b64}"
+                    save_school_data(school_code, "users.json", users)
+                    user['profile_pic'] = f"data:image/png;base64,{b64}"
+                    st.rerun()
+            with col2:
+                with st.form("edit_profile"):
+                    name = st.text_input("Full Name", user['fullname'])
+                    phone = st.text_input("Phone", user.get('phone', ''))
+                    bio = st.text_area("Bio", user.get('bio', ''))
+                    if st.form_submit_button("💾 Update Profile", use_container_width=True):
+                        for u in users:
+                            if u['email'] == user['email']:
+                                u['fullname'] = name
+                                u['phone'] = phone
+                                u['bio'] = bio
+                        save_school_data(school_code, "users.json", users)
+                        user.update({'fullname': name, 'phone': phone, 'bio': bio})
+                        st.success("Profile updated!")
+                        st.rerun()
+    
+    # ----- TEACHER SECTION -----
+    elif user['role'] == 'teacher':
+        if menu == "Dashboard":
+            st.markdown(f"<h1 style='text-align: center;'>👨‍🏫 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
+            my_classes = [c for c in classes if c.get('teacher') == user['email']]
+            my_groups = [g for g in groups if g.get('leader') == user['email']]
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("My Classes", len(my_classes))
+            with col2:
+                st.metric("My Groups", len(my_groups))
+            with col3:
+                st.metric("Assignments", len([a for a in assignments if a.get('teacher') == user['email']]))
+        
+        elif menu == "My Classes":
+            st.markdown("<h1 style='text-align: center;'>📚 My Classes</h1>", unsafe_allow_html=True)
+            my_classes = [c for c in classes if c.get('teacher') == user['email']]
+            if my_classes:
+                for c in my_classes:
+                    with st.expander(f"📖 {c['name']} - {c['code']}"):
+                        st.write(f"**Room:** {c.get('room', 'TBD')}")
+                        st.write(f"**Schedule:** {c.get('schedule', 'TBD')}")
+                        st.write(f"**Students:** {len(c.get('students', []))}/{c.get('max_students', 30)}")
+                        if c.get('students'):
+                            st.write("**Enrolled Students:**")
+                            for student_email in c['students']:
+                                student = next((u for u in users if u['email'] == student_email), None)
+                                if student:
+                                    st.write(f"- {student['fullname']}")
+            else:
+                st.info("You haven't been assigned any classes yet")
+        
+        elif menu == "My Groups":
+            st.markdown("<h1 style='text-align: center;'>👥 My Groups</h1>", unsafe_allow_html=True)
+            my_groups = [g for g in groups if g.get('leader') == user['email']]
+            if my_groups:
+                for g in my_groups:
+                    with st.expander(f"👥 {g['name']} - {g['code']}"):
+                        st.write(f"**Description:** {g.get('description', 'No description')}")
+                        st.write(f"**Members:** {len(g.get('members', []))}/{g.get('max_members', 10)}")
+                        if g.get('members'):
+                            st.write("**Members:**")
+                            for member_email in g['members']:
+                                member = next((u for u in users if u['email'] == member_email), None)
+                                if member:
+                                    st.write(f"- {member['fullname']} ({member['role']})")
+            else:
+                st.info("You haven't created any groups yet")
+        
+        elif menu == "Assignments":
+            st.markdown("<h1 style='text-align: center;'>📝 Assignments</h1>", unsafe_allow_html=True)
+            with st.form("create_assignment"):
+                my_classes = [c['name'] for c in classes if c.get('teacher') == user['email']]
+                if my_classes:
+                    class_name = st.selectbox("Select Class", my_classes)
+                    title = st.text_input("Assignment Title")
+                    description = st.text_area("Description")
+                    due_date = st.date_input("Due Date")
+                    if st.form_submit_button("✅ Create Assignment", use_container_width=True):
+                        assignment_code = generate_id("ASN")
+                        assignments.append({
+                            "code": assignment_code,
+                            "class": class_name,
+                            "teacher": user['email'],
+                            "teacher_name": user['fullname'],
+                            "title": title,
+                            "description": description,
+                            "due": due_date.strftime("%Y-%m-%d"),
+                            "created": datetime.now().strftime("%Y-%m-%d"),
+                            "submissions": []
+                        })
+                        save_school_data(school_code, "assignments.json", assignments)
+                        st.success(f"Assignment created! Code: {assignment_code}")
+                        st.rerun()
+                else:
+                    st.warning("You don't have any classes yet")
+        
+        elif menu == "Requests":
+            st.markdown("<h1 style='text-align: center;'>✅ Pending Requests</h1>", unsafe_allow_html=True)
+            my_classes = [c['name'] for c in classes if c.get('teacher') == user['email']]
+            class_reqs = [r for r in class_requests if r['status'] == 'pending' and r['class_name'] in my_classes]
+            
+            if class_reqs:
+                for req in class_reqs:
+                    with st.container():
+                        col1, col2, col3 = st.columns([2, 2, 1])
+                        with col1:
+                            st.write(f"**{req['student_name']}**")
+                        with col2:
+                            st.write(f"📚 {req['class_name']}")
+                        with col3:
+                            if st.button("✅ Approve", key=f"app_{req['id']}"):
+                                for c in classes:
+                                    if c['name'] == req['class_name']:
+                                        c['students'].append(req['student_email'])
+                                req['status'] = 'approved'
+                                save_school_data(school_code, "classes.json", classes)
+                                save_school_data(school_code, "class_requests.json", class_requests)
+                                st.rerun()
+                        st.divider()
+            else:
+                st.info("No pending requests")
+        
+        elif menu == "Profile":
+            st.markdown("<h1 style='text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                if user.get('profile_pic'):
+                    st.image(user['profile_pic'], width=150)
+                else:
+                    st.markdown("<h1 style='font-size: 5rem; text-align: center;'>👨‍🏫</h1>", unsafe_allow_html=True)
+                pic = st.file_uploader("📸 Upload Photo", type=['png', 'jpg', 'jpeg'], key="teacher_pic")
+                if pic:
+                    img = Image.open(pic)
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    b64 = base64.b64encode(buffered.getvalue()).decode()
+                    for u in users:
+                        if u['email'] == user['email']:
+                            u['profile_pic'] = f"data:image/png;base64,{b64}"
+                    save_school_data(school_code, "users.json", users)
+                    user['profile_pic'] = f"data:image/png;base64,{b64}"
+                    st.rerun()
+            with col2:
+                with st.form("edit_teacher_profile"):
+                    name = st.text_input("Full Name", user['fullname'])
+                    phone = st.text_input("Phone", user.get('phone', ''))
+                    bio = st.text_area("Bio", user.get('bio', ''))
+                    if st.form_submit_button("💾 Update Profile", use_container_width=True):
+                        for u in users:
+                            if u['email'] == user['email']:
+                                u['fullname'] = name
+                                u['phone'] = phone
+                                u['bio'] = bio
+                        save_school_data(school_code, "users.json", users)
+                        user.update({'fullname': name, 'phone': phone, 'bio': bio})
+                        st.success("Profile updated!")
+                        st.rerun()
+    
+    # ----- STUDENT SECTION -----
+    else:
+        if menu == "Dashboard":
+            st.markdown(f"<h1 style='text-align: center;'>👨‍🎓 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
+            my_classes = [c for c in classes if user['email'] in c.get('students', [])]
+            my_groups = [g for g in groups if user['email'] in g.get('members', [])]
+            
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("My Classes", len(my_classes))
+            with col2:
+                st.metric("My Groups", len(my_groups))
+            with col3:
+                upcoming = [a for a in assignments if a['class'] in [c['name'] for c in my_classes]]
+                st.metric("Assignments", len(upcoming))
+        
+        elif menu == "Browse Classes":
+            st.markdown("<h1 style='text-align: center;'>📚 Available Classes</h1>", unsafe_allow_html=True)
+            available = [c for c in classes if user['email'] not in c.get('students', []) and len(c.get('students', [])) < c.get('max_students', 30)]
+            if available:
+                for c in available:
+                    with st.container():
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            st.write(f"**{c['name']}**")
+                            st.write(f"👨‍🏫 {c.get('teacher_name', 'Unknown')} • {c.get('schedule', 'TBD')}")
+                        with col2:
+                            if st.button("📝 Request", key=f"req_{c['code']}"):
+                                class_requests.append({
+                                    "id": generate_id("REQ"),
+                                    "student_email": user['email'],
+                                    "student_name": user['fullname'],
+                                    "class_name": c['name'],
+                                    "class_code": c['code'],
+                                    "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                                    "status": "pending"
+                                })
+                                save_school_data(school_code, "class_requests.json", class_requests)
+                                st.success("Request sent!")
+                                st.rerun()
+                        st.divider()
+            else:
+                st.info("No available classes to join")
+        
+        elif menu == "Browse Groups":
+            st.markdown("<h1 style='text-align: center;'>👥 Available Groups</h1>", unsafe_allow_html=True)
+            available = [g for g in groups if user['email'] not in g.get('members', []) and len(g.get('members', [])) < g.get('max_members', 10)]
+            if available:
+                for g in available:
+                    with st.container():
+                        col1, col2 = st.columns([3, 1])
+                        with col1:
+                            st.write(f"**{g['name']}**")
+                            st.write(f"👥 Leader: {g.get('leader_name', 'Unknown')}")
+                        with col2:
+                            if st.button("📝 Request", key=f"req_group_{g['code']}"):
+                                group_requests.append({
+                                    "id": generate_id("REQ"),
+                                    "student_email": user['email'],
+                                    "student_name": user['fullname'],
+                                    "group_name": g['name'],
+                                    "group_code": g['code'],
+                                    "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                                    "status": "pending"
+                                })
+                                save_school_data(school_code, "group_requests.json", group_requests)
+                                st.success("Request sent!")
+                                st.rerun()
+                        st.divider()
+            else:
+                st.info("No available groups to join")
+        
+        elif menu == "Homework":
+            st.markdown("<h1 style='text-align: center;'>📝 My Homework</h1>", unsafe_allow_html=True)
+            my_classes = [c['name'] for c in classes if user['email'] in c.get('students', [])]
+            my_assignments = [a for a in assignments if a['class'] in my_classes]
+            if my_assignments:
+                for a in my_assignments:
+                    with st.container():
+                        st.write(f"**{a['title']}**")
+                        st.write(f"📚 {a['class']} - Due: {a['due']}")
+                        st.write(f"📝 {a.get('description', 'No description')}")
+                        st.divider()
+            else:
+                st.info("No homework assigned")
+        
+        elif menu == "My Grades":
+            st.markdown("<h1 style='text-align: center;'>📊 My Grades</h1>", unsafe_allow_html=True)
+            my_grades = [g for g in grades if g.get('student') == user['email']]
+            if my_grades:
+                for g in my_grades:
+                    st.write(f"**{g.get('assignment_title', 'Assignment')}**: {g['grade']}")
+            else:
+                st.info("No grades available yet")
+        
+        elif menu == "Profile":
+            st.markdown("<h1 style='text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
+            col1, col2 = st.columns([1, 2])
+            with col1:
+                if user.get('profile_pic'):
+                    st.image(user['profile_pic'], width=150)
+                else:
+                    st.markdown("<h1 style='font-size: 5rem; text-align: center;'>👨‍🎓</h1>", unsafe_allow_html=True)
+                pic = st.file_uploader("📸 Upload Photo", type=['png', 'jpg', 'jpeg'], key="student_pic")
+                if pic:
+                    img = Image.open(pic)
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    b64 = base64.b64encode(buffered.getvalue()).decode()
+                    for u in users:
+                        if u['email'] == user['email']:
+                            u['profile_pic'] = f"data:image/png;base64,{b64}"
+                    save_school_data(school_code, "users.json", users)
+                    user['profile_pic'] = f"data:image/png;base64,{b64}"
+                    st.rerun()
+            with col2:
+                with st.form("edit_student_profile"):
+                    name = st.text_input("Full Name", user['fullname'])
+                    phone = st.text_input("Phone", user.get('phone', ''))
+                    bio = st.text_area("Bio", user.get('bio', ''))
+                    if st.form_submit_button("💾 Update Profile", use_container_width=True):
+                        for u in users:
+                            if u['email'] == user['email']:
+                                u['fullname'] = name
+                                u['phone'] = phone
+                                u['bio'] = bio
+                        save_school_data(school_code, "users.json", users)
+                        user.update({'fullname': name, 'phone': phone, 'bio': bio})
+                        st.success("Profile updated!")
+                        st.rerun()
 
 else:
     st.error("Something went wrong. Please restart.")
