@@ -17,63 +17,66 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ============ FUNCTION TO GET BACKGROUND IMAGE ============
-def get_background_image():
-    """Returns a background image URL"""
-    # Using reliable images
-    images = [
-        "https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/159844/cellular-education-classroom-159844.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/301926/pexels-photo-301926.jpeg?auto=compress&cs=tinysrgb&w=1920"
+# ============ VIBRANT BACKGROUND COLORS (NO IMAGES) ============
+def get_background_gradient():
+    """Returns a vibrant gradient background"""
+    gradients = [
+        "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff6b6b 100%)",
+        "linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #48dbfb 100%)",
+        "linear-gradient(135deg, #1dd1a1 0%, #f368e0 50%, #ff9f43 100%)",
+        "linear-gradient(135deg, #54a0ff 0%, #5f27cd 50%, #00d2d3 100%)"
     ]
-    return random.choice(images)
+    return random.choice(gradients)
 
-# ============ CUSTOM CSS ============
-BG_IMAGE = get_background_image()
+# ============ CUSTOM CSS - VIBRANT & BEAUTIFUL ============
+BG_GRADIENT = get_background_gradient()
 
 st.markdown(f"""
 <style>
     /* Import Google Font */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
     
     * {{
         font-family: 'Poppins', sans-serif;
     }}
     
-    /* Main container with background image */
+    /* VIBRANT GRADIENT BACKGROUND */
     .stApp {{
-        background-image: url('{BG_IMAGE}');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
+        background: {BG_GRADIENT};
+        background-size: 400% 400%;
+        animation: gradient-shift 15s ease infinite;
+        min-height: 100vh;
     }}
     
-    /* Dark overlay for better readability */
-    .stApp::before {{
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.65);
-        z-index: 0;
+    @keyframes gradient-shift {{
+        0% {{ background-position: 0% 50%; }}
+        50% {{ background-position: 100% 50%; }}
+        100% {{ background-position: 0% 50%; }}
     }}
     
-    /* Ensure all content is above overlay */
-    .main > div, section[data-testid="stSidebar"] {{
-        position: relative;
-        z-index: 2;
+    /* MAIN CONTENT AREA - GLASS EFFECT */
+    .main > div {{
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        border-radius: 40px;
+        padding: 2rem;
+        margin: 1rem;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        animation: float 6s ease-in-out infinite;
     }}
     
-    /* ============ SIDEBAR STYLES ============ */
+    @keyframes float {{
+        0%, 100% {{ transform: translateY(0); }}
+        50% {{ transform: translateY(-5px); }}
+    }}
+    
+    /* ============ SIDEBAR - VIBRANT PURPLE GRADIENT ============ */
     section[data-testid="stSidebar"] {{
-        background: linear-gradient(135deg, rgba(75, 0, 130, 0.95), rgba(138, 43, 226, 0.95), rgba(255, 215, 0, 0.9)) !important;
+        background: linear-gradient(135deg, rgba(106, 17, 203, 0.95), rgba(37, 117, 252, 0.95), rgba(255, 107, 107, 0.95)) !important;
         backdrop-filter: blur(15px) !important;
-        border-right: 4px solid gold !important;
-        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6) !important;
+        border-right: 4px solid #f9ca24 !important;
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5) !important;
     }}
     
     section[data-testid="stSidebar"] > div {{
@@ -81,7 +84,7 @@ st.markdown(f"""
         padding: 1.5rem 1rem !important;
     }}
     
-    /* ALL SIDEBAR TEXT - COMPLETELY VISIBLE */
+    /* ALL SIDEBAR TEXT - BRIGHT WHITE */
     section[data-testid="stSidebar"] .stMarkdown,
     section[data-testid="stSidebar"] .stRadio label,
     section[data-testid="stSidebar"] p,
@@ -93,30 +96,30 @@ st.markdown(f"""
     section[data-testid="stSidebar"] .st-emotion-cache-16idsys p,
     section[data-testid="stSidebar"] .st-emotion-cache-1dj0hjr,
     section[data-testid="stSidebar"] .st-emotion-cache-1v0mbdj {{
-        color: white !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+        color: WHITE !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
         font-weight: 600 !important;
-        opacity: 1 !important;
+        font-size: 1rem !important;
     }}
     
-    /* Sidebar radio buttons */
+    /* SIDEBAR RADIO BUTTONS - BEAUTIFUL CARDS */
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
-        background: rgba(255, 255, 255, 0.15) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(5px) !important;
-        border-radius: 20px !important;
+        border-radius: 25px !important;
         padding: 1rem !important;
-        border: 2px solid rgba(255, 215, 0, 0.5) !important;
+        border: 2px solid #f9ca24 !important;
         margin-top: 1rem !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {{
-        background: rgba(255, 255, 255, 0.2) !important;
-        border-radius: 15px !important;
-        padding: 12px 18px !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        border-radius: 20px !important;
+        padding: 12px 20px !important;
         margin: 8px 0 !important;
-        border: 2px solid rgba(255, 215, 0, 0.3) !important;
+        border: 2px solid transparent !important;
         transition: all 0.3s ease !important;
-        color: white !important;
+        color: WHITE !important;
         font-weight: 600 !important;
         font-size: 1rem !important;
         display: flex !important;
@@ -125,32 +128,32 @@ st.markdown(f"""
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
-        background: rgba(255, 255, 255, 0.35) !important;
+        background: rgba(249, 202, 36, 0.3) !important;
         transform: translateX(8px) !important;
-        border-color: gold !important;
-        box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5) !important;
+        border-color: #f9ca24 !important;
+        box-shadow: 0 5px 20px rgba(249, 202, 36, 0.5) !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {{
-        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
         border: 3px solid white !important;
-        box-shadow: 0 0 30px gold !important;
-        color: #4B0082 !important;
-        font-weight: 700 !important;
+        box-shadow: 0 0 30px #f9ca24 !important;
+        color: #6a11cb !important;
+        font-weight: 800 !important;
     }}
     
-    /* Sidebar button */
+    /* SIDEBAR BUTTON */
     section[data-testid="stSidebar"] .stButton button {{
-        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
-        color: #4B0082 !important;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
+        color: #6a11cb !important;
         border: 3px solid white !important;
         border-radius: 50px !important;
         padding: 15px 25px !important;
-        font-weight: 700 !important;
+        font-weight: 800 !important;
         font-size: 1.1rem !important;
         text-transform: uppercase !important;
-        letter-spacing: 1px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+        letter-spacing: 2px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
         transition: all 0.3s ease !important;
         width: 100% !important;
         margin-top: 1rem !important;
@@ -158,290 +161,355 @@ st.markdown(f"""
     
     section[data-testid="stSidebar"] .stButton button:hover {{
         transform: scale(1.05) !important;
-        box-shadow: 0 8px 30px gold !important;
-        border-color: gold !important;
+        box-shadow: 0 8px 30px #f9ca24 !important;
+        border-color: #f9ca24 !important;
     }}
     
-    /* School header */
+    /* SCHOOL HEADER - VIBRANT */
     .school-header {{
-        background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(138, 43, 226, 0.9));
+        background: linear-gradient(135deg, rgba(106, 17, 203, 0.9), rgba(37, 117, 252, 0.9));
         backdrop-filter: blur(10px);
-        border: 4px solid gold;
-        border-radius: 30px;
+        border: 4px solid #f9ca24;
+        border-radius: 40px;
         padding: 25px;
         margin-bottom: 20px;
         text-align: center;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-        animation: glow 3s infinite;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        animation: header-glow 3s infinite;
     }}
     
-    @keyframes glow {{
-        0%, 100% {{ border-color: gold; box-shadow: 0 0 30px gold; }}
+    @keyframes header-glow {{
+        0%, 100% {{ border-color: #f9ca24; box-shadow: 0 0 30px #f9ca24; }}
         50% {{ border-color: white; box-shadow: 0 0 50px white; }}
     }}
     
     .school-header h2 {{
-        color: white !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        color: WHITE !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         margin: 0;
-        font-size: 1.8rem;
-        font-weight: 700;
+        font-size: 2rem;
+        font-weight: 800;
     }}
     
     .school-code {{
-        background: rgba(0,0,0,0.6);
+        background: rgba(0,0,0,0.4);
         padding: 12px;
         border-radius: 50px;
         margin-top: 15px;
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: gold !important;
-        border: 2px solid gold;
+        border: 2px solid #f9ca24;
     }}
     
     .school-code code {{
         background: transparent !important;
-        color: gold !important;
-        font-size: 1.2rem;
+        color: #f9ca24 !important;
+        font-size: 1.3rem;
+        font-weight: 700;
     }}
     
-    /* Profile card */
+    /* PROFILE CARD */
     .profile-card {{
-        background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(138, 43, 226, 0.9));
+        background: linear-gradient(135deg, rgba(106, 17, 203, 0.9), rgba(37, 117, 252, 0.9));
         backdrop-filter: blur(10px);
+        border: 3px solid #f9ca24;
         border-radius: 30px;
         padding: 20px;
-        border: 3px solid gold;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
         gap: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
     }}
     
     .profile-card h1 {{
-        color: white !important;
+        color: WHITE !important;
         margin: 0;
         font-size: 3rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }}
     
-    /* ============ MAIN CONTENT STYLES ============ */
-    /* ALL TEXT IN MAIN CONTENT - VISIBLE */
-    .main .stMarkdown,
-    .main .stText,
-    .main p,
-    .main h1,
-    .main h2,
-    .main h3,
-    .main h4,
-    .main span,
-    .main div:not(.stButton) {{
-        color: white !important;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+    /* ============ MAIN CONTENT - VIBRANT ============ */
+    /* RAINBOW HEADERS */
+    h1 {{
+        background: linear-gradient(135deg, #f9ca24, #f6e58d, #ff7979, #badc58, #7ed6df, #e056fd);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-size: 3rem !important;
+        font-weight: 900 !important;
+        text-align: center;
+        animation: rainbow 5s infinite;
+        margin-bottom: 2rem !important;
     }}
     
-    /* Headers with extra glow */
-    h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
-        color: white !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px gold !important;
+    @keyframes rainbow {{
+        0%, 100% {{ filter: drop-shadow(0 0 20px #f9ca24); }}
+        33% {{ filter: drop-shadow(0 0 20px #ff7979); }}
+        66% {{ filter: drop-shadow(0 0 20px #7ed6df); }}
+    }}
+    
+    h2, h3 {{
+        color: WHITE !important;
         font-weight: 700 !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }}
     
-    /* Input fields - FIXED TEXT VISIBILITY */
-    .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
-        background: rgba(255, 255, 255, 0.2) !important;
-        border: 3px solid gold !important;
-        border-radius: 20px !important;
-        color: white !important;
-        font-weight: 500 !important;
-        font-size: 1rem !important;
-        padding: 0.8rem 1rem !important;
-        backdrop-filter: blur(5px) !important;
-    }}
-    
-    .stTextInput input::placeholder, .stTextArea textarea::placeholder {{
-        color: rgba(255, 255, 255, 0.7) !important;
-        font-weight: 400 !important;
-    }}
-    
-    .stTextInput input:focus, .stTextArea textarea:focus {{
-        background: rgba(255, 255, 255, 0.3) !important;
-        border-color: white !important;
-        box-shadow: 0 0 30px gold !important;
-    }}
-    
-    /* Labels */
+    /* FORM ELEMENTS - VIBRANT */
     .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {{
-        color: white !important;
-        font-weight: 600 !important;
-        text-shadow: 2px 2px 4px black !important;
+        color: WHITE !important;
+        font-weight: 700 !important;
         font-size: 1.1rem !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
         margin-bottom: 0.5rem !important;
     }}
     
-    /* Buttons */
-    .stButton button {{
-        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
-        color: #4B0082 !important;
-        border: 3px solid white !important;
-        border-radius: 50px !important;
-        padding: 0.8rem 2rem !important;
-        font-weight: 700 !important;
+    .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
+        border: 3px solid #f9ca24 !important;
+        border-radius: 25px !important;
+        color: WHITE !important;
+        font-weight: 600 !important;
         font-size: 1.1rem !important;
-        text-transform: uppercase !important;
-        letter-spacing: 1px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
+        padding: 0.8rem 1.2rem !important;
         transition: all 0.3s ease !important;
     }}
     
-    .stButton button:hover {{
-        transform: scale(1.05) !important;
-        box-shadow: 0 8px 30px gold !important;
-        border-color: gold !important;
+    .stTextInput input:focus, .stTextArea textarea:focus {{
+        border-color: white !important;
+        box-shadow: 0 0 30px #f9ca24 !important;
+        background: rgba(255, 255, 255, 0.3) !important;
     }}
     
-    /* Tabs */
+    /* Placeholder text */
+    .stTextInput input::placeholder, .stTextArea textarea::placeholder {{
+        color: rgba(255, 255, 255, 0.8) !important;
+        font-style: italic;
+    }}
+    
+    /* BUTTONS - ANIMATED GRADIENT */
+    .stButton button {{
+        background: linear-gradient(135deg, #f9ca24, #f6e58d, #ff7979, #badc58, #7ed6df, #e056fd) !important;
+        background-size: 300% 300% !important;
+        animation: button-gradient 5s ease infinite !important;
+        color: #6a11cb !important;
+        border: 4px solid white !important;
+        border-radius: 60px !important;
+        padding: 0.8rem 2.5rem !important;
+        font-weight: 900 !important;
+        font-size: 1.2rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 2px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+        transition: all 0.3s ease !important;
+    }}
+    
+    @keyframes button-gradient {{
+        0% {{ background-position: 0% 50%; }}
+        50% {{ background-position: 100% 50%; }}
+        100% {{ background-position: 0% 50%; }}
+    }}
+    
+    .stButton button:hover {{
+        transform: scale(1.05) translateY(-3px) !important;
+        box-shadow: 0 15px 40px #f9ca24 !important;
+        border-color: #f9ca24 !important;
+    }}
+    
+    /* TABS - BEAUTIFUL */
     .stTabs [data-baseweb="tab-list"] {{
-        background: rgba(0, 0, 0, 0.3) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(10px) !important;
-        border-radius: 50px !important;
+        border-radius: 60px !important;
         padding: 0.5rem !important;
-        border: 3px solid gold !important;
+        border: 3px solid #f9ca24 !important;
         gap: 0.5rem;
+        margin-bottom: 2rem !important;
     }}
     
     .stTabs [data-baseweb="tab"] {{
-        color: white !important;
+        color: WHITE !important;
         border-radius: 50px !important;
         padding: 0.8rem 2rem !important;
-        font-weight: 600 !important;
-        font-size: 1rem !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        transition: all 0.3s ease !important;
     }}
     
     .stTabs [aria-selected="true"] {{
-        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
-        color: #4B0082 !important;
-        font-weight: 700 !important;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
+        color: #6a11cb !important;
+        font-weight: 900 !important;
         border: 2px solid white !important;
+        box-shadow: 0 0 30px #f9ca24 !important;
     }}
     
-    /* Metrics */
+    /* METRICS - VIBRANT CARDS */
     .stMetric {{
-        background: rgba(0, 0, 0, 0.3) !important;
-        backdrop-filter: blur(10px) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
+        border: 3px solid #f9ca24 !important;
         border-radius: 30px !important;
         padding: 1.5rem !important;
-        border: 3px solid gold !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+    }}
+    
+    .stMetric:hover {{
+        transform: translateY(-5px) !important;
+        box-shadow: 0 15px 40px #f9ca24 !important;
     }}
     
     .stMetric label {{
-        color: white !important;
-        font-size: 1.1rem !important;
-        font-weight: 500 !important;
+        color: WHITE !important;
+        font-size: 1.2rem !important;
+        font-weight: 600 !important;
     }}
     
     .stMetric div {{
-        color: gold !important;
-        font-size: 2.5rem !important;
-        font-weight: 700 !important;
-        text-shadow: 0 0 20px gold !important;
+        color: #f9ca24 !important;
+        font-size: 3rem !important;
+        font-weight: 900 !important;
+        text-shadow: 0 0 20px #f9ca24 !important;
     }}
     
-    /* Expanders */
+    /* EXPANDERS */
     .streamlit-expanderHeader {{
-        background: rgba(0, 0, 0, 0.3) !important;
-        backdrop-filter: blur(10px) !important;
-        border-radius: 20px !important;
-        border: 2px solid gold !important;
-        color: white !important;
-        font-weight: 600 !important;
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(5px) !important;
+        border: 3px solid #f9ca24 !important;
+        border-radius: 25px !important;
+        color: WHITE !important;
+        font-weight: 700 !important;
         font-size: 1.1rem !important;
+        padding: 1rem !important;
     }}
     
-    /* Success/Warning/Error messages */
+    /* ALERTS - VIBRANT */
     .stAlert {{
-        background: rgba(0, 0, 0, 0.4) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(10px) !important;
         border-radius: 20px !important;
-        color: white !important;
-        font-weight: 500 !important;
-        border-left: 6px solid !important;
+        color: WHITE !important;
+        font-weight: 600 !important;
+        border-left: 8px solid !important;
+        padding: 1rem !important;
     }}
     
     .stAlert-success {{
         border-left-color: #00ff88 !important;
+        box-shadow: 0 0 20px #00ff88 !important;
     }}
     
     .stAlert-error {{
         border-left-color: #ff4757 !important;
+        box-shadow: 0 0 20px #ff4757 !important;
     }}
     
     .stAlert-warning {{
-        border-left-color: #ffa502 !important;
+        border-left-color: #f9ca24 !important;
+        box-shadow: 0 0 20px #f9ca24 !important;
     }}
     
-    /* Dividers */
+    /* DIVIDERS - RAINBOW */
     hr {{
         border: none !important;
-        height: 3px !important;
-        background: linear-gradient(90deg, transparent, gold, white, gold, transparent) !important;
+        height: 4px !important;
+        background: linear-gradient(90deg, transparent, #f9ca24, #ff7979, #7ed6df, #badc58, #f9ca24, transparent) !important;
         margin: 2rem 0 !important;
+        animation: divider-pulse 3s infinite !important;
     }}
     
-    /* Code blocks */
+    @keyframes divider-pulse {{
+        0%, 100% {{ opacity: 1; }}
+        50% {{ opacity: 0.7; }}
+    }}
+    
+    /* CODE BLOCKS */
     code {{
-        background: rgba(0, 0, 0, 0.5) !important;
-        color: gold !important;
-        border-radius: 10px !important;
-        padding: 0.2rem 0.5rem !important;
-        font-weight: 600 !important;
-        border: 1px solid gold !important;
+        background: rgba(0, 0, 0, 0.4) !important;
+        color: #f9ca24 !important;
+        border: 2px solid #f9ca24 !important;
+        border-radius: 15px !important;
+        padding: 0.3rem 0.8rem !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
     }}
     
-    /* Footer */
-    footer {{
-        display: none !important;
+    /* GLASS CARDS */
+    .glass-card {{
+        background: rgba(255, 255, 255, 0.2) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 4px solid #f9ca24 !important;
+        border-radius: 40px !important;
+        padding: 2rem !important;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.3) !important;
+        transition: all 0.3s ease !important;
     }}
     
-    /* Animated title */
+    .glass-card:hover {{
+        transform: translateY(-5px) !important;
+        box-shadow: 0 25px 60px #f9ca24 !important;
+    }}
+    
+    .glass-card * {{
+        color: WHITE !important;
+    }}
+    
+    /* RADIANT TITLE */
     .radiant-title {{
         text-align: center;
-        font-size: 4rem;
-        font-weight: 800;
-        background: linear-gradient(90deg, gold, white, #FFD700, #FFA500);
+        font-size: 5rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #f9ca24, #f6e58d, #ff7979, #badc58, #7ed6df, #e056fd);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: title-pulse 3s infinite;
-        text-shadow: 0 0 40px rgba(255,215,0,0.7);
+        animation: title-float 3s infinite, title-rainbow 5s infinite;
         margin-bottom: 0.5rem;
+        text-shadow: 0 0 40px rgba(249, 202, 36, 0.5);
     }}
     
-    @keyframes title-pulse {{
-        0%, 100% {{ filter: drop-shadow(0 0 30px gold); }}
-        50% {{ filter: drop-shadow(0 0 60px white); }}
+    @keyframes title-float {{
+        0%, 100% {{ transform: translateY(0); }}
+        50% {{ transform: translateY(-10px); }}
+    }}
+    
+    @keyframes title-rainbow {{
+        0% {{ filter: drop-shadow(0 0 30px #f9ca24); }}
+        25% {{ filter: drop-shadow(0 0 30px #ff7979); }}
+        50% {{ filter: drop-shadow(0 0 30px #7ed6df); }}
+        75% {{ filter: drop-shadow(0 0 30px #badc58); }}
+        100% {{ filter: drop-shadow(0 0 30px #f9ca24); }}
     }}
     
     .radiant-subtitle {{
         text-align: center;
-        color: white;
-        font-size: 1.8rem;
+        color: WHITE !important;
+        font-size: 2rem;
         font-weight: 400;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px gold;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         margin-bottom: 2rem;
+        animation: subtitle-pulse 3s infinite;
     }}
     
-    /* Card containers */
-    .glass-card {{
-        background: rgba(0, 0, 0, 0.3) !important;
-        backdrop-filter: blur(10px) !important;
-        border: 3px solid gold !important;
-        border-radius: 30px !important;
-        padding: 2rem !important;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    @keyframes subtitle-pulse {{
+        0%, 100% {{ opacity: 1; }}
+        50% {{ opacity: 0.8; }}
     }}
     
-    /* Ensure all text in glass cards is visible */
-    .glass-card * {{
-        color: white !important;
+    /* Hide footer */
+    footer {{
+        display: none !important;
+    }}
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {{
+        width: 12px;
+        background: rgba(255,255,255,0.1);
+    }}
+    
+    ::-webkit-scrollbar-thumb {{
+        background: linear-gradient(135deg, #f9ca24, #ff7979);
+        border-radius: 10px;
+        border: 2px solid white;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -925,7 +993,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     # ----- ADMIN -----
     if user['role'] == 'admin':
         if menu == "Dashboard":
-            st.markdown(f"<h1 style='color: white; text-align: center;'>👑 {school['name']} Dashboard</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 style='text-align: center;'>👑 {school['name']} Dashboard</h1>", unsafe_allow_html=True)
             
             col1,col2,col3,col4 = st.columns(4)
             with col1:
@@ -947,7 +1015,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 st.success("🌟 All caught up! No pending requests")
         
         elif menu == "Teachers":
-            st.markdown("<h1 style='color: white; text-align: center;'>👨‍🏫 Teacher Management</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center;'>👨‍🏫 Teacher Management</h1>", unsafe_allow_html=True)
             tab1, tab2 = st.tabs(["✨ Create Teacher Codes", "👥 Active Teachers"])
             
             with tab1:
@@ -985,7 +1053,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             st.markdown(f"**{len(t.get('used_by_list',[]))}** teachers")
         
         elif menu == "Approvals":
-            st.markdown("<h1 style='color: white; text-align: center;'>✅ Admin Veto Power</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center;'>✅ Admin Veto Power</h1>", unsafe_allow_html=True)
             tab1, tab2 = st.tabs(["📚 Class Requests", "👥 Group Requests"])
             
             with tab1:
@@ -1021,7 +1089,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             st.rerun()
         
         elif menu == "Profile":
-            st.markdown("<h1 style='color: white; text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
             col1,col2 = st.columns([1,2])
             with col1:
                 if user.get('profile_pic'):
@@ -1059,7 +1127,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     # ----- TEACHER -----
     elif user['role'] == 'teacher':
         if menu == "Dashboard":
-            st.markdown(f"<h1 style='color: white; text-align: center;'>👨‍🏫 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 style='text-align: center;'>👨‍🏫 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
             my_classes = [c for c in classes if c.get('teacher') == user['email']]
             my_groups = [g for g in groups if g.get('leader') == user['email']]
             
@@ -1069,7 +1137,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             col3.metric("Assignments", len([a for a in assignments if a.get('teacher')==user['email']]))
         
         elif menu == "Profile":
-            st.markdown("<h1 style='color: white; text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
             col1,col2 = st.columns([1,2])
             with col1:
                 if user.get('profile_pic'):
@@ -1107,7 +1175,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     # ----- STUDENT -----
     else:
         if menu == "Dashboard":
-            st.markdown(f"<h1 style='color: white; text-align: center;'>👨‍🎓 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 style='text-align: center;'>👨‍🎓 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
             my_classes = [c for c in classes if user['email'] in c.get('students',[])]
             my_groups = [g for g in groups if user['email'] in g.get('members',[])]
             
@@ -1117,7 +1185,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             col3.metric("Assignments", len([a for a in assignments if a['class'] in [c['name'] for c in my_classes]]))
         
         elif menu == "Browse Classes":
-            st.markdown("<h1 style='color: white; text-align: center;'>📚 Available Classes</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center;'>📚 Available Classes</h1>", unsafe_allow_html=True)
             available = [c for c in classes if user['email'] not in c.get('students',[]) and len(c.get('students',[])) < c.get('max_students',30)]
             for c in available:
                 with st.container():
@@ -1139,7 +1207,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         st.rerun()
         
         elif menu == "Profile":
-            st.markdown("<h1 style='color: white; text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
             col1,col2 = st.columns([1,2])
             with col1:
                 if user.get('profile_pic'):
