@@ -17,46 +17,71 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ============ CUSTOM CSS - VIBRANT & BEAUTIFUL ============
-st.markdown("""
+# ============ FUNCTION TO GET BACKGROUND IMAGE ============
+def get_background_image():
+    """Returns a background image URL"""
+    # Using reliable images
+    images = [
+        "https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/159844/cellular-education-classroom-159844.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/301926/pexels-photo-301926.jpeg?auto=compress&cs=tinysrgb&w=1920"
+    ]
+    return random.choice(images)
+
+# ============ CUSTOM CSS ============
+BG_IMAGE = get_background_image()
+
+st.markdown(f"""
 <style>
     /* Import Google Font */
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
     
-    * {
+    * {{
         font-family: 'Poppins', sans-serif;
-    }
+    }}
     
-    /* VIBRANT GRADIENT BACKGROUND */
-    .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff6b6b 100%);
-        min-height: 100vh;
-    }
+    /* Main container with background image */
+    .stApp {{
+        background-image: url('{BG_IMAGE}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+    }}
     
-    /* MAIN CONTENT AREA - GLASS EFFECT */
-    .main > div {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 30px;
-        padding: 2rem;
-        margin: 1rem;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    }
+    /* Dark overlay for better readability */
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.65);
+        z-index: 0;
+    }}
     
-    /* ============ SIDEBAR - VIBRANT PURPLE ============ */
-    section[data-testid="stSidebar"] {
-        background: linear-gradient(135deg, #4834d4 0%, #686de0 50%, #7ed6df 100%) !important;
-        border-right: 4px solid #f9ca24 !important;
-        box-shadow: 10px 0 30px rgba(0,0,0,0.3) !important;
-    }
+    /* Ensure all content is above overlay */
+    .main > div, section[data-testid="stSidebar"] {{
+        position: relative;
+        z-index: 2;
+    }}
     
-    section[data-testid="stSidebar"] > div {
+    /* ============ SIDEBAR STYLES ============ */
+    section[data-testid="stSidebar"] {{
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.95), rgba(138, 43, 226, 0.95), rgba(255, 215, 0, 0.9)) !important;
+        backdrop-filter: blur(15px) !important;
+        border-right: 4px solid gold !important;
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6) !important;
+    }}
+    
+    section[data-testid="stSidebar"] > div {{
         background: transparent !important;
         padding: 1.5rem 1rem !important;
-    }
+    }}
     
-    /* SIDEBAR TEXT - BRIGHT AND BEAUTIFUL */
+    /* ALL SIDEBAR TEXT - COMPLETELY VISIBLE */
     section[data-testid="stSidebar"] .stMarkdown,
     section[data-testid="stSidebar"] .stRadio label,
     section[data-testid="stSidebar"] p,
@@ -64,365 +89,360 @@ st.markdown("""
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3,
     section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] div {
-        color: WHITE !important;
+    section[data-testid="stSidebar"] div,
+    section[data-testid="stSidebar"] .st-emotion-cache-16idsys p,
+    section[data-testid="stSidebar"] .st-emotion-cache-1dj0hjr,
+    section[data-testid="stSidebar"] .st-emotion-cache-1v0mbdj {{
+        color: white !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
         font-weight: 600 !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
-    }
+        opacity: 1 !important;
+    }}
     
-    /* SIDEBAR RADIO BUTTONS - BEAUTIFUL CARDS */
-    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {
-        background: rgba(255, 255, 255, 0.2) !important;
+    /* Sidebar radio buttons */
+    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
+        background: rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(5px) !important;
         border-radius: 20px !important;
         padding: 1rem !important;
-        border: 2px solid #f9ca24 !important;
-    }
+        border: 2px solid rgba(255, 215, 0, 0.5) !important;
+        margin-top: 1rem !important;
+    }}
     
-    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {
-        background: rgba(0, 0, 0, 0.3) !important;
+    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {{
+        background: rgba(255, 255, 255, 0.2) !important;
         border-radius: 15px !important;
         padding: 12px 18px !important;
         margin: 8px 0 !important;
-        border: 2px solid transparent !important;
+        border: 2px solid rgba(255, 215, 0, 0.3) !important;
         transition: all 0.3s ease !important;
-        color: WHITE !important;
+        color: white !important;
         font-weight: 600 !important;
-    }
+        font-size: 1rem !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 12px !important;
+    }}
     
-    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {
-        background: rgba(249, 202, 36, 0.3) !important;
-        border-color: #f9ca24 !important;
-        transform: translateX(5px) !important;
-    }
+    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
+        background: rgba(255, 255, 255, 0.35) !important;
+        transform: translateX(8px) !important;
+        border-color: gold !important;
+        box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5) !important;
+    }}
     
-    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {
-        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
-        border: 2px solid white !important;
-        color: #4834d4 !important;
-        font-weight: 800 !important;
-        box-shadow: 0 0 20px #f9ca24 !important;
-    }
+    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {{
+        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        border: 3px solid white !important;
+        box-shadow: 0 0 30px gold !important;
+        color: #4B0082 !important;
+        font-weight: 700 !important;
+    }}
     
-    /* SIDEBAR BUTTON */
-    section[data-testid="stSidebar"] .stButton button {
-        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
-        color: #4834d4 !important;
+    /* Sidebar button */
+    section[data-testid="stSidebar"] .stButton button {{
+        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        color: #4B0082 !important;
         border: 3px solid white !important;
         border-radius: 50px !important;
-        padding: 12px 24px !important;
-        font-weight: 800 !important;
+        padding: 15px 25px !important;
+        font-weight: 700 !important;
         font-size: 1.1rem !important;
         text-transform: uppercase !important;
         letter-spacing: 1px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
         transition: all 0.3s ease !important;
-    }
+        width: 100% !important;
+        margin-top: 1rem !important;
+    }}
     
-    section[data-testid="stSidebar"] .stButton button:hover {
+    section[data-testid="stSidebar"] .stButton button:hover {{
         transform: scale(1.05) !important;
-        box-shadow: 0 8px 25px #f9ca24 !important;
-    }
+        box-shadow: 0 8px 30px gold !important;
+        border-color: gold !important;
+    }}
     
-    /* SCHOOL HEADER - VIBRANT */
-    .school-header {
-        background: linear-gradient(135deg, rgba(72, 52, 212, 0.9), rgba(126, 214, 223, 0.9));
+    /* School header */
+    .school-header {{
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(138, 43, 226, 0.9));
         backdrop-filter: blur(10px);
-        border: 4px solid #f9ca24;
+        border: 4px solid gold;
         border-radius: 30px;
         padding: 25px;
         margin-bottom: 20px;
         text-align: center;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         animation: glow 3s infinite;
-    }
+    }}
     
-    @keyframes glow {
-        0%, 100% { box-shadow: 0 0 30px #f9ca24; }
-        50% { box-shadow: 0 0 50px #7ed6df; }
-    }
+    @keyframes glow {{
+        0%, 100% {{ border-color: gold; box-shadow: 0 0 30px gold; }}
+        50% {{ border-color: white; box-shadow: 0 0 50px white; }}
+    }}
     
-    .school-header h2 {
-        color: WHITE !important;
-        font-size: 2rem;
-        font-weight: 800;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    .school-header h2 {{
+        color: white !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         margin: 0;
-    }
+        font-size: 1.8rem;
+        font-weight: 700;
+    }}
     
-    .school-code {
-        background: rgba(0, 0, 0, 0.4);
+    .school-code {{
+        background: rgba(0,0,0,0.6);
         padding: 12px;
         border-radius: 50px;
         margin-top: 15px;
-        border: 2px solid #f9ca24;
-    }
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: gold !important;
+        border: 2px solid gold;
+    }}
     
-    .school-code code {
-        color: #f9ca24 !important;
-        font-size: 1.3rem;
-        font-weight: 700;
+    .school-code code {{
         background: transparent !important;
-    }
+        color: gold !important;
+        font-size: 1.2rem;
+    }}
     
-    /* PROFILE CARD */
-    .profile-card {
-        background: linear-gradient(135deg, rgba(72, 52, 212, 0.8), rgba(126, 214, 223, 0.8));
+    /* Profile card */
+    .profile-card {{
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(138, 43, 226, 0.9));
         backdrop-filter: blur(10px);
-        border: 3px solid #f9ca24;
-        border-radius: 25px;
+        border-radius: 30px;
         padding: 20px;
+        border: 3px solid gold;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
         gap: 15px;
-    }
+    }}
     
-    .profile-card h1 {
-        color: WHITE !important;
-        font-size: 3rem;
+    .profile-card h1 {{
+        color: white !important;
         margin: 0;
-    }
+        font-size: 3rem;
+    }}
     
-    /* ============ MAIN CONTENT - VIBRANT ============ */
-    /* HEADERS - BEAUTIFUL GRADIENT */
-    h1 {
-        background: linear-gradient(135deg, #f9ca24, #f6e58d, #7ed6df, #686de0);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 3rem !important;
-        font-weight: 800 !important;
-        text-align: center;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-        animation: title-glow 3s infinite;
-    }
+    /* ============ MAIN CONTENT STYLES ============ */
+    /* ALL TEXT IN MAIN CONTENT - VISIBLE */
+    .main .stMarkdown,
+    .main .stText,
+    .main p,
+    .main h1,
+    .main h2,
+    .main h3,
+    .main h4,
+    .main span,
+    .main div:not(.stButton) {{
+        color: white !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+    }}
     
-    @keyframes title-glow {
-        0%, 100% { filter: drop-shadow(0 0 20px #f9ca24); }
-        50% { filter: drop-shadow(0 0 40px #7ed6df); }
-    }
-    
-    h2, h3 {
-        color: WHITE !important;
+    /* Headers with extra glow */
+    h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
+        color: white !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px gold !important;
         font-weight: 700 !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
+    }}
     
-    /* FORM ELEMENTS - BEAUTIFUL */
-    .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {
-        color: WHITE !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-    }
-    
-    .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {
+    /* Input fields - FIXED TEXT VISIBILITY */
+    .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
         background: rgba(255, 255, 255, 0.2) !important;
-        backdrop-filter: blur(5px) !important;
-        border: 3px solid #f9ca24 !important;
-        border-radius: 15px !important;
-        color: WHITE !important;
+        border: 3px solid gold !important;
+        border-radius: 20px !important;
+        color: white !important;
         font-weight: 500 !important;
-        font-size: 1.1rem !important;
-        padding: 0.8rem !important;
-        transition: all 0.3s ease !important;
-    }
+        font-size: 1rem !important;
+        padding: 0.8rem 1rem !important;
+        backdrop-filter: blur(5px) !important;
+    }}
     
-    .stTextInput input:focus, .stTextArea textarea:focus {
-        border-color: #7ed6df !important;
-        box-shadow: 0 0 25px #f9ca24 !important;
-        background: rgba(255, 255, 255, 0.3) !important;
-    }
-    
-    /* Placeholder text */
-    .stTextInput input::placeholder, .stTextArea textarea::placeholder {
+    .stTextInput input::placeholder, .stTextArea textarea::placeholder {{
         color: rgba(255, 255, 255, 0.7) !important;
-        font-style: italic;
-    }
+        font-weight: 400 !important;
+    }}
     
-    /* BUTTONS - VIBRANT GRADIENT */
-    .stButton button {
-        background: linear-gradient(135deg, #f9ca24, #f6e58d, #7ed6df, #686de0) !important;
-        background-size: 300% 300% !important;
-        animation: gradient-shift 5s ease infinite !important;
-        color: #4834d4 !important;
+    .stTextInput input:focus, .stTextArea textarea:focus {{
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: white !important;
+        box-shadow: 0 0 30px gold !important;
+    }}
+    
+    /* Labels */
+    .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {{
+        color: white !important;
+        font-weight: 600 !important;
+        text-shadow: 2px 2px 4px black !important;
+        font-size: 1.1rem !important;
+        margin-bottom: 0.5rem !important;
+    }}
+    
+    /* Buttons */
+    .stButton button {{
+        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        color: #4B0082 !important;
         border: 3px solid white !important;
         border-radius: 50px !important;
         padding: 0.8rem 2rem !important;
-        font-weight: 800 !important;
-        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
         text-transform: uppercase !important;
         letter-spacing: 1px !important;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
         transition: all 0.3s ease !important;
-    }
+    }}
     
-    @keyframes gradient-shift {
-        0% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-        100% { background-position: 0% 50%; }
-    }
-    
-    .stButton button:hover {
+    .stButton button:hover {{
         transform: scale(1.05) !important;
-        box-shadow: 0 8px 30px #f9ca24 !important;
-        border-color: #f9ca24 !important;
-    }
+        box-shadow: 0 8px 30px gold !important;
+        border-color: gold !important;
+    }}
     
-    /* TABS - BEAUTIFUL */
-    .stTabs [data-baseweb="tab-list"] {
-        background: rgba(255, 255, 255, 0.2) !important;
-        backdrop-filter: blur(5px) !important;
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {{
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
         border-radius: 50px !important;
         padding: 0.5rem !important;
-        border: 3px solid #f9ca24 !important;
-    }
+        border: 3px solid gold !important;
+        gap: 0.5rem;
+    }}
     
-    .stTabs [data-baseweb="tab"] {
-        color: WHITE !important;
-        font-weight: 600 !important;
-        font-size: 1.1rem !important;
-        padding: 0.8rem 2rem !important;
+    .stTabs [data-baseweb="tab"] {{
+        color: white !important;
         border-radius: 50px !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stTabs [aria-selected="true"] {
-        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
-        color: #4834d4 !important;
-        font-weight: 800 !important;
-        border: 2px solid white !important;
-    }
-    
-    /* METRICS - BEAUTIFUL CARDS */
-    .stMetric {
-        background: rgba(255, 255, 255, 0.2) !important;
-        backdrop-filter: blur(5px) !important;
-        border: 3px solid #f9ca24 !important;
-        border-radius: 20px !important;
-        padding: 1.5rem !important;
-        transition: all 0.3s ease !important;
-    }
-    
-    .stMetric:hover {
-        transform: translateY(-5px) !important;
-        box-shadow: 0 10px 30px #f9ca24 !important;
-    }
-    
-    .stMetric label {
-        color: WHITE !important;
-        font-size: 1.1rem !important;
-    }
-    
-    .stMetric div {
-        color: #f9ca24 !important;
-        font-size: 2.5rem !important;
-        font-weight: 800 !important;
-        text-shadow: 0 0 15px #f9ca24 !important;
-    }
-    
-    /* EXPANDERS */
-    .streamlit-expanderHeader {
-        background: rgba(255, 255, 255, 0.2) !important;
-        backdrop-filter: blur(5px) !important;
-        border: 3px solid #f9ca24 !important;
-        border-radius: 15px !important;
-        color: WHITE !important;
-        font-weight: 700 !important;
-        font-size: 1.1rem !important;
-    }
-    
-    /* ALERTS - VIBRANT */
-    .stAlert {
-        background: rgba(255, 255, 255, 0.2) !important;
-        backdrop-filter: blur(5px) !important;
-        border-left: 6px solid !important;
-        border-radius: 15px !important;
-        color: WHITE !important;
+        padding: 0.8rem 2rem !important;
         font-weight: 600 !important;
-    }
+        font-size: 1rem !important;
+    }}
     
-    .stAlert-success {
-        border-left-color: #00ff88 !important;
-    }
+    .stTabs [aria-selected="true"] {{
+        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        color: #4B0082 !important;
+        font-weight: 700 !important;
+        border: 2px solid white !important;
+    }}
     
-    .stAlert-error {
-        border-left-color: #ff4757 !important;
-    }
+    /* Metrics */
+    .stMetric {{
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 30px !important;
+        padding: 1.5rem !important;
+        border: 3px solid gold !important;
+    }}
     
-    .stAlert-warning {
-        border-left-color: #f9ca24 !important;
-    }
+    .stMetric label {{
+        color: white !important;
+        font-size: 1.1rem !important;
+        font-weight: 500 !important;
+    }}
     
-    /* DIVIDERS - BEAUTIFUL */
-    hr {
-        border: none !important;
-        height: 4px !important;
-        background: linear-gradient(90deg, transparent, #f9ca24, #7ed6df, #686de0, #f9ca24, transparent) !important;
-        margin: 2rem 0 !important;
-    }
+    .stMetric div {{
+        color: gold !important;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 20px gold !important;
+    }}
     
-    /* CODE */
-    code {
+    /* Expanders */
+    .streamlit-expanderHeader {{
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 20px !important;
+        border: 2px solid gold !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+    }}
+    
+    /* Success/Warning/Error messages */
+    .stAlert {{
         background: rgba(0, 0, 0, 0.4) !important;
-        color: #f9ca24 !important;
-        border: 2px solid #f9ca24 !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 20px !important;
+        color: white !important;
+        font-weight: 500 !important;
+        border-left: 6px solid !important;
+    }}
+    
+    .stAlert-success {{
+        border-left-color: #00ff88 !important;
+    }}
+    
+    .stAlert-error {{
+        border-left-color: #ff4757 !important;
+    }}
+    
+    .stAlert-warning {{
+        border-left-color: #ffa502 !important;
+    }}
+    
+    /* Dividers */
+    hr {{
+        border: none !important;
+        height: 3px !important;
+        background: linear-gradient(90deg, transparent, gold, white, gold, transparent) !important;
+        margin: 2rem 0 !important;
+    }}
+    
+    /* Code blocks */
+    code {{
+        background: rgba(0, 0, 0, 0.5) !important;
+        color: gold !important;
         border-radius: 10px !important;
         padding: 0.2rem 0.5rem !important;
-        font-weight: 700 !important;
-    }
+        font-weight: 600 !important;
+        border: 1px solid gold !important;
+    }}
     
-    /* CARDS */
-    .glass-card {
-        background: rgba(255, 255, 255, 0.2) !important;
-        backdrop-filter: blur(10px) !important;
-        border: 4px solid #f9ca24 !important;
-        border-radius: 30px !important;
-        padding: 2rem !important;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
-        transition: all 0.3s ease !important;
-    }
+    /* Footer */
+    footer {{
+        display: none !important;
+    }}
     
-    .glass-card:hover {
-        transform: translateY(-5px) !important;
-        box-shadow: 0 15px 40px #f9ca24 !important;
-    }
-    
-    .glass-card * {
-        color: WHITE !important;
-    }
-    
-    /* TITLE */
-    .radiant-title {
+    /* Animated title */
+    .radiant-title {{
         text-align: center;
-        font-size: 4.5rem;
-        font-weight: 900;
-        background: linear-gradient(135deg, #f9ca24, #f6e58d, #7ed6df, #686de0, #ff6b6b);
+        font-size: 4rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, gold, white, #FFD700, #FFA500);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: title-float 3s infinite;
+        animation: title-pulse 3s infinite;
+        text-shadow: 0 0 40px rgba(255,215,0,0.7);
         margin-bottom: 0.5rem;
-        text-shadow: 0 0 30px rgba(249, 202, 36, 0.5);
-    }
+    }}
     
-    @keyframes title-float {
-        0%, 100% { transform: translateY(0); }
-        50% { transform: translateY(-5px); }
-    }
+    @keyframes title-pulse {{
+        0%, 100% {{ filter: drop-shadow(0 0 30px gold); }}
+        50% {{ filter: drop-shadow(0 0 60px white); }}
+    }}
     
-    .radiant-subtitle {
+    .radiant-subtitle {{
         text-align: center;
-        color: WHITE !important;
-        font-size: 2rem;
+        color: white;
+        font-size: 1.8rem;
         font-weight: 400;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px gold;
         margin-bottom: 2rem;
-    }
+    }}
     
-    /* Hide footer */
-    footer {
-        display: none !important;
-    }
+    /* Card containers */
+    .glass-card {{
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 3px solid gold !important;
+        border-radius: 30px !important;
+        padding: 2rem !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    }}
+    
+    /* Ensure all text in glass cards is visible */
+    .glass-card * {{
+        color: white !important;
+    }}
 </style>
 """, unsafe_allow_html=True)
 
@@ -489,96 +509,98 @@ if 'menu_index' not in st.session_state:
 
 # ----- WELCOME PAGE -----
 if st.session_state.page == 'welcome':
+    # Animated Title
     st.markdown('<h1 class="radiant-title">✨ School Community Hub ✨</h1>', unsafe_allow_html=True)
     st.markdown('<p class="radiant-subtitle">Connect • Collaborate • Shine Together</p>', unsafe_allow_html=True)
     st.divider()
     
-    tab1, tab2, tab3, tab4 = st.tabs(["👑 Admin Portal", "🏫 Create School", "👨‍🏫 Teacher Space", "👨‍🎓 Student World"])
+    # Beautiful Tabs
+    tab1, tab2, tab3, tab4 = st.tabs(["👑 **Admin Login**", "🏫 **Create School**", "👨‍🏫 **Teacher Login**", "👨‍🎓 **Student Login**"])
     
-    # TAB 1: ADMIN LOGIN
+    # ---------- TAB 1: ADMIN LOGIN ----------
     with tab1:
         col1, col2 = st.columns([1,1])
         with col1:
-            st.subheader("🔐 Admin Login")
-            with st.form("admin_login"):
-                school = st.text_input("🏫 School Code", placeholder="Enter your school code")
-                email = st.text_input("📧 Email", placeholder="admin@school.edu")
-                pwd = st.text_input("🔑 Password", type="password", placeholder="••••••••")
-                if st.form_submit_button("✨ Login Now ✨", use_container_width=True):
-                    if not school or not email or not pwd:
+            with st.form("admin_login", clear_on_submit=True):
+                st.subheader("🌟 Admin Login")
+                school_code = st.text_input("🏫 School Code", placeholder="Enter your school code")
+                admin_email = st.text_input("📧 Email", placeholder="admin@school.edu")
+                admin_password = st.text_input("🔐 Password", type="password", placeholder="••••••••")
+                if st.form_submit_button("✨ LOGIN ✨", use_container_width=True):
+                    if not school_code or not admin_email or not admin_password:
                         st.error("Please fill all fields")
                     else:
-                        schools = load_all_schools()
-                        if school in schools:
-                            s = schools[school]
-                            if s['admin_email'] == email:
-                                users = load_school_data(school, "users.json", [])
-                                hashed = hashlib.sha256(pwd.encode()).hexdigest()
+                        all_schools = load_all_schools()
+                        if school_code in all_schools:
+                            school = all_schools[school_code]
+                            if school['admin_email'] == admin_email:
+                                users = load_school_data(school_code, "users.json", [])
+                                hashed = hashlib.sha256(admin_password.encode()).hexdigest()
                                 for u in users:
-                                    if u['email'] == email and u['password'] == hashed and u['role'] == 'admin':
-                                        st.session_state.current_school = s
+                                    if u['email'] == admin_email and u['password'] == hashed and u['role'] == 'admin':
+                                        st.session_state.current_school = school
                                         st.session_state.user = u
                                         st.session_state.page = 'dashboard'
                                         st.rerun()
                                 st.error("Invalid password")
                             else:
-                                st.error("Not admin email")
+                                st.error("Not the admin email")
                         else:
                             st.error("School not found")
         with col2:
             st.markdown("""
             <div class="glass-card" style="text-align: center;">
-                <h3 style="color: #f9ca24;">👑 Admin Powers</h3>
-                <p style="color: white;">Full control over your school community</p>
-                <h1 style="font-size: 5rem; color: #f9ca24;">✨</h1>
+                <h3>👑 Admin Powers</h3>
+                <p style="opacity: 0.9;">Full control over your school community</p>
+                <div style="font-size: 5rem;">✨</div>
             </div>
             """, unsafe_allow_html=True)
     
-    # TAB 2: CREATE SCHOOL
+    # ---------- TAB 2: CREATE SCHOOL ----------
     with tab2:
         col1, col2 = st.columns([1,1])
         with col1:
-            st.subheader("🚀 Create New School")
-            with st.form("create_school"):
-                name = st.text_input("🏫 School Name", placeholder="e.g., Nqatho Sec Sch")
-                admin = st.text_input("👤 Your Full Name", placeholder="Wanjiku Edwin Guchu")
-                email = st.text_input("📧 Your Email", placeholder="you@school.edu")
-                pwd = st.text_input("🔐 Password", type="password", placeholder="Create strong password")
+            with st.form("create_school", clear_on_submit=True):
+                st.subheader("🚀 Start Your Journey")
+                school_name = st.text_input("🏫 School Name", placeholder="e.g., Nqatho Sec Sch")
+                admin_name = st.text_input("👤 Your Full Name", placeholder="e.g., Wanjiku Edwin Guchu")
+                admin_email = st.text_input("📧 Your Email", placeholder="you@school.edu")
+                password = st.text_input("🔐 Password", type="password", placeholder="Create password")
                 confirm = st.text_input("🔐 Confirm Password", type="password", placeholder="Confirm password")
                 city = st.text_input("🏙️ City", placeholder="Nairobi")
-                state = st.text_input("🗺️ State", placeholder="Nairobi")
-                motto = st.text_input("✨ School Motto", placeholder="DTS")
+                state = st.text_input("🗺️ State/Province", placeholder="Nairobi")
+                motto = st.text_input("✨ School Motto", placeholder="e.g., DTS")
                 
-                if st.form_submit_button("🌟 Create School 🌟", use_container_width=True):
-                    if not name or not email or not pwd:
+                if st.form_submit_button("🌟 CREATE SCHOOL 🌟", use_container_width=True):
+                    if not school_name or not admin_email or not password:
                         st.error("Required fields missing")
-                    elif pwd != confirm:
-                        st.error("Passwords don't match")
+                    elif password != confirm:
+                        st.error("Passwords do not match")
                     else:
-                        schools = load_all_schools()
+                        all_schools = load_all_schools()
                         code = generate_school_code()
-                        while code in schools:
+                        while code in all_schools:
                             code = generate_school_code()
                         
-                        new = {
+                        new_school = {
                             "code": code,
-                            "name": name,
+                            "name": school_name,
                             "city": city,
                             "state": state,
                             "motto": motto,
                             "created": datetime.now().strftime("%Y-%m-%d"),
-                            "admin_email": email,
-                            "admin_name": admin,
+                            "admin_email": admin_email,
+                            "admin_name": admin_name,
                             "stats": {"students":0, "teachers":0, "classes":0, "groups":0}
                         }
-                        schools[code] = new
-                        save_all_schools(schools)
+                        all_schools[code] = new_school
+                        save_all_schools(all_schools)
                         
                         users = [{
                             "user_id": generate_id("USR"),
-                            "email": email,
-                            "fullname": admin,
-                            "password": hashlib.sha256(pwd.encode()).hexdigest(),
+                            "email": admin_email,
+                            "fullname": admin_name,
+                            "password": hashlib.sha256(password.encode()).hexdigest(),
                             "role": "admin",
                             "joined": datetime.now().strftime("%Y-%m-%d"),
                             "school_code": code
@@ -596,44 +618,44 @@ if st.session_state.page == 'welcome':
                         save_school_data(code, "class_requests.json", [])
                         save_school_data(code, "group_requests.json", [])
                         
-                        st.session_state.current_school = new
+                        st.session_state.current_school = new_school
                         st.session_state.user = users[0]
                         st.session_state.page = 'dashboard'
-                        st.success(f"✨ School Created! Code: **{code}**")
+                        st.success(f"✨ School Created! Your Code: **{code}**")
                         st.rerun()
         with col2:
             st.markdown("""
             <div class="glass-card" style="text-align: center;">
-                <h3 style="color: #f9ca24;">🎓 Begin Your Legacy</h3>
-                <p style="color: white;">Start your own school community</p>
-                <h1 style="font-size: 5rem; color: #f9ca24;">🚀</h1>
+                <h3>🎓 Begin Your Legacy</h3>
+                <p style="opacity: 0.9;">Create your school and become the founding administrator</p>
+                <div style="font-size: 5rem;">🚀</div>
             </div>
             """, unsafe_allow_html=True)
     
-    # TAB 3: TEACHER
+    # ---------- TAB 3: TEACHER LOGIN & REGISTER ----------
     with tab3:
-        subtab1, subtab2 = st.tabs(["🔐 Login", "📝 Register"])
+        subtab1, subtab2 = st.tabs(["🔐 **Teacher Login**", "📝 **New Teacher**"])
         
         with subtab1:
             col1, col2 = st.columns([1,1])
             with col1:
-                st.subheader("👨‍🏫 Teacher Login")
-                with st.form("teacher_login"):
-                    school = st.text_input("🏫 School Code")
-                    email = st.text_input("📧 Email")
-                    pwd = st.text_input("🔑 Password", type="password")
-                    if st.form_submit_button("✨ Login ✨", use_container_width=True):
-                        if not school or not email or not pwd:
+                with st.form("teacher_login", clear_on_submit=True):
+                    st.subheader("👨‍🏫 Teacher Login")
+                    school_code = st.text_input("🏫 School Code", placeholder="Enter school code")
+                    email = st.text_input("📧 Email", placeholder="teacher@school.edu")
+                    password = st.text_input("🔐 Password", type="password", placeholder="••••••••")
+                    if st.form_submit_button("✨ LOGIN ✨", use_container_width=True):
+                        if not school_code or not email or not password:
                             st.error("All fields required")
                         else:
-                            schools = load_all_schools()
-                            if school in schools:
-                                s = schools[school]
-                                users = load_school_data(school, "users.json", [])
-                                hashed = hashlib.sha256(pwd.encode()).hexdigest()
+                            all_schools = load_all_schools()
+                            if school_code in all_schools:
+                                school = all_schools[school_code]
+                                users = load_school_data(school_code, "users.json", [])
+                                hashed = hashlib.sha256(password.encode()).hexdigest()
                                 for u in users:
                                     if u['email'] == email and u['password'] == hashed and u['role'] == 'teacher':
-                                        st.session_state.current_school = s
+                                        st.session_state.current_school = school
                                         st.session_state.user = u
                                         st.session_state.page = 'dashboard'
                                         st.rerun()
@@ -643,43 +665,46 @@ if st.session_state.page == 'welcome':
             with col2:
                 st.markdown("""
                 <div class="glass-card" style="text-align: center;">
-                    <h3 style="color: #f9ca24;">📚 Your Classroom</h3>
-                    <p style="color: white;">Login to manage classes</p>
-                    <h1 style="font-size: 5rem; color: #f9ca24;">🍎</h1>
+                    <h3>📚 Your Classroom Awaits</h3>
+                    <p style="opacity: 0.9;">Login to manage classes and inspire students</p>
+                    <div style="font-size: 5rem;">🍎</div>
                 </div>
                 """, unsafe_allow_html=True)
         
         with subtab2:
             col1, col2 = st.columns([1,1])
             with col1:
-                st.subheader("📝 New Teacher")
-                with st.form("teacher_register"):
-                    school = st.text_input("🏫 School Code", key="reg_school")
-                    teacher_code = st.text_input("🔑 Teacher Code", placeholder="e.g., MATH-DEPT")
-                    name = st.text_input("👤 Full Name")
-                    email = st.text_input("📧 Email", key="reg_email")
-                    pwd = st.text_input("🔐 Password", type="password", key="reg_pass")
-                    confirm = st.text_input("🔐 Confirm Password", type="password", key="reg_confirm")
+                with st.form("teacher_register", clear_on_submit=True):
+                    st.subheader("🌟 New Teacher Registration")
+                    school_code = st.text_input("🏫 School Code", placeholder="Enter school code", key="reg_school")
+                    teacher_code = st.text_input("🔑 Teacher Code", placeholder="e.g., MATH-DEPT, MR-JOHNSON")
+                    fullname = st.text_input("👤 Full Name", placeholder="Your full name")
+                    email = st.text_input("📧 Email", placeholder="teacher@school.edu", key="reg_email")
+                    password = st.text_input("🔐 Password", type="password", placeholder="Create password", key="reg_pass")
+                    confirm = st.text_input("🔐 Confirm Password", type="password", placeholder="Confirm password", key="reg_confirm")
                     
-                    if st.form_submit_button("🌟 Register Now 🌟", use_container_width=True):
-                        if not all([school, teacher_code, name, email, pwd]):
+                    if st.form_submit_button("🌟 REGISTER NOW 🌟", use_container_width=True):
+                        if not all([school_code, teacher_code, fullname, email, password]):
                             st.error("All fields required")
-                        elif pwd != confirm:
-                            st.error("Passwords don't match")
+                        elif password != confirm:
+                            st.error("Passwords do not match")
                         else:
-                            schools = load_all_schools()
-                            if school in schools:
-                                s = schools[school]
-                                teachers = load_school_data(school, "teachers.json", [])
+                            all_schools = load_all_schools()
+                            if school_code not in all_schools:
+                                st.error("School not found")
+                            else:
+                                school = all_schools[school_code]
+                                teachers_data = load_school_data(school_code, "teachers.json", [])
+                                # Verify teacher code
                                 valid = False
                                 record = None
-                                for t in teachers:
+                                for t in teachers_data:
                                     if t['code'] == teacher_code.upper() and t['status'] == 'active':
                                         valid = True
                                         record = t
                                         t.setdefault('used_by_list', []).append({
                                             "email": email,
-                                            "name": name,
+                                            "name": fullname,
                                             "date": datetime.now().strftime("%Y-%m-%d %H:%M")
                                         })
                                         t['last_used'] = datetime.now().strftime("%Y-%m-%d %H:%M")
@@ -689,70 +714,70 @@ if st.session_state.page == 'welcome':
                                     st.error("Invalid teacher code")
                                     st.stop()
                                 
-                                users = load_school_data(school, "users.json", [])
+                                users = load_school_data(school_code, "users.json", [])
                                 if any(u['email'] == email for u in users):
-                                    st.error("Email already exists")
+                                    st.error("Email already registered")
                                     st.stop()
                                 
                                 new_user = {
                                     "user_id": generate_id("USR"),
                                     "email": email,
-                                    "fullname": name,
-                                    "password": hashlib.sha256(pwd.encode()).hexdigest(),
+                                    "fullname": fullname,
+                                    "password": hashlib.sha256(password.encode()).hexdigest(),
                                     "role": "teacher",
+                                    "title": f"Teacher - {record.get('department','General')}",
                                     "joined": datetime.now().strftime("%Y-%m-%d"),
-                                    "school_code": school,
+                                    "school_code": school_code,
                                     "teacher_code_used": teacher_code.upper(),
                                     "classes": [],
                                     "groups": []
                                 }
                                 users.append(new_user)
-                                save_school_data(school, "users.json", users)
-                                save_school_data(school, "teachers.json", teachers)
-                                s['stats']['teachers'] += 1
-                                schools[school] = s
-                                save_all_schools(schools)
+                                save_school_data(school_code, "users.json", users)
+                                save_school_data(school_code, "teachers.json", teachers_data)
                                 
-                                st.session_state.current_school = s
+                                school['stats']['teachers'] = school['stats'].get('teachers',0)+1
+                                all_schools[school_code] = school
+                                save_all_schools(all_schools)
+                                
+                                st.session_state.current_school = school
                                 st.session_state.user = new_user
                                 st.session_state.page = 'dashboard'
-                                st.success("✨ Registration successful!")
+                                st.success("✨ Registration Successful!")
                                 st.rerun()
-                            else:
-                                st.error("School not found")
             with col2:
                 st.markdown("""
                 <div class="glass-card" style="text-align: center;">
-                    <h3 style="color: #f9ca24;">✨ Join the Team</h3>
-                    <p style="color: white;">Use your teacher code</p>
-                    <h1 style="font-size: 5rem; color: #f9ca24;">📝</h1>
+                    <h3>🎯 Start Your Journey</h3>
+                    <p style="opacity: 0.9;">Use your teacher code to join your school community</p>
+                    <div style="font-size: 5rem;">✨</div>
                 </div>
                 """, unsafe_allow_html=True)
     
-    # TAB 4: STUDENT
+    # ---------- TAB 4: STUDENT LOGIN & REGISTER ----------
     with tab4:
-        subtab1, subtab2 = st.tabs(["🔐 Login", "📝 Register"])
+        subtab1, subtab2 = st.tabs(["🔐 **Student Login**", "📝 **New Student**"])
         
         with subtab1:
             col1, col2 = st.columns([1,1])
             with col1:
-                st.subheader("👨‍🎓 Student Login")
-                with st.form("student_login"):
-                    school = st.text_input("🏫 School Code")
-                    email = st.text_input("📧 Email")
-                    pwd = st.text_input("🔑 Password", type="password")
-                    if st.form_submit_button("✨ Login ✨", use_container_width=True):
-                        if not school or not email or not pwd:
+                with st.form("student_login", clear_on_submit=True):
+                    st.subheader("👨‍🎓 Student Login")
+                    school_code = st.text_input("🏫 School Code", placeholder="Enter school code")
+                    email = st.text_input("📧 Email", placeholder="student@school.edu")
+                    password = st.text_input("🔐 Password", type="password", placeholder="••••••••")
+                    if st.form_submit_button("✨ LOGIN ✨", use_container_width=True):
+                        if not school_code or not email or not password:
                             st.error("All fields required")
                         else:
-                            schools = load_all_schools()
-                            if school in schools:
-                                s = schools[school]
-                                users = load_school_data(school, "users.json", [])
-                                hashed = hashlib.sha256(pwd.encode()).hexdigest()
+                            all_schools = load_all_schools()
+                            if school_code in all_schools:
+                                school = all_schools[school_code]
+                                users = load_school_data(school_code, "users.json", [])
+                                hashed = hashlib.sha256(password.encode()).hexdigest()
                                 for u in users:
                                     if u['email'] == email and u['password'] == hashed and u['role'] == 'student':
-                                        st.session_state.current_school = s
+                                        st.session_state.current_school = school
                                         st.session_state.user = u
                                         st.session_state.page = 'dashboard'
                                         st.rerun()
@@ -762,66 +787,66 @@ if st.session_state.page == 'welcome':
             with col2:
                 st.markdown("""
                 <div class="glass-card" style="text-align: center;">
-                    <h3 style="color: #f9ca24;">📖 Your Learning Hub</h3>
-                    <p style="color: white;">Access classes and homework</p>
-                    <h1 style="font-size: 5rem; color: #f9ca24;">📚</h1>
+                    <h3>📚 Your Learning Hub</h3>
+                    <p style="opacity: 0.9;">Access classes, homework, and connect with peers</p>
+                    <div style="font-size: 5rem;">📖</div>
                 </div>
                 """, unsafe_allow_html=True)
         
         with subtab2:
             col1, col2 = st.columns([1,1])
             with col1:
-                st.subheader("🆕 New Student")
-                with st.form("student_register"):
-                    school = st.text_input("🏫 School Code", key="stud_school")
-                    name = st.text_input("👤 Full Name")
-                    email = st.text_input("📧 Email", key="stud_email")
-                    pwd = st.text_input("🔐 Password", type="password", key="stud_pass")
-                    confirm = st.text_input("🔐 Confirm Password", type="password", key="stud_confirm")
+                with st.form("student_register", clear_on_submit=True):
+                    st.subheader("🌟 New Student Registration")
+                    school_code = st.text_input("🏫 School Code", placeholder="Enter school code", key="stud_reg_school")
+                    fullname = st.text_input("👤 Full Name", placeholder="Your full name")
+                    email = st.text_input("📧 Email", placeholder="student@school.edu", key="stud_reg_email")
+                    password = st.text_input("🔐 Password", type="password", placeholder="Create password", key="stud_reg_pass")
+                    confirm = st.text_input("🔐 Confirm Password", type="password", placeholder="Confirm password", key="stud_reg_confirm")
                     
-                    if st.form_submit_button("🌟 Register Now 🌟", use_container_width=True):
-                        if not all([school, name, email, pwd]):
+                    if st.form_submit_button("🌟 REGISTER NOW 🌟", use_container_width=True):
+                        if not all([school_code, fullname, email, password]):
                             st.error("All fields required")
-                        elif pwd != confirm:
-                            st.error("Passwords don't match")
+                        elif password != confirm:
+                            st.error("Passwords do not match")
                         else:
-                            schools = load_all_schools()
-                            if school in schools:
-                                s = schools[school]
-                                users = load_school_data(school, "users.json", [])
+                            all_schools = load_all_schools()
+                            if school_code not in all_schools:
+                                st.error("School not found")
+                            else:
+                                school = all_schools[school_code]
+                                users = load_school_data(school_code, "users.json", [])
                                 if any(u['email'] == email for u in users):
-                                    st.error("Email already exists")
+                                    st.error("Email already registered")
                                 else:
                                     new_user = {
                                         "user_id": generate_id("USR"),
                                         "email": email,
-                                        "fullname": name,
-                                        "password": hashlib.sha256(pwd.encode()).hexdigest(),
+                                        "fullname": fullname,
+                                        "password": hashlib.sha256(password.encode()).hexdigest(),
                                         "role": "student",
                                         "joined": datetime.now().strftime("%Y-%m-%d"),
-                                        "school_code": school,
+                                        "school_code": school_code,
                                         "classes": [],
                                         "groups": []
                                     }
                                     users.append(new_user)
-                                    save_school_data(school, "users.json", users)
-                                    s['stats']['students'] += 1
-                                    schools[school] = s
-                                    save_all_schools(schools)
+                                    save_school_data(school_code, "users.json", users)
+                                    school['stats']['students'] = school['stats'].get('students',0)+1
+                                    all_schools[school_code] = school
+                                    save_all_schools(all_schools)
                                     
-                                    st.session_state.current_school = s
+                                    st.session_state.current_school = school
                                     st.session_state.user = new_user
                                     st.session_state.page = 'dashboard'
-                                    st.success("✨ Registration successful!")
+                                    st.success("✨ Registration Successful!")
                                     st.rerun()
-                            else:
-                                st.error("School not found")
             with col2:
                 st.markdown("""
                 <div class="glass-card" style="text-align: center;">
-                    <h3 style="color: #f9ca24;">🎓 Begin Your Journey</h3>
-                    <p style="color: white;">Join your school community</p>
-                    <h1 style="font-size: 5rem; color: #f9ca24;">🌟</h1>
+                    <h3>🎓 Begin Your Adventure</h3>
+                    <p style="opacity: 0.9;">Join your school and start your learning journey</p>
+                    <div style="font-size: 5rem;">🚀</div>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -845,18 +870,20 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     class_requests = load_school_data(school_code, "class_requests.json", [])
     group_requests = load_school_data(school_code, "group_requests.json", [])
     
-    # SIDEBAR
+    # ============ SIDEBAR ============
     with st.sidebar:
+        # School Header with Glow
         st.markdown(f"""
         <div class="school-header">
             <h2>{school['name']}</h2>
-            <p style="color: white;">✨ {school.get('motto','')} ✨</p>
+            <p style="color: rgba(255,255,255,0.9); font-style: italic; margin: 5px 0;">✨ {school.get('motto','')} ✨</p>
             <div class="school-code">
                 <code>{school['code']}</code>
             </div>
         </div>
         """, unsafe_allow_html=True)
         
+        # User Profile Card
         st.markdown('<div class="profile-card">', unsafe_allow_html=True)
         if user.get('profile_pic'):
             st.image(user['profile_pic'], width=70)
@@ -864,105 +891,144 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             emoji = "👑" if user['role'] == 'admin' else "👨‍🏫" if user['role'] == 'teacher' else "👨‍🎓"
             st.markdown(f"<h1 style='font-size: 3rem; margin: 0;'>{emoji}</h1>", unsafe_allow_html=True)
         st.markdown(f"""
-        <div style="color: white;">
+        <div style="color: white; flex: 1;">
             <strong style="font-size: 1.2rem;">{user['fullname']}</strong><br>
-            <span style="background: #f9ca24; color: #4834d4; padding: 3px 12px; border-radius: 20px; font-weight: 700;">{user['role'].upper()}</span><br>
-            <small>{user['email']}</small>
+            <span style="background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 50px; font-size: 0.8rem;">{user['role'].upper()}</span><br>
+            <span style="font-size: 0.8rem; opacity: 0.8;">{user['email']}</span>
         </div>
         """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
         
         st.divider()
         
-        # Navigation
+        # Navigation Menu
         if user['role'] == 'admin':
-            options = ["Dashboard", "Teachers", "Classes", "Students", "Groups", "Approvals", "Profile"]
+            menu_options = ["Dashboard", "Announcements", "Teachers", "Classes", "Students", "Groups", "Approvals", "Codes", "Reports", "Settings", "Profile"]
         elif user['role'] == 'teacher':
-            options = ["Dashboard", "My Classes", "My Groups", "Assignments", "Requests", "Profile"]
+            menu_options = ["Dashboard", "Announcements", "My Classes", "My Groups", "Assignments", "Requests", "Resources", "Discussions", "Gradebook", "Profile"]
         else:
-            options = ["Dashboard", "Browse Classes", "Browse Groups", "Homework", "My Grades", "Profile"]
+            menu_options = ["Dashboard", "Announcements", "Browse Classes", "Browse Groups", "Homework", "Study Materials", "Discussions", "My Grades", "Profile"]
         
-        menu = st.radio("📌 Navigation", options, index=st.session_state.menu_index)
+        menu = st.radio("Navigation", menu_options, index=st.session_state.menu_index, label_visibility="collapsed")
+        
         st.divider()
         
-        if st.button("🚪 Logout", use_container_width=True):
+        # Logout button
+        if st.button("🚪 LOGOUT", use_container_width=True):
             st.session_state.user = None
             st.session_state.current_school = None
             st.session_state.page = 'welcome'
             st.rerun()
     
-    # MAIN CONTENT
+    # ============ MAIN CONTENT ============
+    
+    # ----- ADMIN -----
     if user['role'] == 'admin':
         if menu == "Dashboard":
-            st.markdown(f"<h1>👑 {school['name']} Dashboard</h1>", unsafe_allow_html=True)
-            col1, col2, col3, col4 = st.columns(4)
-            col1.metric("🎓 Students", school['stats'].get('students',0))
-            col2.metric("👨‍🏫 Teachers", school['stats'].get('teachers',0))
-            col3.metric("📚 Classes", school['stats'].get('classes',0))
-            col4.metric("👥 Groups", school['stats'].get('groups',0))
+            st.markdown(f"<h1 style='color: white; text-align: center;'>👑 {school['name']} Dashboard</h1>", unsafe_allow_html=True)
             
-            pending = len([r for r in class_requests if r['status']=='pending']) + len([r for r in group_requests if r['status']=='pending'])
+            col1,col2,col3,col4 = st.columns(4)
+            with col1:
+                st.metric("Students", school['stats'].get('students',0))
+            with col2:
+                st.metric("Teachers", school['stats'].get('teachers',0))
+            with col3:
+                st.metric("Classes", school['stats'].get('classes',0))
+            with col4:
+                st.metric("Groups", school['stats'].get('groups',0))
+            
+            st.divider()
+            
+            pending = len([r for r in class_requests if r['status']=='pending']) + \
+                     len([r for r in group_requests if r['status']=='pending'])
             if pending:
-                st.warning(f"✨ {pending} pending requests")
+                st.warning(f"✨ {pending} pending requests await your approval")
             else:
-                st.success("✨ All caught up!")
+                st.success("🌟 All caught up! No pending requests")
         
         elif menu == "Teachers":
-            st.markdown("<h1>👨‍🏫 Teacher Management</h1>", unsafe_allow_html=True)
-            tab1, tab2 = st.tabs(["✨ Create Codes", "👥 Active Teachers"])
+            st.markdown("<h1 style='color: white; text-align: center;'>👨‍🏫 Teacher Management</h1>", unsafe_allow_html=True)
+            tab1, tab2 = st.tabs(["✨ Create Teacher Codes", "👥 Active Teachers"])
             
             with tab1:
-                with st.form("create_code"):
-                    name = st.text_input("Code Name", placeholder="e.g., Mathematics Department")
-                    code = st.text_input("Custom Code", placeholder="e.g., MATH-DEPT")
-                    dept = st.selectbox("Department", ["Math","Science","English","History","Other"])
-                    if st.form_submit_button("✨ Create Code", use_container_width=True):
+                with st.form("create_teacher_code"):
+                    name = st.text_input("📝 Code Name", placeholder="e.g., Mathematics Department")
+                    code = st.text_input("🔑 Custom Code", placeholder="e.g., MATH-DEPT, FORM1-2024")
+                    dept = st.selectbox("🏢 Department", ["Mathematics","Science","English","History","Computer Science","Other"])
+                    if st.form_submit_button("✨ Create Code ✨", use_container_width=True):
                         if name and code:
-                            if any(t['code']==code.upper() for t in teachers_data):
-                                st.error("Code exists")
+                            exists = any(t['code']==code.upper() for t in teachers_data)
+                            if exists:
+                                st.error("Code already exists")
                             else:
                                 teachers_data.append({
                                     "id": generate_id("TCH"),
                                     "name": name,
                                     "code": code.upper(),
                                     "department": dept,
-                                    "created": datetime.now().strftime("%Y-%m-%d"),
+                                    "created": datetime.now().strftime("%Y-%m-%d %H:%M"),
                                     "status": "active",
                                     "used_by_list": []
                                 })
                                 save_school_data(school_code, "teachers.json", teachers_data)
-                                st.success(f"Code {code.upper()} created!")
+                                st.success(f"✨ Code {code.upper()} created!")
                                 st.rerun()
             
             with tab2:
                 for t in teachers_data:
-                    with st.expander(f"{t['name']} - `{t['code']}`"):
-                        st.write(f"Used by: {len(t.get('used_by_list',[]))} teachers")
+                    with st.container():
+                        col1, col2 = st.columns([3,1])
+                        with col1:
+                            st.markdown(f"**{t['name']}**")
+                            st.caption(f"Code: `{t['code']}`")
+                        with col2:
+                            st.markdown(f"**{len(t.get('used_by_list',[]))}** teachers")
         
         elif menu == "Approvals":
-            st.markdown("<h1>✅ Admin Approvals</h1>", unsafe_allow_html=True)
-            for req in [r for r in class_requests if r['status']=='pending']:
-                col1,col2,col3 = st.columns([2,2,1])
-                col1.write(req['student_name'])
-                col2.write(req['class_name'])
-                if col3.button("Approve", key=f"app_{req['id']}"):
-                    for c in classes:
-                        if c['name'] == req['class_name']:
-                            c['students'].append(req['student_email'])
-                    req['status'] = 'approved'
-                    save_school_data(school_code, "classes.json", classes)
-                    save_school_data(school_code, "class_requests.json", class_requests)
-                    st.rerun()
+            st.markdown("<h1 style='color: white; text-align: center;'>✅ Admin Veto Power</h1>", unsafe_allow_html=True)
+            tab1, tab2 = st.tabs(["📚 Class Requests", "👥 Group Requests"])
+            
+            with tab1:
+                for req in [r for r in class_requests if r['status']=='pending']:
+                    with st.container():
+                        col1,col2,col3 = st.columns([2,2,2])
+                        col1.markdown(f"**{req['student_name']}**")
+                        col2.markdown(f"*{req['class_name']}*")
+                        if col3.button("✅ Approve", key=f"app_c_{req['id']}"):
+                            for c in classes:
+                                if c['name'] == req['class_name']:
+                                    c['students'].append(req['student_email'])
+                            req['status'] = 'approved'
+                            req['approved_by'] = user['email'] + " (Veto)"
+                            save_school_data(school_code, "classes.json", classes)
+                            save_school_data(school_code, "class_requests.json", class_requests)
+                            st.rerun()
+            
+            with tab2:
+                for req in [r for r in group_requests if r['status']=='pending']:
+                    with st.container():
+                        col1,col2,col3 = st.columns([2,2,2])
+                        col1.markdown(f"**{req['student_name']}**")
+                        col2.markdown(f"*{req['group_name']}*")
+                        if col3.button("✅ Approve", key=f"app_g_{req['id']}"):
+                            for g in groups:
+                                if g['name'] == req['group_name']:
+                                    g['members'].append(req['student_email'])
+                            req['status'] = 'approved'
+                            req['approved_by'] = user['email'] + " (Veto)"
+                            save_school_data(school_code, "groups.json", groups)
+                            save_school_data(school_code, "group_requests.json", group_requests)
+                            st.rerun()
         
         elif menu == "Profile":
-            st.markdown("<h1>👤 My Profile</h1>", unsafe_allow_html=True)
+            st.markdown("<h1 style='color: white; text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
             col1,col2 = st.columns([1,2])
             with col1:
                 if user.get('profile_pic'):
-                    st.image(user['profile_pic'], width=150)
+                    st.image(user['profile_pic'], width=200)
                 else:
-                    st.markdown("<h1 style='font-size: 5rem;'>👑</h1>", unsafe_allow_html=True)
-                pic = st.file_uploader("Upload Photo", type=['png','jpg','jpeg'])
+                    st.markdown("<h1 style='font-size: 8rem; text-align: center;'>👑</h1>", unsafe_allow_html=True)
+                pic = st.file_uploader("✨ Upload Photo", type=['png','jpg','jpeg'])
                 if pic:
                     img = Image.open(pic)
                     buffered = BytesIO()
@@ -979,7 +1045,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     name = st.text_input("Full Name", user['fullname'])
                     phone = st.text_input("Phone", user.get('phone',''))
                     bio = st.text_area("Bio", user.get('bio',''))
-                    if st.form_submit_button("✨ Update Profile", use_container_width=True):
+                    if st.form_submit_button("✨ Update Profile ✨", use_container_width=True):
                         for u in users:
                             if u['email'] == user['email']:
                                 u['fullname'] = name
@@ -990,26 +1056,126 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         st.success("Profile updated!")
                         st.rerun()
     
+    # ----- TEACHER -----
     elif user['role'] == 'teacher':
         if menu == "Dashboard":
-            st.markdown(f"<h1>👨‍🏫 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 style='color: white; text-align: center;'>👨‍🏫 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
             my_classes = [c for c in classes if c.get('teacher') == user['email']]
+            my_groups = [g for g in groups if g.get('leader') == user['email']]
+            
             col1,col2,col3 = st.columns(3)
             col1.metric("My Classes", len(my_classes))
-            col2.metric("My Groups", len([g for g in groups if g.get('leader')==user['email']]))
+            col2.metric("My Groups", len(my_groups))
             col3.metric("Assignments", len([a for a in assignments if a.get('teacher')==user['email']]))
+        
+        elif menu == "Profile":
+            st.markdown("<h1 style='color: white; text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
+            col1,col2 = st.columns([1,2])
+            with col1:
+                if user.get('profile_pic'):
+                    st.image(user['profile_pic'], width=200)
+                else:
+                    st.markdown("<h1 style='font-size: 8rem; text-align: center;'>👨‍🏫</h1>", unsafe_allow_html=True)
+                pic = st.file_uploader("✨ Upload Photo", type=['png','jpg','jpeg'], key="teacher_pic")
+                if pic:
+                    img = Image.open(pic)
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    b64 = base64.b64encode(buffered.getvalue()).decode()
+                    for u in users:
+                        if u['email'] == user['email']:
+                            u['profile_pic'] = f"data:image/png;base64,{b64}"
+                    save_school_data(school_code, "users.json", users)
+                    user['profile_pic'] = f"data:image/png;base64,{b64}"
+                    st.rerun()
+            with col2:
+                with st.form("teacher_profile_edit"):
+                    name = st.text_input("Full Name", user['fullname'])
+                    phone = st.text_input("Phone", user.get('phone',''))
+                    bio = st.text_area("Bio", user.get('bio',''))
+                    if st.form_submit_button("✨ Update Profile ✨", use_container_width=True):
+                        for u in users:
+                            if u['email'] == user['email']:
+                                u['fullname'] = name
+                                u['phone'] = phone
+                                u['bio'] = bio
+                        save_school_data(school_code, "users.json", users)
+                        user.update({'fullname':name,'phone':phone,'bio':bio})
+                        st.success("Profile updated!")
+                        st.rerun()
     
-    else:  # student
+    # ----- STUDENT -----
+    else:
         if menu == "Dashboard":
-            st.markdown(f"<h1>👨‍🎓 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
+            st.markdown(f"<h1 style='color: white; text-align: center;'>👨‍🎓 Welcome, {user['fullname']}!</h1>", unsafe_allow_html=True)
             my_classes = [c for c in classes if user['email'] in c.get('students',[])]
+            my_groups = [g for g in groups if user['email'] in g.get('members',[])]
+            
             col1,col2,col3 = st.columns(3)
             col1.metric("My Classes", len(my_classes))
-            col2.metric("My Groups", len([g for g in groups if user['email'] in g.get('members',[])]))
+            col2.metric("My Groups", len(my_groups))
             col3.metric("Assignments", len([a for a in assignments if a['class'] in [c['name'] for c in my_classes]]))
+        
+        elif menu == "Browse Classes":
+            st.markdown("<h1 style='color: white; text-align: center;'>📚 Available Classes</h1>", unsafe_allow_html=True)
+            available = [c for c in classes if user['email'] not in c.get('students',[]) and len(c.get('students',[])) < c.get('max_students',30)]
+            for c in available:
+                with st.container():
+                    col1,col2 = st.columns([3,1])
+                    col1.markdown(f"**{c['name']}**")
+                    col1.write(f"👨‍🏫 {c.get('teacher_name','')} • {c.get('schedule','')}")
+                    if col2.button("✨ Request", key=f"req_{c['code']}"):
+                        class_requests.append({
+                            "id": generate_id("REQ"),
+                            "student_email": user['email'],
+                            "student_name": user['fullname'],
+                            "class_name": c['name'],
+                            "class_code": c['code'],
+                            "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
+                            "status": "pending"
+                        })
+                        save_school_data(school_code, "class_requests.json", class_requests)
+                        st.success("Request sent!")
+                        st.rerun()
+        
+        elif menu == "Profile":
+            st.markdown("<h1 style='color: white; text-align: center;'>👤 My Profile</h1>", unsafe_allow_html=True)
+            col1,col2 = st.columns([1,2])
+            with col1:
+                if user.get('profile_pic'):
+                    st.image(user['profile_pic'], width=200)
+                else:
+                    st.markdown("<h1 style='font-size: 8rem; text-align: center;'>👨‍🎓</h1>", unsafe_allow_html=True)
+                pic = st.file_uploader("✨ Upload Photo", type=['png','jpg','jpeg'], key="student_pic")
+                if pic:
+                    img = Image.open(pic)
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    b64 = base64.b64encode(buffered.getvalue()).decode()
+                    for u in users:
+                        if u['email'] == user['email']:
+                            u['profile_pic'] = f"data:image/png;base64,{b64}"
+                    save_school_data(school_code, "users.json", users)
+                    user['profile_pic'] = f"data:image/png;base64,{b64}"
+                    st.rerun()
+            with col2:
+                with st.form("student_profile_edit"):
+                    name = st.text_input("Full Name", user['fullname'])
+                    phone = st.text_input("Phone", user.get('phone',''))
+                    bio = st.text_area("Bio", user.get('bio',''))
+                    if st.form_submit_button("✨ Update Profile ✨", use_container_width=True):
+                        for u in users:
+                            if u['email'] == user['email']:
+                                u['fullname'] = name
+                                u['phone'] = phone
+                                u['bio'] = bio
+                        save_school_data(school_code, "users.json", users)
+                        user.update({'fullname':name,'phone':phone,'bio':bio})
+                        st.success("Profile updated!")
+                        st.rerun()
 
 else:
-    st.error("Something went wrong")
+    st.error("Something went wrong. Please restart.")
     if st.button("🔄 Restart"):
         st.session_state.page = 'welcome'
         st.rerun()
