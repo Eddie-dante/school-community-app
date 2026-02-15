@@ -19,15 +19,14 @@ st.set_page_config(
 
 # ============ FUNCTION TO GET BACKGROUND IMAGE ============
 def get_background_image():
-    """Returns a base64 encoded background image"""
-    # Using multiple reliable Unsplash images as fallback
+    """Returns a background image URL"""
+    # Using reliable images
     images = [
-        "https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Classroom
-        "https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Library
-        "https://images.pexels.com/photos/159844/cellular-education-classroom-159844.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Students
-        "https://images.pexels.com/photos/301926/pexels-photo-301926.jpeg?auto=compress&cs=tinysrgb&w=1920"  # Graduation
+        "https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/159844/cellular-education-classroom-159844.jpeg?auto=compress&cs=tinysrgb&w=1920",
+        "https://images.pexels.com/photos/301926/pexels-photo-301926.jpeg?auto=compress&cs=tinysrgb&w=1920"
     ]
-    import random
     return random.choice(images)
 
 # ============ CUSTOM CSS ============
@@ -49,10 +48,9 @@ st.markdown(f"""
         background-position: center;
         background-attachment: fixed;
         background-repeat: no-repeat;
-        min-height: 100vh;
     }}
     
-    /* Dark overlay to make content readable */
+    /* Dark overlay for better readability */
     .stApp::before {{
         content: "";
         position: fixed;
@@ -60,23 +58,22 @@ st.markdown(f"""
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.7);
+        background: rgba(0, 0, 0, 0.65);
         z-index: 0;
-        pointer-events: none;
     }}
     
     /* Ensure all content is above overlay */
     .main > div, section[data-testid="stSidebar"] {{
         position: relative;
-        z-index: 1;
+        z-index: 2;
     }}
     
-    /* ============ SIDEBAR - COMPLETELY VISIBLE AND STUNNING ============ */
+    /* ============ SIDEBAR STYLES ============ */
     section[data-testid="stSidebar"] {{
-        background: linear-gradient(135deg, rgba(106, 17, 203, 0.95), rgba(37, 117, 252, 0.95)) !important;
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.95), rgba(138, 43, 226, 0.95), rgba(255, 215, 0, 0.9)) !important;
         backdrop-filter: blur(15px) !important;
-        border-right: 3px solid rgba(255, 215, 0, 0.5) !important;
-        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5) !important;
+        border-right: 4px solid gold !important;
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6) !important;
     }}
     
     section[data-testid="stSidebar"] > div {{
@@ -84,68 +81,76 @@ st.markdown(f"""
         padding: 1.5rem 1rem !important;
     }}
     
-    /* Sidebar text - all white and visible */
+    /* ALL SIDEBAR TEXT - COMPLETELY VISIBLE */
     section[data-testid="stSidebar"] .stMarkdown,
     section[data-testid="stSidebar"] .stRadio label,
     section[data-testid="stSidebar"] p,
     section[data-testid="stSidebar"] h1,
     section[data-testid="stSidebar"] h2,
     section[data-testid="stSidebar"] h3,
+    section[data-testid="stSidebar"] span,
+    section[data-testid="stSidebar"] div,
     section[data-testid="stSidebar"] .st-emotion-cache-16idsys p,
-    section[data-testid="stSidebar"] .st-emotion-cache-1dj0hjr {{
+    section[data-testid="stSidebar"] .st-emotion-cache-1dj0hjr,
+    section[data-testid="stSidebar"] .st-emotion-cache-1v0mbdj {{
         color: white !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
-        font-weight: 500 !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+        font-weight: 600 !important;
+        opacity: 1 !important;
     }}
     
-    /* Sidebar radio buttons - beautiful cards */
+    /* Sidebar radio buttons */
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
-        background: rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.15) !important;
         backdrop-filter: blur(5px) !important;
         border-radius: 20px !important;
         padding: 1rem !important;
-        border: 2px solid rgba(255, 215, 0, 0.3) !important;
+        border: 2px solid rgba(255, 215, 0, 0.5) !important;
         margin-top: 1rem !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {{
-        background: rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.2) !important;
         border-radius: 15px !important;
-        padding: 12px 15px !important;
+        padding: 12px 18px !important;
         margin: 8px 0 !important;
-        border: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border: 2px solid rgba(255, 215, 0, 0.3) !important;
         transition: all 0.3s ease !important;
         color: white !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
         display: flex !important;
         align-items: center !important;
-        gap: 10px !important;
+        gap: 12px !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
-        background: rgba(255, 255, 255, 0.25) !important;
-        transform: translateX(5px) !important;
+        background: rgba(255, 255, 255, 0.35) !important;
+        transform: translateX(8px) !important;
         border-color: gold !important;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.3) !important;
+        box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5) !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {{
-        background: linear-gradient(135deg, #667eea, #764ba2) !important;
-        border: 2px solid gold !important;
-        box-shadow: 0 0 25px gold !important;
+        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        border: 3px solid white !important;
+        box-shadow: 0 0 30px gold !important;
+        color: #4B0082 !important;
+        font-weight: 700 !important;
     }}
     
     /* Sidebar button */
     section[data-testid="stSidebar"] .stButton button {{
-        background: linear-gradient(135deg, #ff6b6b, #667eea) !important;
-        color: white !important;
-        border: 2px solid gold !important;
+        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        color: #4B0082 !important;
+        border: 3px solid white !important;
         border-radius: 50px !important;
-        padding: 12px 24px !important;
-        font-weight: 600 !important;
+        padding: 15px 25px !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
         text-transform: uppercase !important;
         letter-spacing: 1px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
         transition: all 0.3s ease !important;
         width: 100% !important;
         margin-top: 1rem !important;
@@ -154,166 +159,212 @@ st.markdown(f"""
     section[data-testid="stSidebar"] .stButton button:hover {{
         transform: scale(1.05) !important;
         box-shadow: 0 8px 30px gold !important;
-        border-color: white !important;
+        border-color: gold !important;
     }}
     
-    /* School header in sidebar */
+    /* School header */
     .school-header {{
-        background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(138, 43, 226, 0.9));
         backdrop-filter: blur(10px);
-        border: 3px solid gold;
+        border: 4px solid gold;
         border-radius: 30px;
-        padding: 20px;
+        padding: 25px;
         margin-bottom: 20px;
         text-align: center;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5);
         animation: glow 3s infinite;
     }}
     
     @keyframes glow {{
-        0%, 100% {{ border-color: gold; box-shadow: 0 0 20px gold; }}
-        50% {{ border-color: #ff6b6b; box-shadow: 0 0 40px #ff6b6b; }}
+        0%, 100% {{ border-color: gold; box-shadow: 0 0 30px gold; }}
+        50% {{ border-color: white; box-shadow: 0 0 50px white; }}
     }}
     
     .school-header h2 {{
-        color: white;
+        color: white !important;
         text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         margin: 0;
         font-size: 1.8rem;
+        font-weight: 700;
     }}
     
     .school-code {{
-        background: rgba(0,0,0,0.5);
-        padding: 10px;
+        background: rgba(0,0,0,0.6);
+        padding: 12px;
         border-radius: 50px;
-        margin-top: 10px;
+        margin-top: 15px;
         font-size: 1.2rem;
         font-weight: bold;
-        color: gold;
+        color: gold !important;
         border: 2px solid gold;
     }}
     
-    /* User profile card */
+    .school-code code {{
+        background: transparent !important;
+        color: gold !important;
+        font-size: 1.2rem;
+    }}
+    
+    /* Profile card */
     .profile-card {{
-        background: linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05));
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(138, 43, 226, 0.9));
         backdrop-filter: blur(10px);
-        border-radius: 25px;
+        border-radius: 30px;
         padding: 20px;
-        border: 2px solid gold;
+        border: 3px solid gold;
         margin-bottom: 20px;
         display: flex;
         align-items: center;
         gap: 15px;
     }}
     
-    /* Main content glass cards */
-    .main .st-emotion-cache-1v0mbdj, 
-    .main .st-emotion-cache-16idsys,
-    .stTabs [data-baseweb="tab-list"],
-    div[data-testid="stExpander"] {{
-        background: rgba(255, 255, 255, 0.1) !important;
-        backdrop-filter: blur(15px) !important;
-        border: 2px solid rgba(255, 215, 0, 0.3) !important;
-        border-radius: 30px !important;
-        padding: 1.5rem !important;
+    .profile-card h1 {{
         color: white !important;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3) !important;
+        margin: 0;
+        font-size: 3rem;
     }}
     
-    /* Headers */
+    /* ============ MAIN CONTENT STYLES ============ */
+    /* ALL TEXT IN MAIN CONTENT - VISIBLE */
+    .main .stMarkdown,
+    .main .stText,
+    .main p,
+    .main h1,
+    .main h2,
+    .main h3,
+    .main h4,
+    .main span,
+    .main div:not(.stButton) {{
+        color: white !important;
+        text-shadow: 1px 1px 3px rgba(0,0,0,0.8) !important;
+    }}
+    
+    /* Headers with extra glow */
     h1, h2, h3, .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 {{
         color: white !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5), 0 0 20px gold !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px gold !important;
+        font-weight: 700 !important;
+    }}
+    
+    /* Input fields - FIXED TEXT VISIBILITY */
+    .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
+        background: rgba(255, 255, 255, 0.2) !important;
+        border: 3px solid gold !important;
+        border-radius: 20px !important;
+        color: white !important;
+        font-weight: 500 !important;
+        font-size: 1rem !important;
+        padding: 0.8rem 1rem !important;
+        backdrop-filter: blur(5px) !important;
+    }}
+    
+    .stTextInput input::placeholder, .stTextArea textarea::placeholder {{
+        color: rgba(255, 255, 255, 0.7) !important;
+        font-weight: 400 !important;
+    }}
+    
+    .stTextInput input:focus, .stTextArea textarea:focus {{
+        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: white !important;
+        box-shadow: 0 0 30px gold !important;
+    }}
+    
+    /* Labels */
+    .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {{
+        color: white !important;
         font-weight: 600 !important;
+        text-shadow: 2px 2px 4px black !important;
+        font-size: 1.1rem !important;
+        margin-bottom: 0.5rem !important;
     }}
     
     /* Buttons */
     .stButton button {{
-        background: linear-gradient(135deg, #667eea, #764ba2) !important;
-        color: white !important;
-        border: 2px solid gold !important;
+        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        color: #4B0082 !important;
+        border: 3px solid white !important;
         border-radius: 50px !important;
-        padding: 0.75rem 2rem !important;
-        font-weight: 600 !important;
+        padding: 0.8rem 2rem !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        text-transform: uppercase !important;
+        letter-spacing: 1px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.5) !important;
         transition: all 0.3s ease !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
     }}
     
     .stButton button:hover {{
         transform: scale(1.05) !important;
-        border-color: white !important;
         box-shadow: 0 8px 30px gold !important;
-    }}
-    
-    /* Text inputs */
-    .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
-        background: rgba(255, 255, 255, 0.15) !important;
-        border: 2px solid rgba(255, 215, 0, 0.3) !important;
-        border-radius: 20px !important;
-        color: white !important;
-        padding: 0.75rem !important;
-        backdrop-filter: blur(5px) !important;
-    }}
-    
-    .stTextInput input:focus, .stTextArea textarea:focus {{
         border-color: gold !important;
-        box-shadow: 0 0 25px gold !important;
-    }}
-    
-    /* Labels */
-    .stTextInput label, .stTextArea label, .stSelectbox label {{
-        color: white !important;
-        font-weight: 500 !important;
-        text-shadow: 1px 1px 2px black !important;
-        font-size: 1rem !important;
     }}
     
     /* Tabs */
     .stTabs [data-baseweb="tab-list"] {{
-        gap: 1rem;
-        background: rgba(255, 255, 255, 0.15) !important;
-        padding: 0.75rem !important;
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 50px !important;
+        padding: 0.5rem !important;
+        border: 3px solid gold !important;
+        gap: 0.5rem;
     }}
     
     .stTabs [data-baseweb="tab"] {{
         color: white !important;
         border-radius: 50px !important;
-        padding: 0.75rem 2rem !important;
-        font-weight: 500 !important;
+        padding: 0.8rem 2rem !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
     }}
     
     .stTabs [aria-selected="true"] {{
-        background: linear-gradient(135deg, #667eea, #764ba2) !important;
-        border: 2px solid gold !important;
+        background: linear-gradient(135deg, #FFD700, #FFA500) !important;
+        color: #4B0082 !important;
+        font-weight: 700 !important;
+        border: 2px solid white !important;
     }}
     
     /* Metrics */
     .stMetric {{
-        background: rgba(255, 255, 255, 0.15) !important;
+        background: rgba(0, 0, 0, 0.3) !important;
         backdrop-filter: blur(10px) !important;
         border-radius: 30px !important;
         padding: 1.5rem !important;
-        border: 2px solid gold !important;
-        color: white !important;
+        border: 3px solid gold !important;
     }}
     
     .stMetric label {{
-        color: rgba(255, 255, 255, 0.9) !important;
+        color: white !important;
+        font-size: 1.1rem !important;
+        font-weight: 500 !important;
     }}
     
     .stMetric div {{
         color: gold !important;
-        text-shadow: 0 0 15px gold !important;
         font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        text-shadow: 0 0 20px gold !important;
+    }}
+    
+    /* Expanders */
+    .streamlit-expanderHeader {{
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        border-radius: 20px !important;
+        border: 2px solid gold !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
     }}
     
     /* Success/Warning/Error messages */
     .stAlert {{
-        background: rgba(255, 255, 255, 0.2) !important;
+        background: rgba(0, 0, 0, 0.4) !important;
         backdrop-filter: blur(10px) !important;
         border-radius: 20px !important;
         color: white !important;
-        border-left: 5px solid !important;
+        font-weight: 500 !important;
+        border-left: 6px solid !important;
     }}
     
     .stAlert-success {{
@@ -324,15 +375,29 @@ st.markdown(f"""
         border-left-color: #ff4757 !important;
     }}
     
-    /* Divider */
+    .stAlert-warning {{
+        border-left-color: #ffa502 !important;
+    }}
+    
+    /* Dividers */
     hr {{
         border: none !important;
-        height: 2px !important;
-        background: linear-gradient(90deg, transparent, gold, transparent) !important;
+        height: 3px !important;
+        background: linear-gradient(90deg, transparent, gold, white, gold, transparent) !important;
         margin: 2rem 0 !important;
     }}
     
-    /* Hide footer */
+    /* Code blocks */
+    code {{
+        background: rgba(0, 0, 0, 0.5) !important;
+        color: gold !important;
+        border-radius: 10px !important;
+        padding: 0.2rem 0.5rem !important;
+        font-weight: 600 !important;
+        border: 1px solid gold !important;
+    }}
+    
+    /* Footer */
     footer {{
         display: none !important;
     }}
@@ -341,27 +406,42 @@ st.markdown(f"""
     .radiant-title {{
         text-align: center;
         font-size: 4rem;
-        font-weight: 700;
-        background: linear-gradient(90deg, gold, #ff6b6b, #667eea, #00ff88);
+        font-weight: 800;
+        background: linear-gradient(90deg, gold, white, #FFD700, #FFA500);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         animation: title-pulse 3s infinite;
-        text-shadow: 0 0 30px rgba(255,215,0,0.5);
+        text-shadow: 0 0 40px rgba(255,215,0,0.7);
         margin-bottom: 0.5rem;
     }}
     
     @keyframes title-pulse {{
-        0%, 100% {{ filter: drop-shadow(0 0 20px gold); }}
-        50% {{ filter: drop-shadow(0 0 40px #667eea); }}
+        0%, 100% {{ filter: drop-shadow(0 0 30px gold); }}
+        50% {{ filter: drop-shadow(0 0 60px white); }}
     }}
     
     .radiant-subtitle {{
         text-align: center;
         color: white;
-        font-size: 1.5rem;
-        font-weight: 300;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        font-size: 1.8rem;
+        font-weight: 400;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.8), 0 0 20px gold;
         margin-bottom: 2rem;
+    }}
+    
+    /* Card containers */
+    .glass-card {{
+        background: rgba(0, 0, 0, 0.3) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 3px solid gold !important;
+        border-radius: 30px !important;
+        padding: 2rem !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.5) !important;
+    }}
+    
+    /* Ensure all text in glass cards is visible */
+    .glass-card * {{
+        color: white !important;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -444,20 +524,20 @@ if st.session_state.page == 'welcome':
             with st.form("admin_login", clear_on_submit=True):
                 st.subheader("🌟 Admin Login")
                 school_code = st.text_input("🏫 School Code", placeholder="Enter your school code")
-                email = st.text_input("📧 Email", placeholder="admin@school.edu")
-                password = st.text_input("🔐 Password", type="password", placeholder="••••••••")
+                admin_email = st.text_input("📧 Email", placeholder="admin@school.edu")
+                admin_password = st.text_input("🔐 Password", type="password", placeholder="••••••••")
                 if st.form_submit_button("✨ LOGIN ✨", use_container_width=True):
-                    if not school_code or not email or not password:
+                    if not school_code or not admin_email or not admin_password:
                         st.error("Please fill all fields")
                     else:
                         all_schools = load_all_schools()
                         if school_code in all_schools:
                             school = all_schools[school_code]
-                            if school['admin_email'] == email:
+                            if school['admin_email'] == admin_email:
                                 users = load_school_data(school_code, "users.json", [])
-                                hashed = hashlib.sha256(password.encode()).hexdigest()
+                                hashed = hashlib.sha256(admin_password.encode()).hexdigest()
                                 for u in users:
-                                    if u['email'] == email and u['password'] == hashed and u['role'] == 'admin':
+                                    if u['email'] == admin_email and u['password'] == hashed and u['role'] == 'admin':
                                         st.session_state.current_school = school
                                         st.session_state.user = u
                                         st.session_state.page = 'dashboard'
@@ -469,9 +549,9 @@ if st.session_state.page == 'welcome':
                             st.error("School not found")
         with col2:
             st.markdown("""
-            <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 3px solid gold; border-radius: 30px; padding: 2rem; text-align: center;">
-                <h3 style="color: white;">👑 Admin Powers</h3>
-                <p style="color: white; opacity: 0.9;">Full control over your school community</p>
+            <div class="glass-card" style="text-align: center;">
+                <h3>👑 Admin Powers</h3>
+                <p style="opacity: 0.9;">Full control over your school community</p>
                 <div style="font-size: 5rem;">✨</div>
             </div>
             """, unsafe_allow_html=True)
@@ -545,9 +625,9 @@ if st.session_state.page == 'welcome':
                         st.rerun()
         with col2:
             st.markdown("""
-            <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 3px solid gold; border-radius: 30px; padding: 2rem; text-align: center;">
-                <h3 style="color: white;">🎓 Begin Your Legacy</h3>
-                <p style="color: white; opacity: 0.9;">Create your school and become the founding administrator</p>
+            <div class="glass-card" style="text-align: center;">
+                <h3>🎓 Begin Your Legacy</h3>
+                <p style="opacity: 0.9;">Create your school and become the founding administrator</p>
                 <div style="font-size: 5rem;">🚀</div>
             </div>
             """, unsafe_allow_html=True)
@@ -584,9 +664,9 @@ if st.session_state.page == 'welcome':
                                 st.error("School not found")
             with col2:
                 st.markdown("""
-                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 3px solid gold; border-radius: 30px; padding: 2rem; text-align: center;">
-                    <h3 style="color: white;">📚 Your Classroom Awaits</h3>
-                    <p style="color: white; opacity: 0.9;">Login to manage classes and inspire students</p>
+                <div class="glass-card" style="text-align: center;">
+                    <h3>📚 Your Classroom Awaits</h3>
+                    <p style="opacity: 0.9;">Login to manage classes and inspire students</p>
                     <div style="font-size: 5rem;">🍎</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -667,9 +747,9 @@ if st.session_state.page == 'welcome':
                                 st.rerun()
             with col2:
                 st.markdown("""
-                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 3px solid gold; border-radius: 30px; padding: 2rem; text-align: center;">
-                    <h3 style="color: white;">🎯 Start Your Journey</h3>
-                    <p style="color: white; opacity: 0.9;">Use your teacher code to join your school community</p>
+                <div class="glass-card" style="text-align: center;">
+                    <h3>🎯 Start Your Journey</h3>
+                    <p style="opacity: 0.9;">Use your teacher code to join your school community</p>
                     <div style="font-size: 5rem;">✨</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -706,9 +786,9 @@ if st.session_state.page == 'welcome':
                                 st.error("School not found")
             with col2:
                 st.markdown("""
-                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 3px solid gold; border-radius: 30px; padding: 2rem; text-align: center;">
-                    <h3 style="color: white;">📚 Your Learning Hub</h3>
-                    <p style="color: white; opacity: 0.9;">Access classes, homework, and connect with peers</p>
+                <div class="glass-card" style="text-align: center;">
+                    <h3>📚 Your Learning Hub</h3>
+                    <p style="opacity: 0.9;">Access classes, homework, and connect with peers</p>
                     <div style="font-size: 5rem;">📖</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -763,9 +843,9 @@ if st.session_state.page == 'welcome':
                                     st.rerun()
             with col2:
                 st.markdown("""
-                <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border: 3px solid gold; border-radius: 30px; padding: 2rem; text-align: center;">
-                    <h3 style="color: white;">🎓 Begin Your Adventure</h3>
-                    <p style="color: white; opacity: 0.9;">Join your school and start your learning journey</p>
+                <div class="glass-card" style="text-align: center;">
+                    <h3>🎓 Begin Your Adventure</h3>
+                    <p style="opacity: 0.9;">Join your school and start your learning journey</p>
                     <div style="font-size: 5rem;">🚀</div>
                 </div>
                 """, unsafe_allow_html=True)
@@ -798,7 +878,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             <h2>{school['name']}</h2>
             <p style="color: rgba(255,255,255,0.9); font-style: italic; margin: 5px 0;">✨ {school.get('motto','')} ✨</p>
             <div class="school-code">
-                <code style="background: transparent; color: gold; font-size: 1.1rem;">{school['code']}</code>
+                <code>{school['code']}</code>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -821,7 +901,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         
         st.divider()
         
-        # Navigation Menu - Standard Radio for Reliability
+        # Navigation Menu
         if user['role'] == 'admin':
             menu_options = ["Dashboard", "Announcements", "Teachers", "Classes", "Students", "Groups", "Approvals", "Codes", "Reports", "Settings", "Profile"]
         elif user['role'] == 'teacher':
