@@ -17,19 +17,24 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ============ VIBRANT BACKGROUND COLORS (NO IMAGES) ============
-def get_background_gradient():
-    """Returns a vibrant gradient background"""
-    gradients = [
-        "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #ff6b6b 100%)",
-        "linear-gradient(135deg, #ff6b6b 0%, #feca57 50%, #48dbfb 100%)",
-        "linear-gradient(135deg, #1dd1a1 0%, #f368e0 50%, #ff9f43 100%)",
-        "linear-gradient(135deg, #54a0ff 0%, #5f27cd 50%, #00d2d3 100%)"
+# ============ FUNCTION TO GET BACKGROUND IMAGE ============
+def get_background_image():
+    """Returns a stunning background image URL"""
+    # Beautiful, high-quality school/education images
+    images = [
+        "https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Beautiful classroom
+        "https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Stunning library
+        "https://images.pexels.com/photos/159844/cellular-education-classroom-159844.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Modern classroom
+        "https://images.pexels.com/photos/301926/pexels-photo-301926.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Graduation ceremony
+        "https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Students studying
+        "https://images.pexels.com/photos/3769714/pexels-photo-3769714.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Modern university
+        "https://images.pexels.com/photos/3769981/pexels-photo-3769981.jpeg?auto=compress&cs=tinysrgb&w=1920",  # Students collaborating
+        "https://images.pexels.com/photos/3770018/pexels-photo-3770018.jpeg?auto=compress&cs=tinysrgb&w=1920"   # Teacher with students
     ]
-    return random.choice(gradients)
+    return random.choice(images)
 
-# ============ CUSTOM CSS - VIBRANT & BEAUTIFUL ============
-BG_GRADIENT = get_background_gradient()
+# ============ CUSTOM CSS - STUNNING BACKGROUND + WHITE TEXT BOXES ============
+BG_IMAGE = get_background_image()
 
 st.markdown(f"""
 <style>
@@ -40,18 +45,37 @@ st.markdown(f"""
         font-family: 'Poppins', sans-serif;
     }}
     
-    /* VIBRANT GRADIENT BACKGROUND */
+    /* STUNNING BACKGROUND IMAGE */
     .stApp {{
-        background: {BG_GRADIENT};
-        background-size: 400% 400%;
-        animation: gradient-shift 15s ease infinite;
-        min-height: 100vh;
+        background-image: url('{BG_IMAGE}');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+        background-repeat: no-repeat;
+        animation: zoom 30s infinite alternate;
     }}
     
-    @keyframes gradient-shift {{
-        0% {{ background-position: 0% 50%; }}
-        50% {{ background-position: 100% 50%; }}
-        100% {{ background-position: 0% 50%; }}
+    @keyframes zoom {{
+        0% {{ transform: scale(1); }}
+        100% {{ transform: scale(1.1); }}
+    }}
+    
+    /* Dark overlay for better readability */
+    .stApp::before {{
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.5));
+        z-index: 0;
+    }}
+    
+    /* Ensure all content is above overlay */
+    .main > div, section[data-testid="stSidebar"] {{
+        position: relative;
+        z-index: 2;
     }}
     
     /* MAIN CONTENT AREA - GLASS EFFECT */
@@ -61,8 +85,8 @@ st.markdown(f"""
         border-radius: 40px;
         padding: 2rem;
         margin: 1rem;
-        border: 3px solid rgba(255, 255, 255, 0.3);
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+        border: 3px solid rgba(255, 215, 0, 0.5);
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
         animation: float 6s ease-in-out infinite;
     }}
     
@@ -71,12 +95,12 @@ st.markdown(f"""
         50% {{ transform: translateY(-5px); }}
     }}
     
-    /* ============ SIDEBAR - VIBRANT PURPLE GRADIENT ============ */
+    /* ============ SIDEBAR - LUXURIOUS GRADIENT ============ */
     section[data-testid="stSidebar"] {{
-        background: linear-gradient(135deg, rgba(106, 17, 203, 0.95), rgba(37, 117, 252, 0.95), rgba(255, 107, 107, 0.95)) !important;
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.95), rgba(138, 43, 226, 0.95), rgba(255, 215, 0, 0.9)) !important;
         backdrop-filter: blur(15px) !important;
-        border-right: 4px solid #f9ca24 !important;
-        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.5) !important;
+        border-right: 4px solid gold !important;
+        box-shadow: 10px 0 40px rgba(0, 0, 0, 0.6) !important;
     }}
     
     section[data-testid="stSidebar"] > div {{
@@ -97,9 +121,8 @@ st.markdown(f"""
     section[data-testid="stSidebar"] .st-emotion-cache-1dj0hjr,
     section[data-testid="stSidebar"] .st-emotion-cache-1v0mbdj {{
         color: WHITE !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5) !important;
         font-weight: 600 !important;
-        font-size: 1rem !important;
     }}
     
     /* SIDEBAR RADIO BUTTONS - BEAUTIFUL CARDS */
@@ -108,7 +131,7 @@ st.markdown(f"""
         backdrop-filter: blur(5px) !important;
         border-radius: 25px !important;
         padding: 1rem !important;
-        border: 2px solid #f9ca24 !important;
+        border: 2px solid gold !important;
         margin-top: 1rem !important;
     }}
     
@@ -121,31 +144,30 @@ st.markdown(f"""
         transition: all 0.3s ease !important;
         color: WHITE !important;
         font-weight: 600 !important;
-        font-size: 1rem !important;
         display: flex !important;
         align-items: center !important;
         gap: 12px !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
-        background: rgba(249, 202, 36, 0.3) !important;
+        background: rgba(255, 215, 0, 0.3) !important;
         transform: translateX(8px) !important;
-        border-color: #f9ca24 !important;
-        box-shadow: 0 5px 20px rgba(249, 202, 36, 0.5) !important;
+        border-color: gold !important;
+        box-shadow: 0 5px 20px rgba(255, 215, 0, 0.5) !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {{
-        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
+        background: linear-gradient(135deg, gold, #ffd700) !important;
         border: 3px solid white !important;
-        box-shadow: 0 0 30px #f9ca24 !important;
-        color: #6a11cb !important;
+        box-shadow: 0 0 30px gold !important;
+        color: #4B0082 !important;
         font-weight: 800 !important;
     }}
     
     /* SIDEBAR BUTTON */
     section[data-testid="stSidebar"] .stButton button {{
-        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
-        color: #6a11cb !important;
+        background: linear-gradient(135deg, gold, #ffd700) !important;
+        color: #4B0082 !important;
         border: 3px solid white !important;
         border-radius: 50px !important;
         padding: 15px 25px !important;
@@ -161,15 +183,15 @@ st.markdown(f"""
     
     section[data-testid="stSidebar"] .stButton button:hover {{
         transform: scale(1.05) !important;
-        box-shadow: 0 8px 30px #f9ca24 !important;
-        border-color: #f9ca24 !important;
+        box-shadow: 0 8px 30px gold !important;
+        border-color: gold !important;
     }}
     
-    /* SCHOOL HEADER - VIBRANT */
+    /* SCHOOL HEADER - GLOWING */
     .school-header {{
-        background: linear-gradient(135deg, rgba(106, 17, 203, 0.9), rgba(37, 117, 252, 0.9));
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(138, 43, 226, 0.9));
         backdrop-filter: blur(10px);
-        border: 4px solid #f9ca24;
+        border: 4px solid gold;
         border-radius: 40px;
         padding: 25px;
         margin-bottom: 20px;
@@ -179,7 +201,7 @@ st.markdown(f"""
     }}
     
     @keyframes header-glow {{
-        0%, 100% {{ border-color: #f9ca24; box-shadow: 0 0 30px #f9ca24; }}
+        0%, 100% {{ border-color: gold; box-shadow: 0 0 30px gold; }}
         50% {{ border-color: white; box-shadow: 0 0 50px white; }}
     }}
     
@@ -196,21 +218,21 @@ st.markdown(f"""
         padding: 12px;
         border-radius: 50px;
         margin-top: 15px;
-        border: 2px solid #f9ca24;
+        border: 2px solid gold;
     }}
     
     .school-code code {{
         background: transparent !important;
-        color: #f9ca24 !important;
+        color: gold !important;
         font-size: 1.3rem;
         font-weight: 700;
     }}
     
     /* PROFILE CARD */
     .profile-card {{
-        background: linear-gradient(135deg, rgba(106, 17, 203, 0.9), rgba(37, 117, 252, 0.9));
+        background: linear-gradient(135deg, rgba(75, 0, 130, 0.9), rgba(138, 43, 226, 0.9));
         backdrop-filter: blur(10px);
-        border: 3px solid #f9ca24;
+        border: 3px solid gold;
         border-radius: 30px;
         padding: 20px;
         margin-bottom: 20px;
@@ -224,73 +246,82 @@ st.markdown(f"""
         color: WHITE !important;
         margin: 0;
         font-size: 3rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }}
     
-    /* ============ MAIN CONTENT - VIBRANT ============ */
-    /* RAINBOW HEADERS */
+    /* ============ MAIN CONTENT ============ */
+    /* HEADERS - GOLD GRADIENT */
     h1 {{
-        background: linear-gradient(135deg, #f9ca24, #f6e58d, #ff7979, #badc58, #7ed6df, #e056fd);
+        background: linear-gradient(135deg, gold, #ffd700, #fff5b0);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-size: 3rem !important;
         font-weight: 900 !important;
         text-align: center;
-        animation: rainbow 5s infinite;
+        animation: title-glow 3s infinite;
         margin-bottom: 2rem !important;
     }}
     
-    @keyframes rainbow {{
-        0%, 100% {{ filter: drop-shadow(0 0 20px #f9ca24); }}
-        33% {{ filter: drop-shadow(0 0 20px #ff7979); }}
-        66% {{ filter: drop-shadow(0 0 20px #7ed6df); }}
+    @keyframes title-glow {{
+        0%, 100% {{ filter: drop-shadow(0 0 20px gold); }}
+        50% {{ filter: drop-shadow(0 0 40px white); }}
     }}
     
     h2, h3 {{
         color: WHITE !important;
         font-weight: 700 !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     }}
     
-    /* FORM ELEMENTS - VIBRANT */
-    .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {{
-        color: WHITE !important;
-        font-weight: 700 !important;
-        font-size: 1.1rem !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
-        margin-bottom: 0.5rem !important;
-    }}
-    
+    /* ============ WHITE TEXT BOXES WITH BLACK TEXT ============ */
     .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
-        background: rgba(255, 255, 255, 0.2) !important;
-        backdrop-filter: blur(5px) !important;
-        border: 3px solid #f9ca24 !important;
+        background: WHITE !important;
+        border: 3px solid gold !important;
         border-radius: 25px !important;
-        color: WHITE !important;
+        color: BLACK !important;
         font-weight: 600 !important;
         font-size: 1.1rem !important;
         padding: 0.8rem 1.2rem !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2) !important;
         transition: all 0.3s ease !important;
     }}
     
     .stTextInput input:focus, .stTextArea textarea:focus {{
-        border-color: white !important;
-        box-shadow: 0 0 30px #f9ca24 !important;
-        background: rgba(255, 255, 255, 0.3) !important;
+        border-color: #4B0082 !important;
+        box-shadow: 0 0 30px gold !important;
+        transform: scale(1.02) !important;
     }}
     
-    /* Placeholder text */
+    /* Placeholder text - gray */
     .stTextInput input::placeholder, .stTextArea textarea::placeholder {{
-        color: rgba(255, 255, 255, 0.8) !important;
+        color: #666666 !important;
         font-style: italic;
+        font-weight: 400 !important;
     }}
     
-    /* BUTTONS - ANIMATED GRADIENT */
+    /* Labels - white with shadow */
+    .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {{
+        color: WHITE !important;
+        font-weight: 700 !important;
+        font-size: 1.1rem !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        margin-bottom: 0.5rem !important;
+    }}
+    
+    /* Select box specific */
+    .stSelectbox div[data-baseweb="select"] > div {{
+        background: WHITE !important;
+        color: BLACK !important;
+    }}
+    
+    /* Date input */
+    .stDateInput input {{
+        color: BLACK !important;
+    }}
+    
+    /* ============ VIBRANT BUTTONS ============ */
     .stButton button {{
-        background: linear-gradient(135deg, #f9ca24, #f6e58d, #ff7979, #badc58, #7ed6df, #e056fd) !important;
-        background-size: 300% 300% !important;
-        animation: button-gradient 5s ease infinite !important;
-        color: #6a11cb !important;
+        background: linear-gradient(135deg, gold, #ffd700, #fff5b0) !important;
+        color: #4B0082 !important;
         border: 4px solid white !important;
         border-radius: 60px !important;
         padding: 0.8rem 2.5rem !important;
@@ -302,16 +333,10 @@ st.markdown(f"""
         transition: all 0.3s ease !important;
     }}
     
-    @keyframes button-gradient {{
-        0% {{ background-position: 0% 50%; }}
-        50% {{ background-position: 100% 50%; }}
-        100% {{ background-position: 0% 50%; }}
-    }}
-    
     .stButton button:hover {{
         transform: scale(1.05) translateY(-3px) !important;
-        box-shadow: 0 15px 40px #f9ca24 !important;
-        border-color: #f9ca24 !important;
+        box-shadow: 0 15px 40px gold !important;
+        border-color: gold !important;
     }}
     
     /* TABS - BEAUTIFUL */
@@ -320,7 +345,7 @@ st.markdown(f"""
         backdrop-filter: blur(10px) !important;
         border-radius: 60px !important;
         padding: 0.5rem !important;
-        border: 3px solid #f9ca24 !important;
+        border: 3px solid gold !important;
         gap: 0.5rem;
         margin-bottom: 2rem !important;
     }}
@@ -335,18 +360,18 @@ st.markdown(f"""
     }}
     
     .stTabs [aria-selected="true"] {{
-        background: linear-gradient(135deg, #f9ca24, #f6e58d) !important;
-        color: #6a11cb !important;
+        background: linear-gradient(135deg, gold, #ffd700) !important;
+        color: #4B0082 !important;
         font-weight: 900 !important;
         border: 2px solid white !important;
-        box-shadow: 0 0 30px #f9ca24 !important;
+        box-shadow: 0 0 30px gold !important;
     }}
     
     /* METRICS - VIBRANT CARDS */
     .stMetric {{
         background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(5px) !important;
-        border: 3px solid #f9ca24 !important;
+        border: 3px solid gold !important;
         border-radius: 30px !important;
         padding: 1.5rem !important;
         transition: all 0.3s ease !important;
@@ -355,27 +380,28 @@ st.markdown(f"""
     
     .stMetric:hover {{
         transform: translateY(-5px) !important;
-        box-shadow: 0 15px 40px #f9ca24 !important;
+        box-shadow: 0 15px 40px gold !important;
     }}
     
     .stMetric label {{
         color: WHITE !important;
         font-size: 1.2rem !important;
         font-weight: 600 !important;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }}
     
     .stMetric div {{
-        color: #f9ca24 !important;
+        color: gold !important;
         font-size: 3rem !important;
         font-weight: 900 !important;
-        text-shadow: 0 0 20px #f9ca24 !important;
+        text-shadow: 0 0 20px gold !important;
     }}
     
     /* EXPANDERS */
     .streamlit-expanderHeader {{
         background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(5px) !important;
-        border: 3px solid #f9ca24 !important;
+        border: 3px solid gold !important;
         border-radius: 25px !important;
         color: WHITE !important;
         font-weight: 700 !important;
@@ -405,29 +431,23 @@ st.markdown(f"""
     }}
     
     .stAlert-warning {{
-        border-left-color: #f9ca24 !important;
-        box-shadow: 0 0 20px #f9ca24 !important;
+        border-left-color: gold !important;
+        box-shadow: 0 0 20px gold !important;
     }}
     
-    /* DIVIDERS - RAINBOW */
+    /* DIVIDERS - GOLD */
     hr {{
         border: none !important;
         height: 4px !important;
-        background: linear-gradient(90deg, transparent, #f9ca24, #ff7979, #7ed6df, #badc58, #f9ca24, transparent) !important;
+        background: linear-gradient(90deg, transparent, gold, white, gold, transparent) !important;
         margin: 2rem 0 !important;
-        animation: divider-pulse 3s infinite !important;
-    }}
-    
-    @keyframes divider-pulse {{
-        0%, 100% {{ opacity: 1; }}
-        50% {{ opacity: 0.7; }}
     }}
     
     /* CODE BLOCKS */
     code {{
         background: rgba(0, 0, 0, 0.4) !important;
-        color: #f9ca24 !important;
-        border: 2px solid #f9ca24 !important;
+        color: gold !important;
+        border: 2px solid gold !important;
         border-radius: 15px !important;
         padding: 0.3rem 0.8rem !important;
         font-weight: 700 !important;
@@ -438,7 +458,7 @@ st.markdown(f"""
     .glass-card {{
         background: rgba(255, 255, 255, 0.2) !important;
         backdrop-filter: blur(10px) !important;
-        border: 4px solid #f9ca24 !important;
+        border: 4px solid gold !important;
         border-radius: 40px !important;
         padding: 2rem !important;
         box-shadow: 0 20px 50px rgba(0,0,0,0.3) !important;
@@ -447,7 +467,7 @@ st.markdown(f"""
     
     .glass-card:hover {{
         transform: translateY(-5px) !important;
-        box-shadow: 0 25px 60px #f9ca24 !important;
+        box-shadow: 0 25px 60px gold !important;
     }}
     
     .glass-card * {{
@@ -459,12 +479,12 @@ st.markdown(f"""
         text-align: center;
         font-size: 5rem;
         font-weight: 900;
-        background: linear-gradient(135deg, #f9ca24, #f6e58d, #ff7979, #badc58, #7ed6df, #e056fd);
+        background: linear-gradient(135deg, gold, #ffd700, #fff5b0);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
-        animation: title-float 3s infinite, title-rainbow 5s infinite;
+        animation: title-float 3s infinite, title-glow 3s infinite;
         margin-bottom: 0.5rem;
-        text-shadow: 0 0 40px rgba(249, 202, 36, 0.5);
+        text-shadow: 0 0 40px rgba(255, 215, 0, 0.5);
     }}
     
     @keyframes title-float {{
@@ -472,20 +492,12 @@ st.markdown(f"""
         50% {{ transform: translateY(-10px); }}
     }}
     
-    @keyframes title-rainbow {{
-        0% {{ filter: drop-shadow(0 0 30px #f9ca24); }}
-        25% {{ filter: drop-shadow(0 0 30px #ff7979); }}
-        50% {{ filter: drop-shadow(0 0 30px #7ed6df); }}
-        75% {{ filter: drop-shadow(0 0 30px #badc58); }}
-        100% {{ filter: drop-shadow(0 0 30px #f9ca24); }}
-    }}
-    
     .radiant-subtitle {{
         text-align: center;
         color: WHITE !important;
         font-size: 2rem;
         font-weight: 400;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         margin-bottom: 2rem;
         animation: subtitle-pulse 3s infinite;
     }}
@@ -507,7 +519,7 @@ st.markdown(f"""
     }}
     
     ::-webkit-scrollbar-thumb {{
-        background: linear-gradient(135deg, #f9ca24, #ff7979);
+        background: linear-gradient(135deg, gold, #ffd700);
         border-radius: 10px;
         border: 2px solid white;
     }}
