@@ -698,12 +698,12 @@ st.markdown(f"""
     /* Ensure all expanders and containers have proper background */
     .stExpander, .stContainer, div[data-testid="stVerticalBlock"] > div {{
         background: transparent !important;
-    }
+    }}
     
     /* Make sure text in main content is visible */
     .main p, .main span, .main div:not(.stTextInput):not(.stTextArea) {{
         color: #333333 !important;
-    }
+    }}
 </style>
 """, unsafe_allow_html=True)
 
