@@ -202,36 +202,37 @@ st.markdown(f"""
         }}
     }}
     
-    .stApp {{
+    /* Apply gradient to body background only */
+    body {{
         {GRADIENT_STYLE}
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+    }}
+    
+    /* Main app container - make sure content is visible */
+    .stApp {{
+        background: transparent !important;
+    }}
+    
+    /* Ensure main content area has proper background */
+    .main .block-container {{
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        padding: 2rem;
+        margin: 1.5rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
         position: relative;
+        z-index: 10;
     }}
     
-    .stApp::before {{
-        content: "";
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.2);
-        backdrop-filter: blur(2px);
-        z-index: 0;
-    }}
-    
-    .main > div, section[data-testid="stSidebar"] {{
-        position: relative;
-        z-index: 2;
-    }}
-    
+    /* Sidebar styling */
     section[data-testid="stSidebar"] {{
         background: rgba(255, 255, 255, 0.95) !important;
-        backdrop-filter: blur(15px) !important;
+        backdrop-filter: blur(10px) !important;
         border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
         box-shadow: 5px 0 30px rgba(0, 0, 0, 0.2) !important;
-        overflow-y: auto !important;
-        height: 100vh !important;
-        transition: transform 0.3s ease !important;
+        z-index: 20;
     }}
     
     button[data-testid="baseButton-header"] {{
@@ -259,7 +260,7 @@ st.markdown(f"""
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
-        background: rgba(255, 255, 255, 0.5) !important;
+        background: rgba(255, 255, 255, 0.8) !important;
         border-radius: 12px !important;
         padding: 0.5rem !important;
         border: 1px solid rgba(255, 255, 255, 0.5) !important;
@@ -281,11 +282,11 @@ st.markdown(f"""
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
-        background: rgba(255, 255, 255, 0.8) !important;
+        background: rgba(255, 255, 255, 0.9) !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {{
-        background: rgba(255, 255, 255, 0.9) !important;
+        background: linear-gradient(135deg, #ff6b6b20, #feca5720) !important;
         border-left: 3px solid #ff6b6b !important;
         font-weight: 700 !important;
     }}
@@ -309,7 +310,7 @@ st.markdown(f"""
     }}
     
     .school-header {{
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.8);
         border: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 12px;
         padding: 12px;
@@ -325,7 +326,7 @@ st.markdown(f"""
     }}
     
     .school-code {{
-        background: rgba(255,255,255,0.5);
+        background: rgba(255,255,255,0.8);
         padding: 4px;
         border-radius: 20px;
         margin-top: 5px;
@@ -340,7 +341,7 @@ st.markdown(f"""
     }}
     
     .profile-card {{
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.8);
         border: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 12px;
         padding: 10px;
@@ -356,16 +357,6 @@ st.markdown(f"""
         border-radius: 50%;
         object-fit: cover;
         border: 2px solid #ff6b6b;
-    }}
-    
-    .main > div {{
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin: 1.5rem;
-        border: 1px solid rgba(255, 255, 255, 0.5);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }}
     
     h1 {{
@@ -387,7 +378,7 @@ st.markdown(f"""
     
     /* Instagram-style chat */
     .chat-container {{
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.8);
         border-radius: 16px;
         padding: 20px;
         height: 500px;
@@ -431,7 +422,7 @@ st.markdown(f"""
     }}
     
     .chat-bubble-received {{
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.9);
         color: #333333;
         border-bottom-left-radius: 4px;
         border: 1px solid rgba(255, 255, 255, 0.5);
@@ -464,37 +455,9 @@ st.markdown(f"""
         text-align: right;
     }}
     
-    .chat-attachment {{
-        background: rgba(255,255,255,0.2);
-        border-radius: 12px;
-        padding: 8px;
-        margin-top: 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }}
-    
-    .chat-attachment:hover {{
-        background: rgba(255,255,255,0.3);
-    }}
-    
-    .chat-delete-btn {{
-        color: rgba(51, 51, 51, 0.5);
-        font-size: 0.7rem;
-        cursor: pointer;
-        margin-left: 8px;
-        transition: color 0.2s ease;
-    }}
-    
-    .chat-delete-btn:hover {{
-        color: #ff4444;
-    }}
-    
     /* Community member card */
     .member-card {{
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.8);
         border-radius: 12px;
         padding: 15px;
         margin-bottom: 10px;
@@ -506,7 +469,7 @@ st.markdown(f"""
     }}
     
     .member-card:hover {{
-        background: rgba(255, 255, 255, 0.7);
+        background: rgba(255, 255, 255, 0.9);
         border-color: #ff6b6b;
     }}
     
@@ -538,11 +501,6 @@ st.markdown(f"""
         margin-top: 4px;
     }}
     
-    .member-status {{
-        color: rgba(51, 51, 51, 0.6);
-        font-size: 0.8rem;
-    }}
-    
     /* Friend request badge */
     .request-badge {{
         background: #ff6b6b;
@@ -556,7 +514,7 @@ st.markdown(f"""
     
     /* Class/Group cards */
     .class-card, .group-card {{
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.8);
         border-radius: 12px;
         padding: 15px;
         margin-bottom: 10px;
@@ -565,7 +523,7 @@ st.markdown(f"""
     
     /* Assignment card */
     .assignment-card {{
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.8);
         border-radius: 12px;
         padding: 15px;
         margin-bottom: 10px;
@@ -574,7 +532,7 @@ st.markdown(f"""
     
     /* Announcement card */
     .announcement-card {{
-        background: rgba(255, 255, 255, 0.5);
+        background: rgba(255, 255, 255, 0.8);
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 15px;
@@ -606,22 +564,6 @@ st.markdown(f"""
         font-size: 0.8rem;
     }}
     
-    .attachment-icon {{
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: rgba(255,255,255,0.2);
-        padding: 4px 10px;
-        border-radius: 20px;
-        font-size: 0.8rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }}
-    
-    .attachment-icon:hover {{
-        background: rgba(255,255,255,0.3);
-    }}
-    
     /* ALL INPUT FIELDS - DEEP BLACK TEXT */
     .stTextInput input, 
     .stTextArea textarea, 
@@ -650,8 +592,6 @@ st.markdown(f"""
     .stNumberInput label {{
         color: #000000 !important;
         font-weight: 500 !important;
-        background: white !important;
-        border: 1px solid rgba(0, 0, 0, 0.1) !important;
     }}
     
     .stTextInput input, 
@@ -660,10 +600,10 @@ st.markdown(f"""
     .stDateInput input,
     .stNumberInput input {{
         background: white !important;
-        border-radius: 12px !important;
+        border-radius: 8px !important;
         padding: 0.6rem 1rem !important;
         font-size: 0.95rem !important;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+        border: 1px solid #e0e0e0 !important;
     }}
     
     .stTextInput input:focus, 
@@ -704,7 +644,7 @@ st.markdown(f"""
     }}
     
     .stTabs [data-baseweb="tab-list"] {{
-        background: rgba(255, 255, 255, 0.5) !important;
+        background: rgba(255, 255, 255, 0.8) !important;
         border-radius: 12px !important;
         padding: 0.3rem !important;
         border: 1px solid rgba(255, 255, 255, 0.5) !important;
@@ -728,7 +668,7 @@ st.markdown(f"""
     }}
     
     .stMetric {{
-        background: rgba(255, 255, 255, 0.5) !important;
+        background: rgba(255, 255, 255, 0.8) !important;
         border: 1px solid rgba(255, 255, 255, 0.5) !important;
         border-radius: 12px !important;
         padding: 1rem !important;
@@ -750,24 +690,20 @@ st.markdown(f"""
         display: none !important;
     }}
     
-    /* Additional black text for all form elements */
-    .stSelectbox div[data-baseweb="select"] span,
-    .stSelectbox div[role="listbox"] div,
-    .stDateInput input,
-    .stNumberInput input {{
-        color: #000000 !important;
+    /* Ensure main content is visible */
+    .main {{
+        background: transparent !important;
     }}
     
-    /* Ensure dropdown options are black */
-    div[role="listbox"] div {{
-        color: #000000 !important;
-        background: white !important;
-    }}
+    /* Ensure all expanders and containers have proper background */
+    .stExpander, .stContainer, div[data-testid="stVerticalBlock"] > div {{
+        background: transparent !important;
+    }
     
-    /* File uploader text */
-    .stFileUploader div {{
+    /* Make sure text in main content is visible */
+    .main p, .main span, .main div:not(.stTextInput):not(.stTextArea) {{
         color: #333333 !important;
-    }}
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -1024,7 +960,7 @@ if st.session_state.page == 'welcome':
                             st.error("School not found")
         with col2:
             st.markdown("""
-            <div style="background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 2rem; text-align: center;">
+            <div style="background: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 2rem; text-align: center;">
                 <h3 style="color: #333333;">👑 Admin Powers</h3>
                 <p style="color: #333333;">Full control over your school</p>
             </div>
@@ -1106,7 +1042,7 @@ if st.session_state.page == 'welcome':
                         st.rerun()
         with col2:
             st.markdown("""
-            <div style="background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 2rem; text-align: center;">
+            <div style="background: rgba(255,255,255,0.8); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 2rem; text-align: center;">
                 <h3 style="color: #333333;">🎓 Begin Your Legacy</h3>
                 <p style="color: #333333;">Create your school community</p>
             </div>
