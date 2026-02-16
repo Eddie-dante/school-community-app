@@ -107,22 +107,79 @@ def get_subjects_for_grade(grade):
     else:
         return PRIMARY_SUBJECTS
 
-# ============ FUNCTION TO GET BACKGROUND IMAGE ============
-def get_background_image():
-    images = [
-        "https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/256417/pexels-photo-256417.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/159844/cellular-education-classroom-159844.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/301926/pexels-photo-301926.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/5212345/pexels-photo-5212345.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/3769714/pexels-photo-3769714.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/3769981/pexels-photo-3769981.jpeg?auto=compress&cs=tinysrgb&w=1920",
-        "https://images.pexels.com/photos/3770018/pexels-photo-3770018.jpeg?auto=compress&cs=tinysrgb&w=1920"
+# ============ BEAUTIFUL GRADIENT BACKGROUND ============
+def get_gradient_colors():
+    """Returns a set of beautiful flowing gradient colors"""
+    gradients = [
+        # Sunrise gradient
+        """
+        background: linear-gradient(-45deg, 
+            #ff6b6b, #feca57, #ff9ff3, #48dbfb, #1dd1a1, #f368e0, #ff9f43
+        );
+        background-size: 400% 400%;
+        animation: gradient 15s ease infinite;
+        """,
+        # Ocean sunset
+        """
+        background: linear-gradient(-45deg, 
+            #ff0844, #ffb199, #ff0844, #00d2ff, #3a1c71, #d76d77, #ffaf7b
+        );
+        background-size: 400% 400%;
+        animation: gradient 18s ease infinite;
+        """,
+        # Purple haze
+        """
+        background: linear-gradient(-45deg, 
+            #8E2DE2, #4A00E0, #6a3093, #a044ff, #c471ed, #f64f59, #c471ed
+        );
+        background-size: 400% 400%;
+        animation: gradient 20s ease infinite;
+        """,
+        # Tropical
+        """
+        background: linear-gradient(-45deg, 
+            #00b09b, #96c93d, #c6ffdd, #fbd786, #f7797d, #4facfe, #00f2fe
+        );
+        background-size: 400% 400%;
+        animation: gradient 16s ease infinite;
+        """,
+        # Cherry blossom
+        """
+        background: linear-gradient(-45deg, 
+            #ff9a9e, #fad0c4, #fad0c4, #ffd1ff, #a1c4fd, #c2e9fb, #fbc2eb
+        );
+        background-size: 400% 400%;
+        animation: gradient 22s ease infinite;
+        """,
+        # Midnight city
+        """
+        background: linear-gradient(-45deg, 
+            #232526, #414345, #232526, #2c3e50, #4b6cb7, #182848, #4b6cb7
+        );
+        background-size: 400% 400%;
+        animation: gradient 25s ease infinite;
+        """,
+        # Autumn leaves
+        """
+        background: linear-gradient(-45deg, 
+            #e44d2e, #f39c12, #d35400, #e67e22, #f1c40f, #e67e22, #d35400
+        );
+        background-size: 400% 400%;
+        animation: gradient 19s ease infinite;
+        """,
+        # Northern lights
+        """
+        background: linear-gradient(-45deg, 
+            #43C6AC, #191654, #43C6AC, #02AAB0, #00CDAC, #02AAB0, #191654
+        );
+        background-size: 400% 400%;
+        animation: gradient 21s ease infinite;
+        """
     ]
-    return random.choice(images)
+    return random.choice(gradients)
 
-# ============ CUSTOM CSS ============
-BG_IMAGE = get_background_image()
+# ============ CUSTOM CSS WITH BEAUTIFUL GRADIENTS ============
+GRADIENT_STYLE = get_gradient_colors()
 
 st.markdown(f"""
 <style>
@@ -133,12 +190,21 @@ st.markdown(f"""
         box-sizing: border-box;
     }}
     
+    @keyframes gradient {{
+        0% {{
+            background-position: 0% 50%;
+        }}
+        50% {{
+            background-position: 100% 50%;
+        }}
+        100% {{
+            background-position: 0% 50%;
+        }}
+    }}
+    
     .stApp {{
-        background-image: url('{BG_IMAGE}');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        background-repeat: no-repeat;
+        {GRADIENT_STYLE}
+        position: relative;
     }}
     
     .stApp::before {{
@@ -148,7 +214,8 @@ st.markdown(f"""
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(135deg, rgba(0,0,0,0.85), rgba(0,0,0,0.75));
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(2px);
         z-index: 0;
     }}
     
@@ -158,10 +225,10 @@ st.markdown(f"""
     }}
     
     section[data-testid="stSidebar"] {{
-        background: linear-gradient(135deg, rgba(20, 20, 40, 0.98), rgba(30, 30, 60, 0.98)) !important;
+        background: rgba(255, 255, 255, 0.95) !important;
         backdrop-filter: blur(15px) !important;
-        border-right: 1px solid rgba(255, 215, 0, 0.3) !important;
-        box-shadow: 5px 0 20px rgba(0, 0, 0, 0.5) !important;
+        border-right: 1px solid rgba(255, 255, 255, 0.3) !important;
+        box-shadow: 5px 0 30px rgba(0, 0, 0, 0.2) !important;
         overflow-y: auto !important;
         height: 100vh !important;
         transition: transform 0.3s ease !important;
@@ -185,17 +252,17 @@ st.markdown(f"""
     section[data-testid="stSidebar"] h3,
     section[data-testid="stSidebar"] span,
     section[data-testid="stSidebar"] div {{
-        color: WHITE !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+        color: #333333 !important;
+        text-shadow: none !important;
         font-weight: 500 !important;
         font-size: 0.9rem !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
-        background: rgba(255, 255, 255, 0.1) !important;
+        background: rgba(255, 255, 255, 0.5) !important;
         border-radius: 12px !important;
         padding: 0.5rem !important;
-        border: 1px solid rgba(255, 215, 0, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
         margin: 0.8rem 0 !important;
     }}
     
@@ -205,7 +272,7 @@ st.markdown(f"""
         padding: 8px 10px !important;
         margin: 2px 0 !important;
         transition: all 0.2s ease !important;
-        color: WHITE !important;
+        color: #333333 !important;
         font-weight: 500 !important;
         font-size: 0.9rem !important;
         display: flex !important;
@@ -214,18 +281,18 @@ st.markdown(f"""
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
-        background: rgba(255, 215, 0, 0.15) !important;
+        background: rgba(255, 255, 255, 0.8) !important;
     }}
     
     section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {{
-        background: rgba(255, 215, 0, 0.25) !important;
-        border-left: 3px solid gold !important;
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-left: 3px solid #ff6b6b !important;
         font-weight: 700 !important;
     }}
     
     section[data-testid="stSidebar"] .stButton button {{
-        background: rgba(255, 215, 0, 0.9) !important;
-        color: #000 !important;
+        background: linear-gradient(135deg, #ff6b6b, #feca57) !important;
+        color: white !important;
         border: none !important;
         border-radius: 8px !important;
         padding: 8px 12px !important;
@@ -236,9 +303,14 @@ st.markdown(f"""
         margin: 0.5rem 0 !important;
     }}
     
+    section[data-testid="stSidebar"] .stButton button:hover {{
+        transform: translateY(-2px) !important;
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4) !important;
+    }}
+    
     .school-header {{
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 215, 0, 0.3);
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 12px;
         padding: 12px;
         margin-bottom: 12px;
@@ -246,30 +318,30 @@ st.markdown(f"""
     }}
     
     .school-header h2 {{
-        color: WHITE !important;
+        color: #333333 !important;
         margin: 0;
         font-size: 1.3rem;
         font-weight: 600;
     }}
     
     .school-code {{
-        background: rgba(0,0,0,0.3);
+        background: rgba(255,255,255,0.5);
         padding: 4px;
         border-radius: 20px;
         margin-top: 5px;
-        border: 1px solid rgba(255, 215, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.5);
     }}
     
     .school-code code {{
         background: transparent !important;
-        color: gold !important;
+        color: #ff6b6b !important;
         font-size: 0.8rem;
-        font-weight: 500;
+        font-weight: 600;
     }}
     
     .profile-card {{
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.5);
         border-radius: 12px;
         padding: 10px;
         margin-bottom: 12px;
@@ -283,35 +355,39 @@ st.markdown(f"""
         height: 40px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid gold;
+        border: 2px solid #ff6b6b;
     }}
     
     .main > div {{
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(255, 255, 255, 0.9);
         backdrop-filter: blur(10px);
         border-radius: 20px;
         padding: 2rem;
         margin: 1.5rem;
-        border: 1px solid rgba(255, 215, 0, 0.3);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     }}
     
     h1 {{
-        color: gold !important;
+        background: linear-gradient(135deg, #ff6b6b, #feca57, #48dbfb, #1dd1a1);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         font-size: 2.5rem !important;
         font-weight: 700 !important;
         text-align: center;
         margin-bottom: 1.5rem !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
     }}
     
     h2, h3 {{
-        color: WHITE !important;
+        color: #333333 !important;
         font-weight: 600 !important;
     }}
     
     /* Instagram-style chat */
     .chat-container {{
-        background: rgba(0, 0, 0, 0.4);
+        background: rgba(255, 255, 255, 0.5);
         border-radius: 16px;
         padding: 20px;
         height: 500px;
@@ -349,16 +425,16 @@ st.markdown(f"""
     }}
     
     .chat-bubble-sent {{
-        background: linear-gradient(135deg, #0095f6, #1877f2);
+        background: linear-gradient(135deg, #ff6b6b, #feca57);
         color: white;
         border-bottom-right-radius: 4px;
     }}
     
     .chat-bubble-received {{
-        background: rgba(255, 255, 255, 0.1);
-        color: white;
+        background: rgba(255, 255, 255, 0.8);
+        color: #333333;
         border-bottom-left-radius: 4px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.5);
     }}
     
     .chat-sender-info {{
@@ -377,19 +453,19 @@ st.markdown(f"""
     
     .chat-sender-name {{
         font-size: 0.8rem;
-        color: gold;
+        color: #ff6b6b;
         font-weight: 600;
     }}
     
     .chat-time {{
         font-size: 0.65rem;
-        color: rgba(255,255,255,0.5);
+        color: rgba(51, 51, 51, 0.5);
         margin-top: 4px;
         text-align: right;
     }}
     
     .chat-attachment {{
-        background: rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.2);
         border-radius: 12px;
         padding: 8px;
         margin-top: 8px;
@@ -401,11 +477,11 @@ st.markdown(f"""
     }}
     
     .chat-attachment:hover {{
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.3);
     }}
     
     .chat-delete-btn {{
-        color: rgba(255, 255, 255, 0.5);
+        color: rgba(51, 51, 51, 0.5);
         font-size: 0.7rem;
         cursor: pointer;
         margin-left: 8px;
@@ -418,7 +494,7 @@ st.markdown(f"""
     
     /* Community member card */
     .member-card {{
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.5);
         border-radius: 12px;
         padding: 15px;
         margin-bottom: 10px;
@@ -430,8 +506,8 @@ st.markdown(f"""
     }}
     
     .member-card:hover {{
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 215, 0, 0.3);
+        background: rgba(255, 255, 255, 0.7);
+        border-color: #ff6b6b;
     }}
     
     .member-pic {{
@@ -439,7 +515,7 @@ st.markdown(f"""
         height: 60px;
         border-radius: 50%;
         object-fit: cover;
-        border: 2px solid gold;
+        border: 2px solid #ff6b6b;
     }}
     
     .member-info {{
@@ -447,30 +523,30 @@ st.markdown(f"""
     }}
     
     .member-name {{
-        color: white;
+        color: #333333;
         font-weight: 600;
         font-size: 1.1rem;
     }}
     
     .member-role {{
-        color: gold;
+        color: #ff6b6b;
         font-size: 0.8rem;
         display: inline-block;
         padding: 2px 8px;
         border-radius: 12px;
-        background: rgba(255, 215, 0, 0.1);
+        background: rgba(255, 107, 107, 0.1);
         margin-top: 4px;
     }}
     
     .member-status {{
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(51, 51, 51, 0.6);
         font-size: 0.8rem;
     }}
     
     /* Friend request badge */
     .request-badge {{
-        background: gold;
-        color: black;
+        background: #ff6b6b;
+        color: white;
         padding: 2px 8px;
         border-radius: 12px;
         font-size: 0.7rem;
@@ -480,29 +556,29 @@ st.markdown(f"""
     
     /* Class/Group cards */
     .class-card, .group-card {{
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.5);
         border-radius: 12px;
         padding: 15px;
         margin-bottom: 10px;
-        border-left: 4px solid gold;
+        border-left: 4px solid #ff6b6b;
     }}
     
     /* Assignment card */
     .assignment-card {{
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.5);
         border-radius: 12px;
         padding: 15px;
         margin-bottom: 10px;
-        border-left: 4px solid #00ff88;
+        border-left: 4px solid #00d2ff;
     }}
     
     /* Announcement card */
     .announcement-card {{
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 255, 255, 0.5);
         border-radius: 12px;
         padding: 20px;
         margin-bottom: 15px;
-        border-left: 4px solid gold;
+        border-left: 4px solid #ff6b6b;
     }}
     
     .announcement-header {{
@@ -520,13 +596,13 @@ st.markdown(f"""
     }}
     
     .announcement-title {{
-        color: gold;
+        color: #333333;
         font-weight: 600;
         font-size: 1.2rem;
     }}
     
     .announcement-meta {{
-        color: rgba(255,255,255,0.5);
+        color: rgba(51, 51, 51, 0.5);
         font-size: 0.8rem;
     }}
     
@@ -534,7 +610,7 @@ st.markdown(f"""
         display: inline-flex;
         align-items: center;
         gap: 4px;
-        background: rgba(255,255,255,0.1);
+        background: rgba(255,255,255,0.2);
         padding: 4px 10px;
         border-radius: 20px;
         font-size: 0.8rem;
@@ -543,34 +619,77 @@ st.markdown(f"""
     }}
     
     .attachment-icon:hover {{
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.3);
     }}
     
-    .stTextInput input, .stTextArea textarea, .stSelectbox div, .stDateInput input {{
-        background: rgba(255, 255, 255, 0.1) !important;
-        border: 1px solid rgba(255, 215, 0, 0.3) !important;
-        border-radius: 12px !important;
-        color: WHITE !important;
-        font-weight: 400 !important;
-        font-size: 0.95rem !important;
-        padding: 0.6rem 1rem !important;
-    }}
-    
-    .stTextInput input:focus, .stTextArea textarea:focus {{
-        border-color: gold !important;
-        box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2) !important;
-    }}
-    
-    .stTextInput label, .stTextArea label, .stSelectbox label, .stDateInput label {{
-        color: WHITE !important;
+    /* ALL INPUT FIELDS - DEEP BLACK TEXT */
+    .stTextInput input, 
+    .stTextArea textarea, 
+    .stSelectbox div, 
+    .stDateInput input,
+    .stNumberInput input,
+    .stTextInput input[type="text"],
+    .stTextInput input[type="password"],
+    .stTextInput input[type="email"],
+    .stTextInput input[type="number"],
+    .stTextInput input::placeholder,
+    .stTextArea textarea::placeholder,
+    .stSelectbox div[data-baseweb="select"] span,
+    .stSelectbox div[role="listbox"] div,
+    .stDateInput input[type="date"],
+    input[type="text"],
+    input[type="password"],
+    input[type="email"],
+    input[type="number"],
+    textarea,
+    select,
+    .stTextInput label,
+    .stTextArea label,
+    .stSelectbox label,
+    .stDateInput label,
+    .stNumberInput label {{
+        color: #000000 !important;
         font-weight: 500 !important;
-        font-size: 0.9rem !important;
-        margin-bottom: 0.3rem !important;
+        background: white !important;
+        border: 1px solid rgba(0, 0, 0, 0.1) !important;
+    }}
+    
+    .stTextInput input, 
+    .stTextArea textarea, 
+    .stSelectbox div, 
+    .stDateInput input,
+    .stNumberInput input {{
+        background: white !important;
+        border-radius: 12px !important;
+        padding: 0.6rem 1rem !important;
+        font-size: 0.95rem !important;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05) !important;
+    }}
+    
+    .stTextInput input:focus, 
+    .stTextArea textarea:focus,
+    .stSelectbox div:focus,
+    .stDateInput input:focus {{
+        border-color: #ff6b6b !important;
+        box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2) !important;
+    }}
+    
+    /* Dropdown options */
+    .stSelectbox div[role="listbox"] div,
+    .stSelectbox div[data-baseweb="select"] div {{
+        color: #000000 !important;
+        background: white !important;
+    }}
+    
+    /* Radio and checkbox labels */
+    .stRadio label,
+    .stCheckbox label {{
+        color: #333333 !important;
     }}
     
     .stButton button {{
-        background: gold !important;
-        color: black !important;
+        background: linear-gradient(135deg, #ff6b6b, #feca57) !important;
+        color: white !important;
         border: none !important;
         border-radius: 8px !important;
         padding: 0.6rem 1.5rem !important;
@@ -581,21 +700,21 @@ st.markdown(f"""
     
     .stButton button:hover {{
         transform: translateY(-2px) !important;
-        box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3) !important;
+        box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4) !important;
     }}
     
     .stTabs [data-baseweb="tab-list"] {{
-        background: rgba(255, 255, 255, 0.05) !important;
+        background: rgba(255, 255, 255, 0.5) !important;
         border-radius: 12px !important;
         padding: 0.3rem !important;
-        border: 1px solid rgba(255, 215, 0, 0.2) !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
         gap: 0.3rem;
         margin-bottom: 1.5rem !important;
         flex-wrap: wrap !important;
     }}
     
     .stTabs [data-baseweb="tab"] {{
-        color: WHITE !important;
+        color: #333333 !important;
         border-radius: 8px !important;
         padding: 0.5rem 1rem !important;
         font-weight: 500 !important;
@@ -603,32 +722,51 @@ st.markdown(f"""
     }}
     
     .stTabs [aria-selected="true"] {{
-        background: gold !important;
-        color: black !important;
+        background: linear-gradient(135deg, #ff6b6b, #feca57) !important;
+        color: white !important;
         font-weight: 600 !important;
     }}
     
     .stMetric {{
-        background: rgba(255, 255, 255, 0.05) !important;
-        border: 1px solid rgba(255, 215, 0, 0.2) !important;
+        background: rgba(255, 255, 255, 0.5) !important;
+        border: 1px solid rgba(255, 255, 255, 0.5) !important;
         border-radius: 12px !important;
         padding: 1rem !important;
     }}
     
     .stMetric label {{
-        color: WHITE !important;
+        color: #333333 !important;
         font-size: 0.8rem !important;
-        font-weight: 400 !important;
+        font-weight: 500 !important;
     }}
     
     .stMetric div {{
-        color: gold !important;
+        color: #ff6b6b !important;
         font-size: 1.8rem !important;
         font-weight: 600 !important;
     }}
     
     footer {{
         display: none !important;
+    }}
+    
+    /* Additional black text for all form elements */
+    .stSelectbox div[data-baseweb="select"] span,
+    .stSelectbox div[role="listbox"] div,
+    .stDateInput input,
+    .stNumberInput input {{
+        color: #000000 !important;
+    }}
+    
+    /* Ensure dropdown options are black */
+    div[role="listbox"] div {{
+        color: #000000 !important;
+        background: white !important;
+    }}
+    
+    /* File uploader text */
+    .stFileUploader div {{
+        color: #333333 !important;
     }}
 </style>
 """, unsafe_allow_html=True)
@@ -849,7 +987,7 @@ if 'attachment' not in st.session_state:
 # ----- WELCOME PAGE -----
 if st.session_state.page == 'welcome':
     st.markdown('<h1>✨ School Community Hub ✨</h1>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align: center; color: white;">Connect • Collaborate • Shine Together</p>', unsafe_allow_html=True)
+    st.markdown('<p style="text-align: center; color: #333333;">Connect • Collaborate • Shine Together</p>', unsafe_allow_html=True)
     st.divider()
     
     tab1, tab2, tab3, tab4, tab5 = st.tabs(["👑 Admin", "🏫 Create", "👨‍🏫 Teachers", "👨‍🎓 Students", "👪 Guardians"])
@@ -886,9 +1024,9 @@ if st.session_state.page == 'welcome':
                             st.error("School not found")
         with col2:
             st.markdown("""
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 2rem; text-align: center;">
-                <h3 style="color: gold;">👑 Admin Powers</h3>
-                <p style="color: white;">Full control over your school</p>
+            <div style="background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 2rem; text-align: center;">
+                <h3 style="color: #333333;">👑 Admin Powers</h3>
+                <p style="color: #333333;">Full control over your school</p>
             </div>
             """, unsafe_allow_html=True)
     
@@ -968,9 +1106,9 @@ if st.session_state.page == 'welcome':
                         st.rerun()
         with col2:
             st.markdown("""
-            <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 2rem; text-align: center;">
-                <h3 style="color: gold;">🎓 Begin Your Legacy</h3>
-                <p style="color: white;">Create your school community</p>
+            <div style="background: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.5); border-radius: 20px; padding: 2rem; text-align: center;">
+                <h3 style="color: #333333;">🎓 Begin Your Legacy</h3>
+                <p style="color: #333333;">Create your school community</p>
             </div>
             """, unsafe_allow_html=True)
     
@@ -1326,9 +1464,9 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         role_display = "ADMIN" if user['role'] == 'admin' else "TEACHER" if user['role'] == 'teacher' else "STUDENT" if user['role'] == 'student' else "GUARDIAN"
         
         st.markdown(f"""
-        <div style="color: white; flex: 1;">
+        <div style="color: #333333; flex: 1;">
             <strong>{user['fullname']}</strong><br>
-            <span style="background: rgba(255,215,0,0.1); color: gold; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem;">{role_display}</span>
+            <span style="background: rgba(255,107,107,0.1); color: #ff6b6b; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem;">{role_display}</span>
         </div>
         """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -1507,15 +1645,15 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     <div class="assignment-card">
                         <div style="display: flex; justify-content: space-between;">
                             <div>
-                                <strong style="color: gold;">{a['title']}</strong>
-                                <span style="color: rgba(255,255,255,0.5); margin-left: 10px;">{a['subject']}</span>
+                                <strong style="color: #ff6b6b;">{a['title']}</strong>
+                                <span style="color: rgba(51,51,51,0.5); margin-left: 10px;">{a['subject']}</span>
                             </div>
-                            <div style="color: {'#ff4444' if datetime.strptime(a['due_date'], '%Y-%m-%d') < datetime.now() else '#00ff88'}">
+                            <div style="color: {'#ff4444' if datetime.strptime(a['due_date'], '%Y-%m-%d') < datetime.now() else '#00d2ff'}">
                                 Due: {a['due_date']}
                             </div>
                         </div>
-                        <div style="margin: 10px 0; color: white;">{a['description']}</div>
-                        <div style="display: flex; gap: 20px; font-size: 0.9rem; color: rgba(255,255,255,0.6);">
+                        <div style="margin: 10px 0; color: #333333;">{a['description']}</div>
+                        <div style="display: flex; gap: 20px; font-size: 0.9rem; color: rgba(51,51,51,0.6);">
                             <span>Points: {a['total_points']}</span>
                             <span>Target: {a['target_class']}</span>
                         </div>
@@ -1588,17 +1726,17 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 
                 with col2:
                     st.markdown(f"**{member['fullname']}**")
-                    st.markdown(f"<span style='color: gold; font-size: 0.8rem;'>{member['role'].title()}</span>", unsafe_allow_html=True)
+                    st.markdown(f"<span style='color: #ff6b6b; font-size: 0.8rem;'>{member['role'].title()}</span>", unsafe_allow_html=True)
                 
                 with col3:
                     if is_friend:
-                        st.markdown("<span style='color: #00ff88;'>✅ Friend</span>", unsafe_allow_html=True)
+                        st.markdown("<span style='color: #00d2ff;'>✅ Friend</span>", unsafe_allow_html=True)
                     elif request_sent:
-                        st.markdown("<span style='color: gold;'>⏳ Request Sent</span>", unsafe_allow_html=True)
+                        st.markdown("<span style='color: #ff6b6b;'>⏳ Request Sent</span>", unsafe_allow_html=True)
                     elif request_received:
-                        st.markdown("<span style='color: #ffa500;'>📥 Request Received</span>", unsafe_allow_html=True)
+                        st.markdown("<span style='color: #feca57;'>📥 Request Received</span>", unsafe_allow_html=True)
                     else:
-                        st.markdown("<span style='color: rgba(255,255,255,0.5);'>Not Connected</span>", unsafe_allow_html=True)
+                        st.markdown("<span style='color: rgba(51,51,51,0.5);'>Not Connected</span>", unsafe_allow_html=True)
                 
                 with col4:
                     if not is_friend and not request_sent and not request_received and member['email'] != user['email']:
@@ -1645,7 +1783,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                     st.markdown(f"<span style='font-size: 1.5rem;'>{emoji}</span>", unsafe_allow_html=True)
                             with col2:
                                 st.markdown(f"**{friend['fullname']}**")
-                                st.markdown(f"<span style='color: gold; font-size: 0.8rem;'>{friend['role'].title()}</span>", unsafe_allow_html=True)
+                                st.markdown(f"<span style='color: #ff6b6b; font-size: 0.8rem;'>{friend['role'].title()}</span>", unsafe_allow_html=True)
                             with col3:
                                 if st.button("💬 Chat", key=f"chat_friend_{friend_email}"):
                                     st.session_state.chat_with = friend_email
@@ -1674,8 +1812,8 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                     st.markdown(f"<span style='font-size: 1.5rem;'>{emoji}</span>", unsafe_allow_html=True)
                             with col2:
                                 st.markdown(f"**{sender['fullname']}**")
-                                st.markdown(f"<span style='color: gold; font-size: 0.8rem;'>{sender['role'].title()}</span>", unsafe_allow_html=True)
-                                st.markdown(f"<span style='color: rgba(255,255,255,0.5); font-size: 0.7rem;'>{req['date']}</span>", unsafe_allow_html=True)
+                                st.markdown(f"<span style='color: #ff6b6b; font-size: 0.8rem;'>{sender['role'].title()}</span>", unsafe_allow_html=True)
+                                st.markdown(f"<span style='color: rgba(51,51,51,0.5); font-size: 0.7rem;'>{req['date']}</span>", unsafe_allow_html=True)
                             with col3:
                                 col_a, col_b = st.columns(2)
                                 with col_a:
@@ -1706,10 +1844,10 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                     st.markdown(f"<span style='font-size: 1.5rem;'>{emoji}</span>", unsafe_allow_html=True)
                             with col2:
                                 st.markdown(f"**{recipient['fullname']}**")
-                                st.markdown(f"<span style='color: gold; font-size: 0.8rem;'>{recipient['role'].title()}</span>", unsafe_allow_html=True)
-                                st.markdown(f"<span style='color: rgba(255,255,255,0.5); font-size: 0.7rem;'>Sent: {req['date']}</span>", unsafe_allow_html=True)
+                                st.markdown(f"<span style='color: #ff6b6b; font-size: 0.8rem;'>{recipient['role'].title()}</span>", unsafe_allow_html=True)
+                                st.markdown(f"<span style='color: rgba(51,51,51,0.5); font-size: 0.7rem;'>Sent: {req['date']}</span>", unsafe_allow_html=True)
                             with col3:
-                                st.markdown("<span style='color: gold;'>⏳ Pending</span>", unsafe_allow_html=True)
+                                st.markdown("<span style='color: #ff6b6b;'>⏳ Pending</span>", unsafe_allow_html=True)
                             st.divider()
             else:
                 st.info("No sent requests")
@@ -1749,7 +1887,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             with col_b:
                                 st.markdown(f"**{friend['fullname']}**")
                                 if last_msg:
-                                    st.markdown(f"<span style='color: rgba(255,255,255,0.5); font-size: 0.8rem;'>{last_msg}</span>", unsafe_allow_html=True)
+                                    st.markdown(f"<span style='color: rgba(51,51,51,0.5); font-size: 0.8rem;'>{last_msg}</span>", unsafe_allow_html=True)
                                 if unread > 0:
                                     st.markdown(f"<span class='request-badge'>{unread}</span>", unsafe_allow_html=True)
                             
@@ -2029,7 +2167,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                     st.write(emoji)
                             with col_b:
                                 rank = "Leader" if member_email == g['leader'] else "Co-Leader" if member_email in g.get('co_leaders', []) else "Member"
-                                st.write(f"{member['fullname']} - <span style='color: gold;'>{rank}</span>", unsafe_allow_html=True)
+                                st.write(f"{member['fullname']} - <span style='color: #ff6b6b;'>{rank}</span>", unsafe_allow_html=True)
                 
                 # Request to join button
                 if user['email'] not in g.get('members', []):
