@@ -12,6 +12,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import time
+import os
 
 # ============ PAGE CONFIG ============
 st.set_page_config(
@@ -66,6 +67,675 @@ KENYAN_GRADES = [
     "Form 1 (11 subjects)", "Form 2 (11 subjects)", "Form 3 (11 subjects)", "Form 4 (11 subjects)"
 ]
 
+# ============ THEMES AND WALLPAPERS ============
+THEMES = {
+    "Sunrise Glow": {
+        "primary": "#ff6b6b",
+        "secondary": "#feca57",
+        "accent": "#48dbfb",
+        "background": "linear-gradient(135deg, #ff6b6b, #feca57, #ff9ff3, #48dbfb)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #cfa668, #e5b873, #f5d742)"
+    },
+    "Ocean Breeze": {
+        "primary": "#00d2ff",
+        "secondary": "#3a1c71",
+        "accent": "#00ff00",
+        "background": "linear-gradient(135deg, #00d2ff, #3a1c71, #d76d77, #ffaf7b)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #4facfe, #00f2fe, #43e97b)"
+    },
+    "Purple Haze": {
+        "primary": "#8E2DE2",
+        "secondary": "#4A00E0",
+        "accent": "#a044ff",
+        "background": "linear-gradient(135deg, #8E2DE2, #4A00E0, #6a3093, #a044ff)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #c471ed, #f64f59, #c471ed)"
+    },
+    "Tropical Paradise": {
+        "primary": "#00b09b",
+        "secondary": "#96c93d",
+        "accent": "#fbd786",
+        "background": "linear-gradient(135deg, #00b09b, #96c93d, #c6ffdd, #fbd786)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #4facfe, #00f2fe, #43e97b)"
+    },
+    "Cherry Blossom": {
+        "primary": "#ff9a9e",
+        "secondary": "#fad0c4",
+        "accent": "#a1c4fd",
+        "background": "linear-gradient(135deg, #ff9a9e, #fad0c4, #ffd1ff, #a1c4fd)",
+        "text": "#333333",
+        "sidebar": "linear-gradient(135deg, #fbc2eb, #a6c1ee, #fbc2eb)"
+    },
+    "Midnight City": {
+        "primary": "#232526",
+        "secondary": "#414345",
+        "accent": "#4b6cb7",
+        "background": "linear-gradient(135deg, #232526, #414345, #2c3e50, #4b6cb7)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #182848, #4b6cb7, #182848)"
+    },
+    "Autumn Leaves": {
+        "primary": "#e44d2e",
+        "secondary": "#f39c12",
+        "accent": "#f1c40f",
+        "background": "linear-gradient(135deg, #e44d2e, #f39c12, #d35400, #e67e22)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #f1c40f, #e67e22, #d35400)"
+    },
+    "Northern Lights": {
+        "primary": "#43C6AC",
+        "secondary": "#191654",
+        "accent": "#00CDAC",
+        "background": "linear-gradient(135deg, #43C6AC, #191654, #02AAB0, #00CDAC)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #02AAB0, #00CDAC, #191654)"
+    },
+    "Forest Mist": {
+        "primary": "#11998e",
+        "secondary": "#38ef7d",
+        "accent": "#38ef7d",
+        "background": "linear-gradient(135deg, #11998e, #38ef7d, #11998e, #38ef7d)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #11998e, #38ef7d, #11998e)"
+    },
+    "Lavender Dream": {
+        "primary": "#aa4b6b",
+        "secondary": "#6b6b83",
+        "accent": "#3b8d99",
+        "background": "linear-gradient(135deg, #aa4b6b, #6b6b83, #3b8d99, #aa4b6b)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #aa4b6b, #6b6b83, #3b8d99)"
+    },
+    "Sunset Orange": {
+        "primary": "#f12711",
+        "secondary": "#f5af19",
+        "accent": "#f5af19",
+        "background": "linear-gradient(135deg, #f12711, #f5af19, #f12711, #f5af19)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #f12711, #f5af19, #f12711)"
+    },
+    "Electric Blue": {
+        "primary": "#00c6fb",
+        "secondary": "#005bea",
+        "accent": "#00c6fb",
+        "background": "linear-gradient(135deg, #00c6fb, #005bea, #00c6fb, #005bea)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #00c6fb, #005bea, #00c6fb)"
+    },
+    "Pink Flamingo": {
+        "primary": "#f857a6",
+        "secondary": "#ff5858",
+        "accent": "#f857a6",
+        "background": "linear-gradient(135deg, #f857a6, #ff5858, #f857a6, #ff5858)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #f857a6, #ff5858, #f857a6)"
+    },
+    "Emerald City": {
+        "primary": "#348f50",
+        "secondary": "#56ab2f",
+        "accent": "#56ab2f",
+        "background": "linear-gradient(135deg, #348f50, #56ab2f, #348f50, #56ab2f)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #348f50, #56ab2f, #348f50)"
+    },
+    "Ruby Red": {
+        "primary": "#cb356b",
+        "secondary": "#bd3f32",
+        "accent": "#cb356b",
+        "background": "linear-gradient(135deg, #cb356b, #bd3f32, #cb356b, #bd3f32)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #cb356b, #bd3f32, #cb356b)"
+    },
+    "Sapphire Blue": {
+        "primary": "#0f0c29",
+        "secondary": "#302b63",
+        "accent": "#24243e",
+        "background": "linear-gradient(135deg, #0f0c29, #302b63, #24243e, #0f0c29)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #0f0c29, #302b63, #24243e)"
+    },
+    "Amber Glow": {
+        "primary": "#ff8008",
+        "secondary": "#ffc837",
+        "accent": "#ff8008",
+        "background": "linear-gradient(135deg, #ff8008, #ffc837, #ff8008, #ffc837)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #ff8008, #ffc837, #ff8008)"
+    },
+    "Teal Tide": {
+        "primary": "#1d976c",
+        "secondary": "#93f9b9",
+        "accent": "#1d976c",
+        "background": "linear-gradient(135deg, #1d976c, #93f9b9, #1d976c, #93f9b9)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #1d976c, #93f9b9, #1d976c)"
+    },
+    "Grape Escape": {
+        "primary": "#8e2de2",
+        "secondary": "#4a00e0",
+        "accent": "#8e2de2",
+        "background": "linear-gradient(135deg, #8e2de2, #4a00e0, #8e2de2, #4a00e0)",
+        "text": "#ffffff",
+        "sidebar": "linear-gradient(135deg, #8e2de2, #4a00e0, #8e2de2)"
+    },
+    "Peach Perfect": {
+        "primary": "#ff6a88",
+        "secondary": "#ff99ac",
+        "accent": "#ff6a88",
+        "background": "linear-gradient(135deg, #ff6a88, #ff99ac, #ff6a88, #ff99ac)",
+        "text": "#333333",
+        "sidebar": "linear-gradient(135deg, #ff6a88, #ff99ac, #ff6a88)"
+    }
+}
+
+WALLPAPERS = {
+    "None": "",
+    "Abstract Waves": "https://images.unsplash.com/photo-1557682250-33bd709cbe85",
+    "Geometric Pattern": "https://images.unsplash.com/photo-1557683311-eac922347aa1",
+    "Nature Leaves": "https://images.unsplash.com/photo-1557683316-973673baf926",
+    "Starry Night": "https://images.unsplash.com/photo-1557683320-2d5001d5e9c5",
+    "Color Splash": "https://images.unsplash.com/photo-1557683304-6733ba7e4d6f",
+    "Gradient Flow": "https://images.unsplash.com/photo-1557683316-973673baf926",
+    "Minimal Lines": "https://images.unsplash.com/photo-1557683311-eac922347aa1",
+    "Dark Texture": "https://images.unsplash.com/photo-1557682250-33bd709cbe85",
+    "Light Texture": "https://images.unsplash.com/photo-1557683320-2d5001d5e9c5",
+    "Forest": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
+    "Mountains": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b",
+    "Ocean": "https://images.unsplash.com/photo-1507525425510-56b1e2d6c4f2",
+    "Desert": "https://images.unsplash.com/photo-1509316785289-025f5b846b35",
+    "City Lights": "https://images.unsplash.com/photo-1519501025264-65ba15a82390",
+    "Aurora": "https://images.unsplash.com/photo-1483347756197-71ef80e95f73",
+    "Galaxy": "https://images.unsplash.com/photo-1462331940025-496dfbfc7564",
+    "Sunset": "https://images.unsplash.com/photo-1506815444479-bfdb1e96c566",
+    "Rainbow": "https://images.unsplash.com/photo-1511300636408-a63a89df3482",
+    "Clouds": "https://images.unsplash.com/photo-1501630834273-4b5604d2ee31",
+    "Stars": "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a"
+}
+
+def get_theme_css(theme_name, wallpaper=None):
+    theme = THEMES.get(theme_name, THEMES["Sunrise Glow"])
+    wallpaper_url = WALLPAPERS.get(wallpaper, "") if wallpaper else ""
+    
+    background_style = f"url('{wallpaper_url}') no-repeat center center fixed" if wallpaper_url else theme["background"]
+    background_size = "cover" if wallpaper_url else "400% 400%"
+    
+    return f"""
+    <style>
+        body {{
+            background: {background_style};
+            background-size: {background_size};
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Poppins', sans-serif;
+        }}
+        
+        .stApp {{
+            background: transparent !important;
+        }}
+        
+        .main .block-container {{
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+            z-index: 10;
+        }}
+        
+        section[data-testid="stSidebar"] {{
+            background: {theme["sidebar"]};
+            background-size: 300% 300%;
+            animation: golden-shimmer 8s ease infinite;
+            backdrop-filter: blur(5px) !important;
+            border-right: 2px solid rgba(255, 215, 0, 0.4) !important;
+            box-shadow: 5px 0 30px rgba(218, 165, 32, 0.4) !important;
+            z-index: 20;
+        }}
+        
+        section[data-testid="stSidebar"] > div {{
+            background: rgba(0, 0, 0, 0.2) !important;
+            padding: 1rem 0.8rem !important;
+            width: 100% !important;
+        }}
+        
+        section[data-testid="stSidebar"] .stMarkdown,
+        section[data-testid="stSidebar"] .stRadio label,
+        section[data-testid="stSidebar"] p,
+        section[data-testid="stSidebar"] h1,
+        section[data-testid="stSidebar"] h2,
+        section[data-testid="stSidebar"] h3,
+        section[data-testid="stSidebar"] span,
+        section[data-testid="stSidebar"] div {{
+            color: #FFD700 !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+            font-weight: 600 !important;
+        }}
+        
+        section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
+            background: rgba(0, 0, 0, 0.3) !important;
+            border-radius: 12px !important;
+            padding: 0.5rem !important;
+            border: 1px solid rgba(255, 215, 0, 0.3) !important;
+            margin: 0.8rem 0 !important;
+        }}
+        
+        section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {{
+            background: transparent !important;
+            border-radius: 8px !important;
+            padding: 8px 10px !important;
+            margin: 2px 0 !important;
+            transition: all 0.2s ease !important;
+            color: #FFD700 !important;
+            font-weight: 600 !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
+        }}
+        
+        section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
+            background: rgba(255, 215, 0, 0.2) !important;
+            transform: translateX(5px) !important;
+        }}
+        
+        section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {{
+            background: rgba(255, 215, 0, 0.3) !important;
+            border-left: 4px solid #FFD700 !important;
+            font-weight: 700 !important;
+            box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3) !important;
+        }}
+        
+        section[data-testid="stSidebar"] .stButton button {{
+            background: linear-gradient(135deg, #FFD700, #DAA520) !important;
+            color: #2b2b2b !important;
+            border: none !important;
+            border-radius: 8px !important;
+            padding: 8px 12px !important;
+            font-weight: 700 !important;
+            font-size: 0.9rem !important;
+            transition: all 0.2s ease !important;
+            width: 100% !important;
+            margin: 0.5rem 0 !important;
+            box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4) !important;
+        }}
+        
+        section[data-testid="stSidebar"] .stButton button:hover {{
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6) !important;
+        }}
+        
+        .school-header {{
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #FFD700;
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 12px;
+            text-align: center;
+            backdrop-filter: blur(5px);
+        }}
+        
+        .school-header h2 {{
+            color: #FFD700 !important;
+            margin: 0;
+            font-size: 1.3rem;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }}
+        
+        .school-code {{
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px;
+            border-radius: 20px;
+            margin-top: 5px;
+            border: 1px solid #FFD700;
+        }}
+        
+        .school-code code {{
+            background: transparent !important;
+            color: #FFD700 !important;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }}
+        
+        .profile-card {{
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid #FFD700;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(5px);
+        }}
+        
+        .stSelectbox div[data-baseweb="select"] {{
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: 2px solid #FFD700 !important;
+            border-radius: 10px !important;
+            color: #000000 !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            backdrop-filter: blur(5px);
+        }}
+        
+        .stSelectbox div[data-baseweb="select"]:hover {{
+            border-color: #DAA520 !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5) !important;
+        }}
+        
+        .stTextInput input, 
+        .stTextArea textarea, 
+        .stDateInput input,
+        .stNumberInput input {{
+            background: rgba(255, 255, 255, 0.9) !important;
+            border: 2px solid #FFD700 !important;
+            border-radius: 10px !important;
+            padding: 0.6rem 1rem !important;
+            font-size: 0.95rem !important;
+            color: #000000 !important;
+            font-weight: 500 !important;
+            transition: all 0.3s ease !important;
+            backdrop-filter: blur(5px);
+        }}
+        
+        .stTextInput input:focus, 
+        .stTextArea textarea:focus,
+        .stDateInput input:focus,
+        .stNumberInput input:focus {{
+            border-color: #DAA520 !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5) !important;
+        }}
+        
+        .stTextInput label,
+        .stTextArea label,
+        .stSelectbox label,
+        .stDateInput label,
+        .stNumberInput label {{
+            color: {theme["text"]} !important;
+            font-weight: 600 !important;
+            font-size: 0.9rem !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }}
+        
+        .stTabs [data-baseweb="tab-list"] {{
+            background: linear-gradient(135deg, #FFD700, #DAA520) !important;
+            border-radius: 12px !important;
+            padding: 0.3rem !important;
+            gap: 0.3rem;
+            margin-bottom: 1.5rem !important;
+        }}
+        
+        .stTabs [data-baseweb="tab"] {{
+            color: #2b2b2b !important;
+            border-radius: 8px !important;
+            padding: 0.5rem 1rem !important;
+            font-weight: 600 !important;
+        }}
+        
+        .stTabs [aria-selected="true"] {{
+            background: rgba(0, 0, 0, 0.2) !important;
+            color: #000000 !important;
+        }}
+        
+        h1 {{
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 2.5rem !important;
+            font-weight: 700 !important;
+            text-align: center;
+            margin-bottom: 1.5rem !important;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }}
+        
+        .golden-card {{
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-left: 6px solid #FFD700;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
+            color: {theme["text"]};
+        }}
+        
+        .golden-card h1, .golden-card h2, .golden-card h3, .golden-card h4, .golden-card p {{
+            color: {theme["text"]} !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }}
+        
+        .performance-excellent {{
+            background: linear-gradient(135deg, #00ff00, #00ff99);
+            color: #000000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-block;
+            text-shadow: none;
+        }}
+        
+        .performance-good {{
+            background: linear-gradient(135deg, #00ffff, #0066ff);
+            color: #000000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-block;
+            text-shadow: none;
+        }}
+        
+        .performance-average {{
+            background: linear-gradient(135deg, #ffff00, #ff9900);
+            color: #000000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-block;
+            text-shadow: none;
+        }}
+        
+        .performance-needs-improvement {{
+            background: linear-gradient(135deg, #ff4444, #ff0000);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-block;
+            text-shadow: none;
+        }}
+        
+        .chat-container {{
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            height: 400px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            border: 1px solid #FFD700;
+        }}
+        
+        .chat-message-wrapper {{
+            display: flex;
+            margin-bottom: 10px;
+            animation: fadeIn 0.3s ease;
+        }}
+        
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(10px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+        
+        .chat-message-sent {{
+            justify-content: flex-end;
+        }}
+        
+        .chat-message-received {{
+            justify-content: flex-start;
+        }}
+        
+        .chat-bubble {{
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            position: relative;
+            word-wrap: break-word;
+            backdrop-filter: blur(10px);
+        }}
+        
+        .chat-bubble-sent {{
+            background: rgba(255, 215, 0, 0.3);
+            color: {theme["text"]};
+            border-bottom-right-radius: 4px;
+            border: 1px solid #FFD700;
+        }}
+        
+        .chat-bubble-received {{
+            background: rgba(255, 255, 255, 0.2);
+            color: {theme["text"]};
+            border-bottom-left-radius: 4px;
+            border: 1px solid #FFD700;
+        }}
+        
+        .chat-sender-info {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 4px;
+        }}
+        
+        .chat-sender-name {{
+            font-size: 0.8rem;
+            color: #FFD700;
+            font-weight: 600;
+        }}
+        
+        .chat-time {{
+            font-size: 0.65rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-top: 4px;
+            text-align: right;
+        }}
+        
+        .main-nav-button {{
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: {theme["text"]};
+            border: 2px solid #FFD700;
+            border-radius: 15px;
+            padding: 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            margin: 10px 0;
+        }}
+        
+        .main-nav-button:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.5);
+            border-color: white;
+        }}
+        
+        .class-card {{
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #FFD700;
+            box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
+            color: {theme["text"]};
+        }}
+        
+        .class-card h4, .class-card p {{
+            color: {theme["text"]} !important;
+        }}
+        
+        .member-card {{
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid #FFD700;
+            color: {theme["text"]};
+        }}
+        
+        .member-pic {{
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #FFD700;
+        }}
+        
+        .request-badge {{
+            background: #FFD700;
+            color: #2b2b2b;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 8px;
+        }}
+        
+        .main p, .main span, .main div:not(.stTextInput):not(.stTextArea) {{
+            color: {theme["text"]} !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }}
+        
+        .stMetric label, .stMetric div {{
+            color: {theme["text"]} !important;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }}
+        
+        .streamlit-expanderHeader {{
+            color: {theme["text"]} !important;
+            background: rgba(255, 215, 0, 0.2) !important;
+            backdrop-filter: blur(10px) !important;
+        }}
+        
+        .dataframe {{
+            background: rgba(255, 255, 255, 0.15) !important;
+            color: {theme["text"]} !important;
+            backdrop-filter: blur(10px) !important;
+        }}
+        
+        .dataframe th {{
+            background: rgba(255, 215, 0, 0.3) !important;
+            color: {theme["text"]} !important;
+        }}
+        
+        .dataframe td {{
+            color: {theme["text"]} !important;
+        }}
+        
+        @keyframes golden-shimmer {{
+            0% {{ background-position: 0% 50%; }}
+            50% {{ background-position: 100% 50%; }}
+            100% {{ background-position: 0% 50%; }}
+        }}
+    </style>
+    """
+
 def get_subjects_for_grade(grade):
     if "Grade" in grade and any(str(i) in grade for i in range(1, 7)):
         return PRIMARY_SUBJECTS
@@ -78,617 +748,6 @@ def get_subjects_for_grade(grade):
         return subjects
     else:
         return PRIMARY_SUBJECTS
-
-# ============ BEAUTIFUL GRADIENT BACKGROUND ============
-def get_gradient_colors():
-    """Returns a set of beautiful flowing luminous gradient colors"""
-    gradients = [
-        # Luminous Rainbow
-        """
-        background: linear-gradient(-45deg, 
-            #ff0066, #ff6600, #ffcc00, #00ff99, #00ccff, #9900ff, #ff00cc
-        );
-        background-size: 400% 400%;
-        animation: gradient 15s ease infinite;
-        """,
-        # Neon Sunset
-        """
-        background: linear-gradient(-45deg, 
-            #ff0844, #ffb199, #00ffff, #ff00ff, #ffff00, #ff6600, #ff0066
-        );
-        background-size: 400% 400%;
-        animation: gradient 18s ease infinite;
-        """,
-        # Electric Purple
-        """
-        background: linear-gradient(-45deg, 
-            #8E2DE2, #4A00E0, #00ffff, #ff00ff, #c471ed, #f64f59, #c471ed
-        );
-        background-size: 400% 400%;
-        animation: gradient 20s ease infinite;
-        """,
-        # Tropical Neon
-        """
-        background: linear-gradient(-45deg, 
-            #00ff00, #00ffff, #ff00ff, #ffff00, #ff6600, #ff0066, #00ff00
-        );
-        background-size: 400% 400%;
-        animation: gradient 16s ease infinite;
-        """,
-        # Cherry Blossom Neon
-        """
-        background: linear-gradient(-45deg, 
-            #ff9a9e, #fad0c4, #ff00ff, #00ffff, #a1c4fd, #c2e9fb, #fbc2eb
-        );
-        background-size: 400% 400%;
-        animation: gradient 22s ease infinite;
-        """,
-        # Midnight Neon
-        """
-        background: linear-gradient(-45deg, 
-            #232526, #414345, #00ffff, #ff00ff, #4b6cb7, #182848, #4b6cb7
-        );
-        background-size: 400% 400%;
-        animation: gradient 25s ease infinite;
-        """,
-        # Autumn Neon
-        """
-        background: linear-gradient(-45deg, 
-            #ff4500, #ff8c00, #ffd700, #00ff00, #00ffff, #ff00ff, #ff4500
-        );
-        background-size: 400% 400%;
-        animation: gradient 19s ease infinite;
-        """,
-        # Northern Lights Neon
-        """
-        background: linear-gradient(-45deg, 
-            #00ff00, #00ffff, #ff00ff, #ffff00, #00ff00, #00ffff, #ff00ff
-        );
-        background-size: 400% 400%;
-        animation: gradient 21s ease infinite;
-        """
-    ]
-    return random.choice(gradients)
-
-# ============ GOLDEN SIDEBAR STYLING ============
-def get_golden_gradient():
-    """Returns a beautiful luminous golden gradient for sidebar"""
-    return """
-    background: linear-gradient(135deg, 
-        #ffd700, #ffb347, #ffa500, #ff8c00, #ffd700, #ffb347, #ffa500
-    );
-    background-size: 300% 300%;
-    animation: golden-shimmer 8s ease infinite;
-    """
-
-# ============ CUSTOM CSS ============
-GRADIENT_STYLE = get_gradient_colors()
-
-st.markdown(f"""
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
-    
-    * {{
-        font-family: 'Poppins', sans-serif;
-        box-sizing: border-box;
-    }}
-    
-    @keyframes gradient {{
-        0% {{ background-position: 0% 50%; }}
-        50% {{ background-position: 100% 50%; }}
-        100% {{ background-position: 0% 50%; }}
-    }}
-    
-    @keyframes golden-shimmer {{
-        0% {{ background-position: 0% 50%; }}
-        50% {{ background-position: 100% 50%; }}
-        100% {{ background-position: 0% 50%; }}
-    }}
-    
-    /* Apply luminous gradient to body background */
-    body {{
-        {GRADIENT_STYLE}
-        margin: 0;
-        padding: 0;
-        min-height: 100vh;
-    }}
-    
-    .stApp {{
-        background: transparent !important;
-    }}
-    
-    /* Main content area - semi-transparent luminous background */
-    .main .block-container {{
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 2rem;
-        margin: 1.5rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        position: relative;
-        z-index: 10;
-    }}
-    
-    /* Luminous Golden Sidebar */
-    section[data-testid="stSidebar"] {{
-        {get_golden_gradient()}
-        backdrop-filter: blur(5px) !important;
-        border-right: 2px solid rgba(255, 215, 0, 0.4) !important;
-        box-shadow: 5px 0 30px rgba(255, 215, 0, 0.4) !important;
-        z-index: 20;
-    }}
-    
-    section[data-testid="stSidebar"] > div {{
-        background: rgba(0, 0, 0, 0.2) !important;
-        padding: 1rem 0.8rem !important;
-        width: 100% !important;
-    }}
-    
-    section[data-testid="stSidebar"] .stMarkdown,
-    section[data-testid="stSidebar"] .stRadio label,
-    section[data-testid="stSidebar"] p,
-    section[data-testid="stSidebar"] h1,
-    section[data-testid="stSidebar"] h2,
-    section[data-testid="stSidebar"] h3,
-    section[data-testid="stSidebar"] span,
-    section[data-testid="stSidebar"] div {{
-        color: #FFD700 !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
-        font-weight: 600 !important;
-    }}
-    
-    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] {{
-        background: rgba(0, 0, 0, 0.3) !important;
-        border-radius: 12px !important;
-        padding: 0.5rem !important;
-        border: 1px solid rgba(255, 215, 0, 0.3) !important;
-        margin: 0.8rem 0 !important;
-    }}
-    
-    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label {{
-        background: transparent !important;
-        border-radius: 8px !important;
-        padding: 8px 10px !important;
-        margin: 2px 0 !important;
-        transition: all 0.2s ease !important;
-        color: #FFD700 !important;
-        font-weight: 600 !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
-    }}
-    
-    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label:hover {{
-        background: rgba(255, 215, 0, 0.2) !important;
-        transform: translateX(5px) !important;
-    }}
-    
-    section[data-testid="stSidebar"] .stRadio div[role="radiogroup"] label[data-checked="true"] {{
-        background: rgba(255, 215, 0, 0.3) !important;
-        border-left: 4px solid #FFD700 !important;
-        font-weight: 700 !important;
-        box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3) !important;
-    }}
-    
-    section[data-testid="stSidebar"] .stButton button {{
-        background: linear-gradient(135deg, #FFD700, #DAA520) !important;
-        color: #2b2b2b !important;
-        border: none !important;
-        border-radius: 8px !important;
-        padding: 8px 12px !important;
-        font-weight: 700 !important;
-        font-size: 0.9rem !important;
-        transition: all 0.2s ease !important;
-        width: 100% !important;
-        margin: 0.5rem 0 !important;
-        box-shadow: 0 4px 15px rgba(218, 165, 32, 0.4) !important;
-    }}
-    
-    section[data-testid="stSidebar"] .stButton button:hover {{
-        transform: translateY(-2px) !important;
-        box-shadow: 0 6px 20px rgba(255, 215, 0, 0.6) !important;
-    }}
-    
-    /* School header in sidebar */
-    .school-header {{
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid #FFD700;
-        border-radius: 12px;
-        padding: 12px;
-        margin-bottom: 12px;
-        text-align: center;
-        backdrop-filter: blur(5px);
-    }}
-    
-    .school-header h2 {{
-        color: #FFD700 !important;
-        margin: 0;
-        font-size: 1.3rem;
-        font-weight: 700;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    }}
-    
-    .school-code {{
-        background: rgba(0, 0, 0, 0.3);
-        padding: 4px;
-        border-radius: 20px;
-        margin-top: 5px;
-        border: 1px solid #FFD700;
-    }}
-    
-    .school-code code {{
-        background: transparent !important;
-        color: #FFD700 !important;
-        font-size: 0.8rem;
-        font-weight: 700;
-    }}
-    
-    /* Profile card in sidebar */
-    .profile-card {{
-        background: rgba(0, 0, 0, 0.3);
-        border: 1px solid #FFD700;
-        border-radius: 12px;
-        padding: 10px;
-        margin-bottom: 12px;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        backdrop-filter: blur(5px);
-    }}
-    
-    /* Input field styling */
-    .stSelectbox div[data-baseweb="select"] {{
-        background: rgba(255, 255, 255, 0.9) !important;
-        border: 2px solid #FFD700 !important;
-        border-radius: 10px !important;
-        color: #000000 !important;
-        font-weight: 500 !important;
-        transition: all 0.3s ease !important;
-        backdrop-filter: blur(5px);
-    }}
-    
-    .stSelectbox div[data-baseweb="select"]:hover {{
-        border-color: #DAA520 !important;
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.5) !important;
-    }}
-    
-    .stSelectbox div[data-baseweb="select"] span {{
-        color: #000000 !important;
-        font-weight: 500 !important;
-    }}
-    
-    .stSelectbox div[role="listbox"] {{
-        background: rgba(255, 255, 255, 0.95) !important;
-        border: 2px solid #FFD700 !important;
-        border-radius: 10px !important;
-        box-shadow: 0 5px 20px rgba(0,0,0,0.2) !important;
-        backdrop-filter: blur(10px);
-    }}
-    
-    .stSelectbox div[role="listbox"] div {{
-        color: #000000 !important;
-        font-weight: 500 !important;
-        padding: 8px 12px !important;
-    }}
-    
-    .stSelectbox div[role="listbox"] div:hover {{
-        background: linear-gradient(135deg, #FFD70080, #DAA52080) !important;
-        color: white !important;
-    }}
-    
-    .stTextInput input, 
-    .stTextArea textarea, 
-    .stDateInput input,
-    .stNumberInput input {{
-        background: rgba(255, 255, 255, 0.9) !important;
-        border: 2px solid #FFD700 !important;
-        border-radius: 10px !important;
-        padding: 0.6rem 1rem !important;
-        font-size: 0.95rem !important;
-        color: #000000 !important;
-        font-weight: 500 !important;
-        transition: all 0.3s ease !important;
-        backdrop-filter: blur(5px);
-    }}
-    
-    .stTextInput input:focus, 
-    .stTextArea textarea:focus,
-    .stDateInput input:focus,
-    .stNumberInput input:focus {{
-        border-color: #DAA520 !important;
-        box-shadow: 0 0 15px rgba(255, 215, 0, 0.5) !important;
-    }}
-    
-    .stTextInput label,
-    .stTextArea label,
-    .stSelectbox label,
-    .stDateInput label,
-    .stNumberInput label {{
-        color: white !important;
-        font-weight: 600 !important;
-        font-size: 0.9rem !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    }}
-    
-    /* Tabs styling */
-    .stTabs [data-baseweb="tab-list"] {{
-        background: linear-gradient(135deg, #FFD700, #DAA520) !important;
-        border-radius: 12px !important;
-        padding: 0.3rem !important;
-        gap: 0.3rem;
-        margin-bottom: 1.5rem !important;
-    }}
-    
-    .stTabs [data-baseweb="tab"] {{
-        color: #2b2b2b !important;
-        border-radius: 8px !important;
-        padding: 0.5rem 1rem !important;
-        font-weight: 600 !important;
-    }}
-    
-    .stTabs [aria-selected="true"] {{
-        background: rgba(0, 0, 0, 0.2) !important;
-        color: #000000 !important;
-    }}
-    
-    /* Headers */
-    h1 {{
-        background: linear-gradient(135deg, #FF6B6B, #4ECDC4, #45B7D1, #96CEB4);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-size: 2.5rem !important;
-        font-weight: 700 !important;
-        text-align: center;
-        margin-bottom: 1.5rem !important;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    }}
-    
-    /* Luminous golden cards */
-    .golden-card {{
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        border-left: 6px solid #FFD700;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 15px rgba(255, 215, 0, 0.3);
-        color: white;
-    }}
-    
-    .golden-card h1, .golden-card h2, .golden-card h3, .golden-card h4, .golden-card p {{
-        color: white !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    }}
-    
-    /* Performance badges */
-    .performance-excellent {{
-        background: linear-gradient(135deg, #00ff00, #00ff99);
-        color: #000000;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        display: inline-block;
-        text-shadow: none;
-    }}
-    
-    .performance-good {{
-        background: linear-gradient(135deg, #00ffff, #0066ff);
-        color: #000000;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        display: inline-block;
-        text-shadow: none;
-    }}
-    
-    .performance-average {{
-        background: linear-gradient(135deg, #ffff00, #ff9900);
-        color: #000000;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        display: inline-block;
-        text-shadow: none;
-    }}
-    
-    .performance-needs-improvement {{
-        background: linear-gradient(135deg, #ff4444, #ff0000);
-        color: white;
-        padding: 4px 12px;
-        border-radius: 20px;
-        font-weight: 600;
-        font-size: 0.8rem;
-        display: inline-block;
-        text-shadow: none;
-    }}
-    
-    /* Chat styling with luminous background */
-    .chat-container {{
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 16px;
-        padding: 20px;
-        height: 400px;
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 15px;
-        border: 1px solid #FFD700;
-    }}
-    
-    .chat-message-wrapper {{
-        display: flex;
-        margin-bottom: 10px;
-        animation: fadeIn 0.3s ease;
-    }}
-    
-    @keyframes fadeIn {{
-        from {{ opacity: 0; transform: translateY(10px); }}
-        to {{ opacity: 1; transform: translateY(0); }}
-    }}
-    
-    .chat-message-sent {{
-        justify-content: flex-end;
-    }}
-    
-    .chat-message-received {{
-        justify-content: flex-start;
-    }}
-    
-    .chat-bubble {{
-        max-width: 70%;
-        padding: 12px 16px;
-        border-radius: 20px;
-        position: relative;
-        word-wrap: break-word;
-        backdrop-filter: blur(10px);
-    }}
-    
-    .chat-bubble-sent {{
-        background: rgba(255, 215, 0, 0.3);
-        color: white;
-        border-bottom-right-radius: 4px;
-        border: 1px solid #FFD700;
-    }}
-    
-    .chat-bubble-received {{
-        background: rgba(255, 255, 255, 0.2);
-        color: white;
-        border-bottom-left-radius: 4px;
-        border: 1px solid #FFD700;
-    }}
-    
-    .chat-sender-info {{
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 4px;
-    }}
-    
-    .chat-sender-name {{
-        font-size: 0.8rem;
-        color: #FFD700;
-        font-weight: 600;
-    }}
-    
-    .chat-time {{
-        font-size: 0.65rem;
-        color: rgba(255, 255, 255, 0.5);
-        margin-top: 4px;
-        text-align: right;
-    }}
-    
-    /* Main navigation buttons with luminous effect */
-    .main-nav-button {{
-        background: rgba(255, 255, 255, 0.2);
-        backdrop-filter: blur(10px);
-        color: white;
-        border: 2px solid #FFD700;
-        border-radius: 15px;
-        padding: 20px;
-        font-size: 1.2rem;
-        font-weight: 700;
-        text-align: center;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
-        margin: 10px 0;
-    }}
-    
-    .main-nav-button:hover {{
-        transform: translateY(-5px);
-        box-shadow: 0 15px 40px rgba(255, 215, 0, 0.5);
-        border-color: white;
-    }}
-    
-    /* Class cards with luminous background */
-    .class-card {{
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 10px;
-        border-left: 4px solid #FFD700;
-        box-shadow: 0 2px 8px rgba(255, 215, 0, 0.2);
-        color: white;
-    }}
-    
-    .class-card h4, .class-card p {{
-        color: white !important;
-    }}
-    
-    /* Member cards with luminous background */
-    .member-card {{
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(10px);
-        border-radius: 12px;
-        padding: 15px;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        border: 1px solid #FFD700;
-        color: white;
-    }}
-    
-    .member-pic {{
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 2px solid #FFD700;
-    }}
-    
-    /* Badges */
-    .request-badge {{
-        background: #FFD700;
-        color: #2b2b2b;
-        padding: 2px 8px;
-        border-radius: 12px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        margin-left: 8px;
-    }}
-    
-    /* Ensure all text in main content is readable on luminous background */
-    .main p, .main span, .main div:not(.stTextInput):not(.stTextArea) {{
-        color: white !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    }}
-    
-    /* Metric labels and values */
-    .stMetric label, .stMetric div {{
-        color: white !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-    }}
-    
-    /* Expander styling */
-    .streamlit-expanderHeader {{
-        color: white !important;
-        background: rgba(255, 215, 0, 0.2) !important;
-        backdrop-filter: blur(10px) !important;
-    }}
-    
-    /* DataFrame styling */
-    .dataframe {{
-        background: rgba(255, 255, 255, 0.15) !important;
-        color: white !important;
-        backdrop-filter: blur(10px) !important;
-    }}
-    
-    .dataframe th {{
-        background: rgba(255, 215, 0, 0.3) !important;
-        color: white !important;
-    }}
-    
-    .dataframe td {{
-        color: white !important;
-    }}
-</style>
-""", unsafe_allow_html=True)
 
 # ============ CODE GENERATOR ============
 def generate_id(prefix, length=8):
@@ -715,6 +774,12 @@ def generate_teacher_code():
     dept = random.choice(['MATH', 'ENG', 'SCI', 'SOC', 'CRE', 'BUS', 'TECH'])
     num = ''.join(random.choices(string.digits, k=3))
     return f"{dept}{num}"
+
+def generate_book_id():
+    return 'BOK' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+def generate_transaction_id():
+    return 'TRN' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
 # ============ DATA STORAGE ============
 DATA_DIR = Path("school_data")
@@ -748,6 +813,15 @@ def save_school_data(school_code, filename, data):
     if school_code:
         with open(DATA_DIR / f"{school_code}_{filename}", 'w') as f:
             json.dump(data, f, indent=2)
+
+def load_user_settings(school_code, user_email):
+    settings = load_school_data(school_code, "user_settings.json", {})
+    return settings.get(user_email, {"theme": "Sunrise Glow", "wallpaper": "None"})
+
+def save_user_settings(school_code, user_email, settings):
+    all_settings = load_school_data(school_code, "user_settings.json", {})
+    all_settings[user_email] = settings
+    save_school_data(school_code, "user_settings.json", all_settings)
 
 # ============ CHAT & FRIENDSHIP FUNCTIONS ============
 def send_friend_request(school_code, from_email, to_email):
@@ -1027,6 +1101,209 @@ def add_parent_feedback(school_code, guardian_email, student_email, feedback_tex
     })
     save_school_data(school_code, "parent_feedback.json", feedback)
 
+# ============ LIBRARY MANAGEMENT FUNCTIONS ============
+def add_book(school_code, title, author, book_type, quantity, isbn=None, publisher=None, year=None):
+    books = load_school_data(school_code, "library_books.json", [])
+    book = {
+        "id": generate_book_id(),
+        "title": title,
+        "author": author,
+        "type": book_type,
+        "quantity": quantity,
+        "available": quantity,
+        "isbn": isbn,
+        "publisher": publisher,
+        "year": year,
+        "added_by": st.session_state.user['email'],
+        "added_date": datetime.now().strftime("%Y-%m-%d")
+    }
+    books.append(book)
+    save_school_data(school_code, "library_books.json", books)
+    return book['id']
+
+def add_library_member(school_code, user_email, member_type="student"):
+    members = load_school_data(school_code, "library_members.json", [])
+    if not any(m['email'] == user_email for m in members):
+        members.append({
+            "email": user_email,
+            "member_type": member_type,
+            "joined_date": datetime.now().strftime("%Y-%m-%d"),
+            "borrowed_books": [],
+            "status": "active"
+        })
+        save_school_data(school_code, "library_members.json", members)
+
+def borrow_book(school_code, user_email, book_id, due_days=14):
+    books = load_school_data(school_code, "library_books.json", [])
+    transactions = load_school_data(school_code, "library_transactions.json", [])
+    members = load_school_data(school_code, "library_members.json", [])
+    
+    # Find book
+    book = next((b for b in books if b['id'] == book_id), None)
+    if not book or book['available'] <= 0:
+        return False, "Book not available"
+    
+    # Find or create member
+    member = next((m for m in members if m['email'] == user_email), None)
+    if not member:
+        add_library_member(school_code, user_email)
+        members = load_school_data(school_code, "library_members.json", [])
+        member = next((m for m in members if m['email'] == user_email), None)
+    
+    # Check if member already has this book
+    if any(b['book_id'] == book_id and b['status'] == 'borrowed' for b in member.get('borrowed_books', [])):
+        return False, "Already borrowed this book"
+    
+    # Create transaction
+    borrow_date = datetime.now()
+    due_date = borrow_date + timedelta(days=due_days)
+    
+    transaction = {
+        "id": generate_transaction_id(),
+        "book_id": book_id,
+        "book_title": book['title'],
+        "user_email": user_email,
+        "borrow_date": borrow_date.strftime("%Y-%m-%d"),
+        "due_date": due_date.strftime("%Y-%m-%d"),
+        "return_date": None,
+        "status": "borrowed",
+        "renewals": 0
+    }
+    transactions.append(transaction)
+    
+    # Update book availability
+    book['available'] -= 1
+    
+    # Update member's borrowed books
+    member.setdefault('borrowed_books', []).append({
+        "book_id": book_id,
+        "transaction_id": transaction['id'],
+        "borrow_date": borrow_date.strftime("%Y-%m-%d"),
+        "due_date": due_date.strftime("%Y-%m-%d"),
+        "status": "borrowed"
+    })
+    
+    save_school_data(school_code, "library_books.json", books)
+    save_school_data(school_code, "library_transactions.json", transactions)
+    save_school_data(school_code, "library_members.json", members)
+    
+    return True, "Book borrowed successfully"
+
+def return_book(school_code, transaction_id):
+    books = load_school_data(school_code, "library_books.json", [])
+    transactions = load_school_data(school_code, "library_transactions.json", [])
+    members = load_school_data(school_code, "library_members.json", [])
+    
+    transaction = next((t for t in transactions if t['id'] == transaction_id), None)
+    if not transaction or transaction['status'] != 'borrowed':
+        return False, "Invalid transaction"
+    
+    # Update transaction
+    transaction['return_date'] = datetime.now().strftime("%Y-%m-%d")
+    transaction['status'] = 'returned'
+    
+    # Update book availability
+    book = next((b for b in books if b['id'] == transaction['book_id']), None)
+    if book:
+        book['available'] += 1
+    
+    # Update member's record
+    member = next((m for m in members if m['email'] == transaction['user_email']), None)
+    if member:
+        for b in member.get('borrowed_books', []):
+            if b['transaction_id'] == transaction_id:
+                b['status'] = 'returned'
+                b['return_date'] = transaction['return_date']
+                break
+    
+    save_school_data(school_code, "library_books.json", books)
+    save_school_data(school_code, "library_transactions.json", transactions)
+    save_school_data(school_code, "library_members.json", members)
+    
+    return True, "Book returned successfully"
+
+def import_books_from_excel(school_code, uploaded_file):
+    try:
+        df = pd.read_excel(uploaded_file)
+        required_columns = ['Title', 'Author', 'Type', 'Quantity']
+        
+        if not all(col in df.columns for col in required_columns):
+            return False, "Excel must contain columns: Title, Author, Type, Quantity"
+        
+        books = load_school_data(school_code, "library_books.json", [])
+        imported_count = 0
+        
+        for _, row in df.iterrows():
+            book = {
+                "id": generate_book_id(),
+                "title": row['Title'],
+                "author": row['Author'],
+                "type": row['Type'],
+                "quantity": int(row['Quantity']),
+                "available": int(row['Quantity']),
+                "isbn": row.get('ISBN', ''),
+                "publisher": row.get('Publisher', ''),
+                "year": row.get('Year', ''),
+                "added_by": st.session_state.user['email'],
+                "added_date": datetime.now().strftime("%Y-%m-%d")
+            }
+            books.append(book)
+            imported_count += 1
+        
+        save_school_data(school_code, "library_books.json", books)
+        return True, f"Successfully imported {imported_count} books"
+    except Exception as e:
+        return False, f"Error importing books: {str(e)}"
+
+def import_members_from_excel(school_code, uploaded_file):
+    try:
+        df = pd.read_excel(uploaded_file)
+        required_columns = ['Name', 'Email', 'Type']
+        
+        if not all(col in df.columns for col in required_columns):
+            return False, "Excel must contain columns: Name, Email, Type"
+        
+        members = load_school_data(school_code, "library_members.json", [])
+        users = load_school_data(school_code, "users.json", [])
+        imported_count = 0
+        
+        for _, row in df.iterrows():
+            # Check if user exists in system
+            user = next((u for u in users if u['email'] == row['Email']), None)
+            if not user:
+                # Create basic user if not exists
+                new_user = {
+                    "user_id": generate_id("USR"),
+                    "email": row['Email'],
+                    "fullname": row['Name'],
+                    "password": hashlib.sha256("default123".encode()).hexdigest(),
+                    "role": row['Type'].lower(),
+                    "joined": datetime.now().strftime("%Y-%m-%d"),
+                    "school_code": school_code,
+                    "profile_pic": None,
+                    "bio": "",
+                    "phone": ""
+                }
+                users.append(new_user)
+            
+            # Add to library members
+            if not any(m['email'] == row['Email'] for m in members):
+                member = {
+                    "email": row['Email'],
+                    "member_type": row['Type'].lower(),
+                    "joined_date": datetime.now().strftime("%Y-%m-%d"),
+                    "borrowed_books": [],
+                    "status": "active"
+                }
+                members.append(member)
+                imported_count += 1
+        
+        save_school_data(school_code, "users.json", users)
+        save_school_data(school_code, "library_members.json", members)
+        return True, f"Successfully imported {imported_count} members"
+    except Exception as e:
+        return False, f"Error importing members: {str(e)}"
+
 # ============ SESSION STATE ============
 if 'user' not in st.session_state:
     st.session_state.user = None
@@ -1044,8 +1321,21 @@ if 'main_nav' not in st.session_state:
     st.session_state.main_nav = 'School Community'
 if 'selected_class' not in st.session_state:
     st.session_state.selected_class = None
+if 'theme' not in st.session_state:
+    st.session_state.theme = "Sunrise Glow"
+if 'wallpaper' not in st.session_state:
+    st.session_state.wallpaper = "None"
 
 # ============ MAIN APP ============
+
+# Load user settings if logged in
+if st.session_state.user and st.session_state.current_school:
+    settings = load_user_settings(st.session_state.current_school['code'], st.session_state.user['email'])
+    st.session_state.theme = settings.get("theme", "Sunrise Glow")
+    st.session_state.wallpaper = settings.get("wallpaper", "None")
+
+# Apply theme CSS
+st.markdown(get_theme_css(st.session_state.theme, st.session_state.wallpaper), unsafe_allow_html=True)
 
 # ----- WELCOME PAGE -----
 if st.session_state.page == 'welcome':
@@ -1184,6 +1474,10 @@ if st.session_state.page == 'welcome':
                             save_school_data(code, "discipline.json", [])
                             save_school_data(code, "teacher_reviews.json", [])
                             save_school_data(code, "parent_feedback.json", [])
+                            save_school_data(code, "library_books.json", [])
+                            save_school_data(code, "library_members.json", [])
+                            save_school_data(code, "library_transactions.json", [])
+                            save_school_data(code, "user_settings.json", {})
                             
                             st.session_state.current_school = new_school
                             st.session_state.user = users[0]
@@ -1300,6 +1594,9 @@ if st.session_state.page == 'welcome':
                                 all_schools[school_code] = school
                                 save_all_schools(all_schools)
                                 
+                                # Add to library members
+                                add_library_member(school_code, email, "teacher")
+                                
                                 st.session_state.current_school = school
                                 st.session_state.user = new_user
                                 st.session_state.page = 'dashboard'
@@ -1385,6 +1682,9 @@ if st.session_state.page == 'welcome':
                                 school['stats']['students'] = school['stats'].get('students', 0) + 1
                                 all_schools[school_code] = school
                                 save_all_schools(all_schools)
+                                
+                                # Add to library members
+                                add_library_member(school_code, new_user['email'], "student")
                                 
                                 st.success(f"✅ Registered! Your Admission Number is: **{admission_number}**")
                                 st.info("📝 Save this number - you'll need it to login!")
@@ -1485,13 +1785,16 @@ if st.session_state.page == 'welcome':
                                 all_schools[school_code] = school
                                 save_all_schools(all_schools)
                                 
+                                # Add to library members
+                                add_library_member(school_code, email, "guardian")
+                                
                                 st.success("✅ Guardian Registration Successful!")
     
     elif st.session_state.main_nav == 'School Management':
         st.markdown("""
         <div class="golden-card" style="text-align: center;">
             <h3>📊 School Management System</h3>
-            <p>Complete school administration - Academics, Finance, Discipline, and more!</p>
+            <p>Complete school administration - Academics, Finance, Discipline, Library, and more!</p>
             <p style="font-size: 0.9rem;">Please log in with your admin or teacher credentials to access management features.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1509,7 +1812,7 @@ if st.session_state.page == 'welcome':
         st.markdown("""
         <div class="golden-card" style="text-align: center;">
             <h3>👤 Personal Dashboard</h3>
-            <p>Your personal information, performance, reviews, and achievements!</p>
+            <p>Your personal information, performance, reviews, achievements, and library account!</p>
             <p style="font-size: 0.9rem;">Please log in with your student or guardian credentials to view your personal dashboard.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -1539,9 +1842,16 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     class_requests = load_school_data(school_code, "class_requests.json", [])
     group_requests = load_school_data(school_code, "group_requests.json", [])
     academic_records = load_school_data(school_code, "academic_records.json", [])
+    library_books = load_school_data(school_code, "library_books.json", [])
+    library_members = load_school_data(school_code, "library_members.json", [])
+    library_transactions = load_school_data(school_code, "library_transactions.json", [])
     
     unread_count = get_unread_count(user['email'], school_code)
     pending_friend_count = len(get_pending_requests(school_code, user['email']))
+    
+    # Get user's borrowed books
+    user_member = next((m for m in library_members if m['email'] == user['email']), None)
+    borrowed_books = user_member.get('borrowed_books', []) if user_member else []
     
     # ============ GOLDEN SIDEBAR ============
     with st.sidebar:
@@ -1584,13 +1894,13 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         base_options = ["Dashboard", "Announcements", "Community", f"Chat 💬{f' ({unread_count})' if unread_count>0 else ''}", f"Group Chats 👥", f"Friends 🤝{f' ({pending_friend_count})' if pending_friend_count>0 else ''}"]
         
         if user['role'] == 'admin':
-            options = base_options + ["Classes", "Groups", "Teachers", "Students", "Guardians", "Assignments", "School Management", "Personal Dashboard", "Profile"]
+            options = base_options + ["Classes", "Groups", "Teachers", "Students", "Guardians", "Assignments", "School Management", "Personal Dashboard", "Library Management", "Settings ⚙️", "Profile"]
         elif user['role'] == 'teacher':
-            options = base_options + ["My Classes", "Groups", "Assignments", "School Management", "Personal Dashboard", "Profile"]
+            options = base_options + ["My Classes", "Groups", "Assignments", "School Management", "Personal Dashboard", "Library Management", "Settings ⚙️", "Profile"]
         elif user['role'] == 'student':
-            options = base_options + ["Browse Classes", "My Classes", "Groups", "Assignments", "Personal Dashboard", "Profile"]
+            options = base_options + ["Browse Classes", "My Classes", "Groups", "Assignments", "Personal Dashboard", "My Library", "Settings ⚙️", "Profile"]
         else:  # guardian
-            options = base_options + ["My Student", "Assignments", "Personal Dashboard", "Profile"]
+            options = base_options + ["My Student", "Assignments", "Personal Dashboard", "My Library", "Settings ⚙️", "Profile"]
         
         if st.session_state.menu_index >= len(options):
             st.session_state.menu_index = 0
@@ -1657,6 +1967,11 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 st.metric("👥 My Groups", len(my_groups))
             with col3:
                 st.metric("🎫 Admission", user['admission_number'][:10] + "..." if len(user['admission_number']) > 10 else user['admission_number'])
+            
+            # Show borrowed books count
+            if borrowed_books:
+                active_borrows = len([b for b in borrowed_books if b['status'] == 'borrowed'])
+                st.metric("📚 Books Borrowed", active_borrows)
         
         else:  # guardian
             st.info(f"👪 Linked to {len(user.get('linked_students', []))} student(s)")
@@ -2552,9 +2867,533 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         else:
             st.info("No linked students found")
     
+    # ============ LIBRARY MANAGEMENT ============
+    elif menu == "Library Management" or menu == "My Library":
+        if menu == "Library Management":
+            st.markdown("<h2 style='text-align: center; color: white;'>📚 Library Management System</h2>", unsafe_allow_html=True)
+            
+            # External links
+            st.markdown("### 🔗 External Management Systems")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.markdown("""
+                <a href="https://eddie-dante.github.io/Management-System/" target="_blank">
+                    <button style="background: linear-gradient(135deg, #FFD700, #DAA520); border: none; color: black; padding: 12px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin: 5px 0;">
+                        📊 Open Main Management System
+                    </button>
+                </a>
+                """, unsafe_allow_html=True)
+            with col2:
+                st.markdown("""
+                <a href="https://eddie-dante.github.io/Library-Management-System-/" target="_blank">
+                    <button style="background: linear-gradient(135deg, #FFD700, #DAA520); border: none; color: black; padding: 12px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin: 5px 0;">
+                        📚 Open Library Management System
+                    </button>
+                </a>
+                """, unsafe_allow_html=True)
+            
+            st.divider()
+            
+            lib_tab1, lib_tab2, lib_tab3, lib_tab4, lib_tab5 = st.tabs([
+                "📖 Book Catalog", "📋 Borrow/Return", "👥 Members", "📊 Transactions", "📤 Import Data"
+            ])
+            
+            with lib_tab1:
+                st.subheader("Book Catalog")
+                
+                if user['role'] in ['admin', 'teacher', 'librarian']:
+                    with st.expander("➕ Add New Book"):
+                        with st.form("add_book"):
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                title = st.text_input("Book Title")
+                                author = st.text_input("Author")
+                                book_type = st.selectbox("Book Type", ["Textbook", "Novel", "Reference", "Magazine", "Other"])
+                            with col2:
+                                quantity = st.number_input("Quantity", min_value=1, value=1)
+                                isbn = st.text_input("ISBN (Optional)")
+                                publisher = st.text_input("Publisher (Optional)")
+                                year = st.text_input("Year (Optional)")
+                            
+                            if st.form_submit_button("Add Book", use_container_width=True):
+                                if title and author:
+                                    add_book(school_code, title, author, book_type, quantity, isbn, publisher, year)
+                                    st.success(f"Book '{title}' added successfully!")
+                                    st.rerun()
+                
+                # Display books
+                if library_books:
+                    search_book = st.text_input("🔍 Search books by title or author", placeholder="Type to search...")
+                    
+                    filtered_books = library_books
+                    if search_book:
+                        filtered_books = [b for b in library_books if 
+                                         search_book.lower() in b['title'].lower() or 
+                                         search_book.lower() in b['author'].lower()]
+                    
+                    for book in filtered_books:
+                        with st.container():
+                            col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+                            with col1:
+                                st.markdown(f"**{book['title']}**")
+                                st.markdown(f"<small>by {book['author']} ({book['type']})</small>", unsafe_allow_html=True)
+                            with col2:
+                                st.markdown(f"Total: {book['quantity']}")
+                            with col3:
+                                st.markdown(f"Available: {book['available']}")
+                            with col4:
+                                if book['available'] > 0 and user['role'] in ['student', 'teacher']:
+                                    if st.button("📖 Borrow", key=f"borrow_{book['id']}"):
+                                        success, message = borrow_book(school_code, user['email'], book['id'])
+                                        if success:
+                                            st.success(message)
+                                            st.rerun()
+                                        else:
+                                            st.error(message)
+                            st.divider()
+                else:
+                    st.info("No books in catalog yet")
+            
+            with lib_tab2:
+                st.subheader("Borrow/Return Books")
+                
+                if user['role'] in ['admin', 'teacher', 'librarian']:
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("##### Borrow Book")
+                        with st.form("borrow_book_form"):
+                            members_list = [f"{m['email']} ({m.get('member_type', 'unknown')})" for m in library_members if m['status'] == 'active']
+                            books_list = [f"{b['title']} by {b['author']}" for b in library_books if b['available'] > 0]
+                            
+                            if members_list and books_list:
+                                borrower = st.selectbox("Select Borrower", members_list)
+                                book_choice = st.selectbox("Select Book", books_list)
+                                due_days = st.number_input("Due in (days)", min_value=1, value=14)
+                                
+                                if st.form_submit_button("Process Borrowing"):
+                                    borrower_email = borrower.split('(')[0].strip()
+                                    book_index = books_list.index(book_choice)
+                                    book_id = library_books[book_index]['id']
+                                    
+                                    success, message = borrow_book(school_code, borrower_email, book_id, due_days)
+                                    if success:
+                                        st.success(message)
+                                        st.rerun()
+                                    else:
+                                        st.error(message)
+                            else:
+                                st.warning("No active members or available books")
+                    
+                    with col2:
+                        st.markdown("##### Return Book")
+                        active_transactions = [t for t in library_transactions if t['status'] == 'borrowed']
+                        
+                        if active_transactions:
+                            for trans in active_transactions[:5]:
+                                with st.container():
+                                    st.markdown(f"**{trans['book_title']}**")
+                                    st.markdown(f"Borrowed by: {trans['user_email']}")
+                                    st.markdown(f"Due: {trans['due_date']}")
+                                    
+                                    if st.button("📤 Return", key=f"return_{trans['id']}"):
+                                        success, message = return_book(school_code, trans['id'])
+                                        if success:
+                                            st.success(message)
+                                            st.rerun()
+                                        else:
+                                            st.error(message)
+                                    st.divider()
+                        else:
+                            st.info("No active borrowings")
+                
+                # Display user's borrowed books
+                if borrowed_books:
+                    st.markdown("##### My Borrowed Books")
+                    active_borrows = [b for b in borrowed_books if b['status'] == 'borrowed']
+                    
+                    for borrow in active_borrows:
+                        book = next((b for b in library_books if b['id'] == borrow['book_id']), None)
+                        if book:
+                            with st.container():
+                                col1, col2, col3 = st.columns([3, 2, 1])
+                                with col1:
+                                    st.markdown(f"**{book['title']}**")
+                                with col2:
+                                    due_date = datetime.strptime(borrow['due_date'], "%Y-%m-%d")
+                                    days_left = (due_date - datetime.now()).days
+                                    status_color = "🟢" if days_left > 3 else "🟡" if days_left > 0 else "🔴"
+                                    st.markdown(f"{status_color} Due: {borrow['due_date']} ({days_left} days)")
+                                with col3:
+                                    if st.button("Return", key=f"user_return_{borrow['transaction_id']}"):
+                                        success, message = return_book(school_code, borrow['transaction_id'])
+                                        if success:
+                                            st.success(message)
+                                            st.rerun()
+                                        else:
+                                            st.error(message)
+                                st.divider()
+            
+            with lib_tab3:
+                st.subheader("Library Members")
+                
+                if user['role'] in ['admin', 'teacher', 'librarian']:
+                    with st.expander("➕ Add Member Manually"):
+                        with st.form("add_member"):
+                            member_email = st.text_input("Member Email")
+                            member_type = st.selectbox("Member Type", ["student", "teacher", "guardian", "librarian"])
+                            
+                            if st.form_submit_button("Add Member"):
+                                add_library_member(school_code, member_email, member_type)
+                                st.success(f"Member {member_email} added")
+                                st.rerun()
+                
+                # Display members
+                if library_members:
+                    for member in library_members:
+                        with st.container():
+                            col1, col2, col3 = st.columns([3, 1, 2])
+                            with col1:
+                                st.markdown(f"**{member['email']}**")
+                                st.markdown(f"<small>Type: {member['member_type']}</small>", unsafe_allow_html=True)
+                            with col2:
+                                active_borrows = len([b for b in member.get('borrowed_books', []) if b['status'] == 'borrowed'])
+                                st.markdown(f"Borrowed: {active_borrows}")
+                            with col3:
+                                if member['status'] == 'active':
+                                    if st.button("Deactivate", key=f"deact_{member['email']}"):
+                                        member['status'] = 'inactive'
+                                        save_school_data(school_code, "library_members.json", library_members)
+                                        st.rerun()
+                                else:
+                                    if st.button("Activate", key=f"act_{member['email']}"):
+                                        member['status'] = 'active'
+                                        save_school_data(school_code, "library_members.json", library_members)
+                                        st.rerun()
+                            st.divider()
+                else:
+                    st.info("No library members yet")
+            
+            with lib_tab4:
+                st.subheader("Transaction History")
+                
+                if library_transactions:
+                    # Create DataFrame for visualization
+                    trans_data = []
+                    for t in library_transactions[-20:]:
+                        trans_data.append({
+                            "Book": t['book_title'][:30] + "...",
+                            "Borrower": t['user_email'],
+                            "Borrow Date": t['borrow_date'],
+                            "Due Date": t['due_date'],
+                            "Return Date": t.get('return_date', 'Not returned'),
+                            "Status": t['status']
+                        })
+                    
+                    if trans_data:
+                        df = pd.DataFrame(trans_data)
+                        st.dataframe(df, use_container_width=True)
+                    
+                    # Statistics
+                    col1, col2, col3 = st.columns(3)
+                    with col1:
+                        st.metric("Total Transactions", len(library_transactions))
+                    with col2:
+                        active = len([t for t in library_transactions if t['status'] == 'borrowed'])
+                        st.metric("Active Borrowings", active)
+                    with col3:
+                        overdue = len([t for t in library_transactions if t['status'] == 'borrowed' and 
+                                     datetime.strptime(t['due_date'], "%Y-%m-%d") < datetime.now()])
+                        st.metric("Overdue Books", overdue)
+                else:
+                    st.info("No transactions yet")
+            
+            with lib_tab5:
+                st.subheader("Import Data from Excel")
+                
+                if user['role'] in ['admin', 'teacher', 'librarian']:
+                    col1, col2 = st.columns(2)
+                    
+                    with col1:
+                        st.markdown("##### Import Books")
+                        books_file = st.file_uploader("Upload Books Excel", type=['xlsx', 'xls'], key="books_import")
+                        
+                        if books_file:
+                            if st.button("Import Books", use_container_width=True):
+                                success, message = import_books_from_excel(school_code, books_file)
+                                if success:
+                                    st.success(message)
+                                    st.rerun()
+                                else:
+                                    st.error(message)
+                            
+                            st.info("Excel should have columns: Title, Author, Type, Quantity")
+                    
+                    with col2:
+                        st.markdown("##### Import Members")
+                        members_file = st.file_uploader("Upload Members Excel", type=['xlsx', 'xls'], key="members_import")
+                        
+                        if members_file:
+                            if st.button("Import Members", use_container_width=True):
+                                success, message = import_members_from_excel(school_code, members_file)
+                                if success:
+                                    st.success(message)
+                                    st.rerun()
+                                else:
+                                    st.error(message)
+                            
+                            st.info("Excel should have columns: Name, Email, Type")
+        
+        else:  # My Library for students/guardians
+            st.markdown("<h2 style='text-align: center; color: white;'>📚 My Library</h2>", unsafe_allow_html=True)
+            
+            lib_tab1, lib_tab2, lib_tab3 = st.tabs(["📖 Browse Books", "📋 My Borrowed Books", "📊 My History"])
+            
+            with lib_tab1:
+                st.subheader("Browse Available Books")
+                
+                available_books = [b for b in library_books if b['available'] > 0]
+                
+                if available_books:
+                    search_book = st.text_input("🔍 Search books by title or author", placeholder="Type to search...")
+                    
+                    filtered_books = available_books
+                    if search_book:
+                        filtered_books = [b for b in available_books if 
+                                         search_book.lower() in b['title'].lower() or 
+                                         search_book.lower() in b['author'].lower()]
+                    
+                    for book in filtered_books:
+                        with st.container():
+                            col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
+                            with col1:
+                                st.markdown(f"**{book['title']}**")
+                                st.markdown(f"<small>by {book['author']} ({book['type']})</small>", unsafe_allow_html=True)
+                            with col2:
+                                st.markdown(f"Available: {book['available']}")
+                            with col3:
+                                if user['role'] in ['student', 'teacher']:
+                                    if st.button("📖 Borrow", key=f"user_borrow_{book['id']}"):
+                                        success, message = borrow_book(school_code, user['email'], book['id'])
+                                        if success:
+                                            st.success(message)
+                                            st.rerun()
+                                        else:
+                                            st.error(message)
+                            st.divider()
+                else:
+                    st.info("No books available for borrowing")
+            
+            with lib_tab2:
+                st.subheader("My Borrowed Books")
+                
+                if borrowed_books:
+                    active_borrows = [b for b in borrowed_books if b['status'] == 'borrowed']
+                    
+                    if active_borrows:
+                        for borrow in active_borrows:
+                            book = next((b for b in library_books if b['id'] == borrow['book_id']), None)
+                            if book:
+                                with st.container():
+                                    col1, col2, col3 = st.columns([3, 2, 1])
+                                    with col1:
+                                        st.markdown(f"**{book['title']}**")
+                                        st.markdown(f"<small>by {book['author']}</small>", unsafe_allow_html=True)
+                                    with col2:
+                                        due_date = datetime.strptime(borrow['due_date'], "%Y-%m-%d")
+                                        days_left = (due_date - datetime.now()).days
+                                        status_color = "🟢" if days_left > 3 else "🟡" if days_left > 0 else "🔴"
+                                        st.markdown(f"{status_color} Due: {borrow['due_date']}")
+                                        if days_left < 0:
+                                            st.markdown(f"<span style='color: #ff4444;'>Overdue by {abs(days_left)} days</span>", 
+                                                      unsafe_allow_html=True)
+                                    with col3:
+                                        if st.button("Return", key=f"user_return_{borrow['transaction_id']}"):
+                                            success, message = return_book(school_code, borrow['transaction_id'])
+                                            if success:
+                                                st.success(message)
+                                                st.rerun()
+                                            else:
+                                                st.error(message)
+                                    st.divider()
+                    else:
+                        st.info("You have no borrowed books")
+                else:
+                    st.info("You have no borrowed books")
+            
+            with lib_tab3:
+                st.subheader("My Borrowing History")
+                
+                user_transactions = [t for t in library_transactions if t['user_email'] == user['email']]
+                
+                if user_transactions:
+                    for trans in reversed(user_transactions[-10:]):
+                        with st.container():
+                            col1, col2, col3 = st.columns([3, 2, 1])
+                            with col1:
+                                st.markdown(f"**{trans['book_title']}**")
+                            with col2:
+                                st.markdown(f"Borrowed: {trans['borrow_date']}")
+                                if trans['return_date']:
+                                    st.markdown(f"Returned: {trans['return_date']}")
+                            with col3:
+                                status_color = "🟢" if trans['status'] == 'returned' else "🟡"
+                                st.markdown(f"{status_color} {trans['status'].title()}")
+                            st.divider()
+                else:
+                    st.info("No borrowing history yet")
+    
+    # ============ SETTINGS SECTION ============
+    elif menu == "Settings ⚙️":
+        st.markdown("<h2 style='text-align: center; color: white;'>⚙️ Settings</h2>", unsafe_allow_html=True)
+        
+        settings_tab1, settings_tab2, settings_tab3 = st.tabs(["🎨 Theme & Wallpaper", "👤 Profile Settings", "🔔 Notifications"])
+        
+        with settings_tab1:
+            st.subheader("Theme Selection")
+            
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                # Theme selector
+                selected_theme = st.selectbox("Choose Theme", list(THEMES.keys()), 
+                                            index=list(THEMES.keys()).index(st.session_state.theme))
+                
+                # Preview theme
+                st.markdown(f"""
+                <div style="background: {THEMES[selected_theme]['primary']}; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                    <p style="color: white;">Primary Color Preview</p>
+                </div>
+                <div style="background: {THEMES[selected_theme]['secondary']}; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                    <p style="color: white;">Secondary Color Preview</p>
+                </div>
+                <div style="background: {THEMES[selected_theme]['accent']}; padding: 10px; border-radius: 8px; margin: 10px 0;">
+                    <p style="color: white;">Accent Color Preview</p>
+                </div>
+                """, unsafe_allow_html=True)
+            
+            with col2:
+                # Wallpaper selector
+                st.subheader("Wallpaper")
+                selected_wallpaper = st.selectbox("Choose Wallpaper", list(WALLPAPERS.keys()),
+                                                index=list(WALLPAPERS.keys()).index(st.session_state.wallpaper))
+                
+                if selected_wallpaper != "None":
+                    st.image(WALLPAPERS[selected_wallpaper], width=200, caption=selected_wallpaper)
+            
+            if st.button("💾 Save Theme Settings", use_container_width=True):
+                st.session_state.theme = selected_theme
+                st.session_state.wallpaper = selected_wallpaper
+                save_user_settings(school_code, user['email'], {
+                    "theme": selected_theme,
+                    "wallpaper": selected_wallpaper
+                })
+                st.success("Settings saved! Refreshing...")
+                st.rerun()
+        
+        with settings_tab2:
+            st.subheader("Profile Settings")
+            
+            col1, col2 = st.columns([1, 2])
+            
+            with col1:
+                if user.get('profile_pic'):
+                    st.image(user['profile_pic'], width=150)
+                else:
+                    emoji = "👑" if user['role'] == 'admin' else "👨‍🏫" if user['role'] == 'teacher' else "👨‍🎓" if user['role'] == 'student' else "👪"
+                    st.markdown(f"<h1 style='font-size: 5rem; text-align: center;'>{emoji}</h1>", unsafe_allow_html=True)
+                
+                pic = st.file_uploader("📸 Upload Profile Photo", type=['png', 'jpg', 'jpeg'], key="settings_profile_pic")
+                if pic:
+                    img = Image.open(pic)
+                    buffered = BytesIO()
+                    img.save(buffered, format="PNG")
+                    b64 = base64.b64encode(buffered.getvalue()).decode()
+                    
+                    for u in users:
+                        if u['email'] == user['email']:
+                            u['profile_pic'] = f"data:image/png;base64,{b64}"
+                    save_school_data(school_code, "users.json", users)
+                    user['profile_pic'] = f"data:image/png;base64,{b64}"
+                    st.success("Profile picture updated!")
+                    st.rerun()
+            
+            with col2:
+                with st.form("settings_profile_form"):
+                    fullname = st.text_input("Full Name", user['fullname'])
+                    phone = st.text_input("Phone", user.get('phone', ''))
+                    bio = st.text_area("Bio", user.get('bio', ''), height=100)
+                    
+                    if st.form_submit_button("💾 Update Profile", use_container_width=True):
+                        for u in users:
+                            if u['email'] == user['email']:
+                                u['fullname'] = fullname
+                                u['phone'] = phone
+                                u['bio'] = bio
+                        save_school_data(school_code, "users.json", users)
+                        user.update({'fullname': fullname, 'phone': phone, 'bio': bio})
+                        st.success("Profile updated successfully!")
+                        st.rerun()
+        
+        with settings_tab3:
+            st.subheader("Notification Settings")
+            
+            with st.form("notification_settings"):
+                st.markdown("##### Email Notifications")
+                email_announcements = st.checkbox("Receive announcement emails", value=True)
+                email_messages = st.checkbox("Receive message notifications", value=True)
+                email_assignments = st.checkbox("Receive assignment reminders", value=True)
+                
+                st.markdown("##### In-App Notifications")
+                sound_notifications = st.checkbox("Play sound for new messages", value=True)
+                desktop_notifications = st.checkbox("Show desktop notifications", value=False)
+                
+                st.markdown("##### Digest Settings")
+                digest_frequency = st.selectbox("Email digest frequency", 
+                                              ["Daily", "Weekly", "Never"])
+                
+                if st.form_submit_button("💾 Save Notification Settings", use_container_width=True):
+                    # Save notification settings to user profile
+                    notification_settings = {
+                        "email_announcements": email_announcements,
+                        "email_messages": email_messages,
+                        "email_assignments": email_assignments,
+                        "sound_notifications": sound_notifications,
+                        "desktop_notifications": desktop_notifications,
+                        "digest_frequency": digest_frequency
+                    }
+                    
+                    for u in users:
+                        if u['email'] == user['email']:
+                            u['notification_settings'] = notification_settings
+                    save_school_data(school_code, "users.json", users)
+                    st.success("Notification settings saved!")
+    
     # ============ SCHOOL MANAGEMENT ============
     elif menu == "School Management":
         st.markdown("<h2 style='text-align: center; color: white;'>📊 School Management System</h2>", unsafe_allow_html=True)
+        
+        # External links
+        st.markdown("### 🔗 External Management Systems")
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown("""
+            <a href="https://eddie-dante.github.io/Management-System/" target="_blank">
+                <button style="background: linear-gradient(135deg, #FFD700, #DAA520); border: none; color: black; padding: 12px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin: 5px 0;">
+                    📊 Open Main Management System
+                </button>
+            </a>
+            """, unsafe_allow_html=True)
+        with col2:
+            st.markdown("""
+            <a href="https://eddie-dante.github.io/Library-Management-System-/" target="_blank">
+                <button style="background: linear-gradient(135deg, #FFD700, #DAA520); border: none; color: black; padding: 12px 20px; border-radius: 8px; font-weight: bold; width: 100%; cursor: pointer; margin: 5px 0;">
+                    📚 Open Library Management System
+                </button>
+            </a>
+            """, unsafe_allow_html=True)
+        
+        st.divider()
         
         mgmt_tab1, mgmt_tab2, mgmt_tab3, mgmt_tab4, mgmt_tab5 = st.tabs([
             "📚 Academic Records", "💰 Finance", "📋 Discipline", "📊 Reports", "⚙️ Administration"
@@ -3013,7 +3852,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     emoji = "👑" if user['role'] == 'admin' else "👨‍🏫" if user['role'] == 'teacher' else "👨‍🎓" if user['role'] == 'student' else "👪"
                     st.markdown(f"<h1 style='font-size: 5rem; text-align: center;'>{emoji}</h1>", unsafe_allow_html=True)
                 
-                pic = st.file_uploader("📸 Upload Profile Photo", type=['png', 'jpg', 'jpeg'])
+                pic = st.file_uploader("📸 Upload Profile Photo", type=['png', 'jpg', 'jpeg'], key="personal_profile_pic")
                 if pic:
                     img = Image.open(pic)
                     buffered = BytesIO()
@@ -3323,6 +4162,12 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     present_count = len([a for a in student_attendance if a['status'] == 'Present'])
                     if present_count / len(student_attendance) >= 0.95:
                         achievements.append(("⭐ Perfect Attendance", "95%+ attendance rate", "blue"))
+                
+                # Library achievements
+                if library_transactions:
+                    user_transactions = [t for t in library_transactions if t['user_email'] == user['email']]
+                    if len(user_transactions) >= 10:
+                        achievements.append(("📚 Avid Reader", "Borrowed 10+ books", "green"))
                 
                 if achievements:
                     for achievement in achievements:
