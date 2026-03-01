@@ -237,7 +237,7 @@ return f"""
         background-size: {background_size};
         margin: 0;
         padding: 0;
-        min-height: 100vh;
+        min-height: 10vh;
         font-family: {font_map.get(font_family, "'Poppins', sans-serif")};
         font-size: {text_size_map.get(text_size, "16px")};
         {contrast_css}
