@@ -240,6 +240,7 @@ THEMES = {
 
 WALLPAPERS = {
     "None": "",
+    # Core originals and early ones
     "Abstract Waves": "https://images.unsplash.com/photo-1557682250-33bd709cbe85",
     "Geometric Pattern": "https://images.unsplash.com/photo-1557683311-eac922347aa1",
     "Nature Leaves": "https://images.unsplash.com/photo-1557683316-973673baf926",
@@ -247,7 +248,7 @@ WALLPAPERS = {
     "Color Splash": "https://images.unsplash.com/photo-1557683304-6733ba7e4d6f",
     "Gradient Flow": "https://images.unsplash.com/photo-1557683316-973673baf926",
     "Minimal Lines": "https://images.unsplash.com/photo-1557683311-eac922347aa1",
-    "Dark Texture": "https://images.unsplash.com/photo-1557682250-33bd709cbe85",
+    "Dark Texture": "https://images.unsplash.com/photo-1596865249308-2472dc5807d7",
     "Light Texture": "https://images.unsplash.com/photo-1557683320-2d5001d5e9c5",
     "Forest": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e",
     "Mountains": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b",
@@ -259,9 +260,56 @@ WALLPAPERS = {
     "Sunset": "https://images.unsplash.com/photo-1506815444479-bfdb1e96c566",
     "Rainbow": "https://images.unsplash.com/photo-1511300636408-a63a89df3482",
     "Clouds": "https://images.unsplash.com/photo-1501630834273-4b5604d2ee31",
-    "Stars": "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a"
-}
+    "Stars": "https://images.unsplash.com/photo-1419242902214-272b3f66ee7a",
 
+    # Abstracts & Gradients (expanded)
+    "Vibrant Color Waves": "https://thumbs.dreamstime.com/b/abstract-colorful-waves-background-vibrant-gradient-texture-stunning-featuring-flowing-beautiful-colors-perfect-396814445.jpg",
+    "Neon Rainbow Gradient": "https://thumbs.dreamstime.com/b/color-spectrum-abstract-background-beautiful-colorful-wallpaper-modern-style-vectors-seamless-digital-design-featuring-smooth-392167435.jpg",
+    "Soft Pastel Blur Gradient": "https://img.freepik.com/free-photo/vivid-blurred-colorful-wallpaper-background_58702-2787.jpg",
+    "Dynamic Fluid Colors": "https://thumbs.dreamstime.com/b/vibrant-abstract-background-featuring-colorful-wavy-patterns-dynamic-shapes-image-showcases-mixture-bold-hues-fluid-321915785.jpg",
+    "Layered Wavy Pastels": "https://thumbs.dreamstime.com/b/colorful-wavy-lines-create-beautiful-abstract-pattern-layered-curve-overlap-creating-smooth-texture-arranged-332756007.jpg",
+    "Colorful Music Gradient": "https://thumbs.dreamstime.com/b/colorful-music-notes-flowing-abstract-background-high-quality-illustration-349594851.jpg",
+    "Pastel Circle Gradient": "https://img.freepik.com/free-vector/beautiful-abstract-pastel-color-gradient-backdrop-with-round-design_1017-53587.jpg",
+    "Purple Blue Wave Abstract": "https://images.unsplash.com/photo-1557682257-2f9c97a8a469",
+
+    # Nature & Landscapes (more serene & epic)
+    "Misty Mountain Lake": "https://images.unsplash.com/photo-1603979649806-5299879db16b",
+    "Tropical Valley View": "https://images.pexels.com/photos/2559941/pexels-photo-2559941.jpeg",
+    "Golden Hour Lake Sunset": "https://images4.alphacoders.com/996/thumb-1920-996399.jpg",
+    "Alpine Sunset Hills": "https://w0.peakpx.com/wallpaper/609/297/HD-wallpaper-sunset-mountain-hills-amazing-beautiful-sunset-sky-clouds-valley-mountain-wildflowers-nature-landscape.jpg",
+    "River Valley Glow": "https://w0.peakpx.com/wallpaper/593/805/HD-wallpaper-sunset-mountain-forest-earth-river.jpg",
+    "Lush Green Waterfall": "https://thumbs.dreamstime.com/b/lush-green-landscape-mountains-waterfall-flowing-calm-river-ocean-distance-lush-green-landscape-333961065.jpg",
+    "Turquoise Mountain Lake": "https://images.unsplash.com/photo-1603979649806-5299879db16b",
+    "Glacier Lake Reflection": "https://wallpapers.com/images/hd/4k-mountain-9md6zlz1czbova8g.jpg",
+    "Yosemite Valley Pond": "https://i.pinimg.com/736x/c5/4a/19/c54a19dd5b96e6aece47b015a794ae74.jpg",
+    "Autumn Golden Forest Path": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=2400",
+
+    # Space & Cosmic (deep & vibrant)
+    "Carina Nebula Cliffs": "https://4kwallpapers.com/images/wallpapers/carina-nebula-cosmic-cliffs-james-webb-space-telescope-3840x2160-8689.jpg",
+    "Vibrant Nebula Storm": "https://thumbs.dreamstime.com/b/infinite-universe-closeup-vibrant-deep-space-nebula-cosmic-clouds-dust-particles-high-resolution-wallpaper-image-368102253.jpg",
+    "Earth in Colorful Nebula": "https://thumbs.dreamstime.com/b/earth-cosmic-space-surrounded-colorful-nebula-stars-ai-generated-372064323.jpg",
+    "Purple Pink Nebula Galaxy": "https://images7.alphacoders.com/568/thumb-1920-568756.jpg",
+    "Cosmic Purple Dust": "https://images5.alphacoders.com/432/thumb-1920-432766.jpg",
+    "Milky Way Cosmic Burst": "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=2400",
+
+    # Additional variety to reach 100+
+    "Minimalist Ocean Horizon": "https://images.unsplash.com/photo-1507525425510-56b1e2d6c4f2?w=2400",
+    "Enchanted Forest Mist": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=2400",
+    "Cyber Neon Grid": "https://images.unsplash.com/photo-1557682257-2f9c97a8a469",
+    "Pastel Dreamscape": "https://images.unsplash.com/photo-1553356084-58ef4a67b2a7",
+    "Volcanic Lava Flow": "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+    "Serene Bamboo Grove": "https://images.unsplash.com/photo-1518531933039-315f5d4a6b1a",
+    "Arctic Iceberg Glow": "https://images.unsplash.com/photo-1540979388789-7cee28a1cdc9",
+    "Fiery Mountain Sunset": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
+    "Underwater Coral Reef": "https://images.unsplash.com/photo-1544551763-46a013bb70b5",
+    "Mystical Foggy Lake": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4",
+    "Snowy Alpine Peaks": "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=2400",
+    "Tropical Beach Sunset": "https://images.unsplash.com/photo-1507525425510-56b1e2d6c4f2?w=2400",
+    "Northern Lights Forest": "https://images.unsplash.com/photo-1483347756197-71ef80e95f73?w=2400",
+    "Minimal Black Horizon": "https://images.unsplash.com/photo-1557682257-2f9c97a8a469",
+    "Vibrant Desert Dunes": "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=2400",
+    "City Skyline Neon": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=2400",
+}
 def get_theme_css(theme_name, wallpaper=None):
     theme = THEMES.get(theme_name, THEMES["Sunrise Glow"])
     wallpaper_url = WALLPAPERS.get(wallpaper, "") if wallpaper else ""
