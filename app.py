@@ -21,6 +21,24 @@ try:
 except ImportError:
     QRCODE_AVAILABLE = False
 
+try:
+    import redis
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+
+try:
+    import openai
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+
+try:
+    from twilio.rest import Client
+    TWILIO_AVAILABLE = True
+except ImportError:
+    TWILIO_AVAILABLE = False
+
 # ============ PAGE CONFIG ============
 st.set_page_config(
     page_title="✨ School Community Hub ✨",
@@ -202,7 +220,7 @@ THEMES = {
         "accent": "#24243e",
         "background": "linear-gradient(135deg, #0f0c29, #302b63, #24243e, #0f0c29)",
         "text": "#ffffff",
-        "sidebar": "linear-gradient(135deg, #0f0c29, #302b63, #24243e)"
+        "sidebar": "linear-gradient(135deg, #182848, #4b6cb7, #182848)"
     },
     "Amber Glow": {
         "primary": "#ff8008",
@@ -5520,26 +5538,3 @@ def get_accessibility_css():
 # Apply accessibility CSS (this will be appended to your existing theme CSS)
 if st.session_state.page == 'dashboard' and st.session_state.user:
     st.markdown(f"<style>{get_accessibility_css()}</style>", unsafe_allow_html=True)
-
-# ============ INSTRUCTIONS FOR INTEGRATION ============
-"""
-INTEGRATION COMPLETE:
-
-1. All original 4263+ lines of code are preserved exactly as they were
-2. New features have been added at the END of the file
-3. Only ONE line was added to the existing sidebar section to call render_enhanced_sidebar_additions()
-4. The render_selected_feature() function was added at the beginning of the main content area
-
-The new features include:
-- Multi-language support (English, Kiswahili, French, Arabic)
-- Accessibility features (text sizing, high contrast, dyslexia font, color blindness modes)
-- Wellness Center with mood tracking
-- Study Groups creation and management
-- Career Guidance quiz and recommendations
-- Emergency Alert System
-- Video Conferencing integration
-- E-Portfolio system
-- QR Code generator for mobile app
-
-No existing functionality has been modified or removed.
-"""
