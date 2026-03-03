@@ -13,6 +13,9 @@ import plotly.express as px
 import plotly.graph_objects as go
 import time
 import os
+import threading
+import queue
+import uuid
 
 # Try importing optional dependencies (will be handled gracefully if not installed)
 try:
@@ -310,6 +313,7 @@ WALLPAPERS = {
     "Vibrant Desert Dunes": "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=2400",
     "City Skyline Neon": "https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=2400",
 }
+
 def get_theme_css(theme_name, wallpaper=None):
     theme = THEMES.get(theme_name, THEMES["Sunrise Glow"])
     wallpaper_url = WALLPAPERS.get(wallpaper, "") if wallpaper else ""
@@ -610,7 +614,7 @@ def get_theme_css(theme_name, wallpaper=None):
         }}
         
         .chat-container {{
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 20px;
@@ -684,6 +688,17 @@ def get_theme_css(theme_name, wallpaper=None):
             text-align: right;
         }}
         
+        .chat-delete-btn {{
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            margin-left: 5px;
+        }}
+        
+        .chat-delete-btn:hover {{
+            color: #ff4444;
+        }}
+        
         .main-nav-button {{
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
@@ -707,7 +722,7 @@ def get_theme_css(theme_name, wallpaper=None):
         }}
         
         .class-card {{
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 15px;
@@ -722,7 +737,7 @@ def get_theme_css(theme_name, wallpaper=None):
         }}
         
         .member-card {{
-            background: rgba(255, 255, 255, 0.15);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
             border-radius: 12px;
             padding: 15px;
@@ -783,6 +798,33 @@ def get_theme_css(theme_name, wallpaper=None):
             color: {theme["text"]} !important;
         }}
         
+        .notification-badge {{
+            background: #ff4444;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }}
+        
+        .ringing-indicator {{
+            animation: ring 1s ease infinite;
+        }}
+        
+        @keyframes ring {{
+            0% {{ transform: rotate(0deg); }}
+            10% {{ transform: rotate(10deg); }}
+            20% {{ transform: rotate(-10deg); }}
+            30% {{ transform: rotate(7deg); }}
+            40% {{ transform: rotate(-7deg); }}
+            50% {{ transform: rotate(5deg); }}
+            60% {{ transform: rotate(-5deg); }}
+            70% {{ transform: rotate(3deg); }}
+            80% {{ transform: rotate(-3deg); }}
+            90% {{ transform: rotate(1deg); }}
+            100% {{ transform: rotate(0deg); }}
+        }}
+        
         @keyframes golden-shimmer {{
             0% {{ background-position: 0% 50%; }}
             50% {{ background-position: 100% 50%; }}
@@ -836,6 +878,15 @@ def generate_book_id():
 def generate_transaction_id():
     return 'TRN' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
+def generate_call_id():
+    return 'CAL' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+def generate_notification_id():
+    return 'NOT' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
+def generate_request_id():
+    return 'REQ' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
+
 # ============ DATA STORAGE ============
 DATA_DIR = Path("school_data")
 DATA_DIR.mkdir(exist_ok=True)
@@ -878,18 +929,187 @@ def save_user_settings(school_code, user_email, settings):
     all_settings[user_email] = settings
     save_school_data(school_code, "user_settings.json", all_settings)
 
+# ============ NOTIFICATION SYSTEM ============
+def create_notification(school_code, user_email, notification_type, title, message, data=None):
+    """Create a notification for a user"""
+    notifications = load_school_data(school_code, "notifications.json", [])
+    notification = {
+        "id": generate_notification_id(),
+        "user_email": user_email,
+        "type": notification_type,
+        "title": title,
+        "message": message,
+        "data": data or {},
+        "read": False,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "expires_at": (datetime.now() + timedelta(days=7)).strftime("%Y-%m-%d %H:%M:%S")
+    }
+    notifications.append(notification)
+    save_school_data(school_code, "notifications.json", notifications)
+    return notification
+
+def mark_notification_read(school_code, notification_id):
+    """Mark a notification as read"""
+    notifications = load_school_data(school_code, "notifications.json", [])
+    for n in notifications:
+        if n['id'] == notification_id:
+            n['read'] = True
+            break
+    save_school_data(school_code, "notifications.json", notifications)
+
+def get_unread_notifications_count(school_code, user_email):
+    """Get count of unread notifications for a user"""
+    notifications = load_school_data(school_code, "notifications.json", [])
+    return len([n for n in notifications if n['user_email'] == user_email and not n['read']])
+
+def get_user_notifications(school_code, user_email, include_read=False):
+    """Get notifications for a user"""
+    notifications = load_school_data(school_code, "notifications.json", [])
+    user_notifications = [n for n in notifications if n['user_email'] == user_email]
+    if not include_read:
+        user_notifications = [n for n in user_notifications if not n['read']]
+    return sorted(user_notifications, key=lambda x: x['created_at'], reverse=True)
+
+# ============ CALL SYSTEM ============
+CALL_TYPES = {
+    "audio": {"icon": "🎧", "name": "Audio Call"},
+    "video": {"icon": "📹", "name": "Video Call"}
+}
+
+def initiate_call(school_code, caller_email, recipients, call_type, room_name=None):
+    """Initiate a call to multiple recipients"""
+    calls = load_school_data(school_code, "calls.json", [])
+    call_id = generate_call_id()
+    
+    # Create unique room name if not provided
+    if not room_name:
+        room_name = f"call_{call_id}"
+    
+    call = {
+        "id": call_id,
+        "caller": caller_email,
+        "recipients": recipients,
+        "call_type": call_type,
+        "room_name": room_name,
+        "status": "ringing",  # ringing, active, ended, missed
+        "started_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "ended_at": None,
+        "answered_by": [],
+        "call_log": []
+    }
+    calls.append(call)
+    save_school_data(school_code, "calls.json", calls)
+    
+    # Create notifications for all recipients
+    users = load_school_data(school_code, "users.json", [])
+    caller = next((u for u in users if u['email'] == caller_email), None)
+    caller_name = caller['fullname'] if caller else caller_email
+    
+    for recipient in recipients:
+        create_notification(
+            school_code,
+            recipient,
+            "incoming_call",
+            f"{CALL_TYPES[call_type]['icon']} Incoming {call_type.title()} Call",
+            f"{caller_name} is calling you",
+            {"call_id": call_id, "caller": caller_email, "call_type": call_type, "room_name": room_name}
+        )
+    
+    return call
+
+def answer_call(school_code, call_id, user_email):
+    """Answer a call"""
+    calls = load_school_data(school_code, "calls.json", [])
+    for call in calls:
+        if call['id'] == call_id:
+            if call['status'] == 'ringing':
+                call['status'] = 'active'
+                call['answered_by'].append(user_email)
+                call['call_log'].append({
+                    "action": "answer",
+                    "user": user_email,
+                    "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                })
+                save_school_data(school_code, "calls.json", calls)
+                
+                # Notify caller that call was answered
+                create_notification(
+                    school_code,
+                    call['caller'],
+                    "call_answered",
+                    "📞 Call Answered",
+                    f"{user_email} answered your call",
+                    {"call_id": call_id}
+                )
+                return True
+    return False
+
+def end_call(school_code, call_id, user_email):
+    """End a call"""
+    calls = load_school_data(school_code, "calls.json", [])
+    for call in calls:
+        if call['id'] == call_id:
+            call['status'] = 'ended'
+            call['ended_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            call['call_log'].append({
+                "action": "end",
+                "user": user_email,
+                "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            })
+            save_school_data(school_code, "calls.json", calls)
+            
+            # Notify all participants
+            all_participants = [call['caller']] + call['recipients']
+            for participant in all_participants:
+                if participant != user_email:
+                    create_notification(
+                        school_code,
+                        participant,
+                        "call_ended",
+                        "📞 Call Ended",
+                        f"Call ended by {user_email}",
+                        {"call_id": call_id}
+                    )
+            return True
+    return False
+
+def get_active_calls(school_code, user_email):
+    """Get active calls for a user"""
+    calls = load_school_data(school_code, "calls.json", [])
+    active_calls = []
+    for call in calls:
+        if call['status'] in ['ringing', 'active']:
+            if user_email in [call['caller']] + call['recipients']:
+                active_calls.append(call)
+    return active_calls
+
 # ============ CHAT & FRIENDSHIP FUNCTIONS ============
 def send_friend_request(school_code, from_email, to_email):
     requests = load_school_data(school_code, "friend_requests.json", [])
     if not any(r['from'] == from_email and r['to'] == to_email and r['status'] == 'pending' for r in requests):
+        request_id = generate_request_id()
         requests.append({
-            "id": generate_id("FRQ"),
+            "id": request_id,
             "from": from_email,
             "to": to_email,
             "status": "pending",
             "date": datetime.now().strftime("%Y-%m-%d %H:%M")
         })
         save_school_data(school_code, "friend_requests.json", requests)
+        
+        # Create notification for recipient
+        users = load_school_data(school_code, "users.json", [])
+        from_user = next((u for u in users if u['email'] == from_email), None)
+        from_name = from_user['fullname'] if from_user else from_email
+        
+        create_notification(
+            school_code,
+            to_email,
+            "friend_request",
+            "🤝 New Friend Request",
+            f"{from_name} sent you a friend request",
+            {"request_id": request_id, "from": from_email}
+        )
         return True
     return False
 
@@ -905,6 +1125,16 @@ def accept_friend_request(school_code, request_id):
                 "user2": max(req['from'], req['to']),
                 "since": datetime.now().strftime("%Y-%m-%d %H:%M")
             })
+            
+            # Create notification for requester
+            create_notification(
+                school_code,
+                req['from'],
+                "friend_accepted",
+                "✅ Friend Request Accepted",
+                f"{req['to']} accepted your friend request",
+                {"friend": req['to']}
+            )
             break
     
     save_school_data(school_code, "friend_requests.json", requests)
@@ -938,8 +1168,9 @@ def get_sent_requests(school_code, user_email):
 
 def send_message(school_code, sender_email, recipient_email, message, attachment=None):
     messages = load_school_data(school_code, "messages.json", [])
+    message_id = generate_id("MSG")
     messages.append({
-        "id": generate_id("MSG"),
+        "id": message_id,
         "sender": sender_email,
         "recipient": recipient_email,
         "message": message,
@@ -947,8 +1178,40 @@ def send_message(school_code, sender_email, recipient_email, message, attachment
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "read": False,
         "deleted": False,
+        "deleted_by": [],
         "conversation_id": f"{min(sender_email, recipient_email)}_{max(sender_email, recipient_email)}"
     })
+    save_school_data(school_code, "messages.json", messages)
+    
+    # Create notification for recipient
+    users = load_school_data(school_code, "users.json", [])
+    sender = next((u for u in users if u['email'] == sender_email), None)
+    sender_name = sender['fullname'] if sender else sender_email
+    
+    create_notification(
+        school_code,
+        recipient_email,
+        "new_message",
+        "💬 New Message",
+        f"{sender_name}: {message[:50]}..." if len(message) > 50 else message,
+        {"message_id": message_id, "sender": sender_email, "conversation_id": f"{min(sender_email, recipient_email)}_{max(sender_email, recipient_email)}"}
+    )
+    
+    return message_id
+
+def delete_message(school_code, message_id, user_email):
+    """Delete a message (soft delete)"""
+    messages = load_school_data(school_code, "messages.json", [])
+    for msg in messages:
+        if msg['id'] == message_id:
+            if 'deleted_by' not in msg:
+                msg['deleted_by'] = []
+            if user_email not in msg['deleted_by']:
+                msg['deleted_by'].append(user_email)
+            # If both parties have deleted, mark as deleted
+            if len(msg['deleted_by']) >= 2:
+                msg['deleted'] = True
+            break
     save_school_data(school_code, "messages.json", messages)
 
 def mark_as_read(message_id, school_code):
@@ -963,6 +1226,20 @@ def get_unread_count(user_email, school_code):
     messages = load_school_data(school_code, "messages.json", [])
     return len([m for m in messages if m['recipient'] == user_email and not m.get('read', False) and not m.get('deleted', False)])
 
+def get_conversation_messages(school_code, user_email, other_email):
+    """Get messages between two users"""
+    messages = load_school_data(school_code, "messages.json", [])
+    conv_id = f"{min(user_email, other_email)}_{max(user_email, other_email)}"
+    conv_msgs = [m for m in messages if m['conversation_id'] == conv_id and not m.get('deleted', False)]
+    
+    # Filter out messages deleted by this user
+    filtered_msgs = []
+    for msg in conv_msgs:
+        if user_email not in msg.get('deleted_by', []):
+            filtered_msgs.append(msg)
+    
+    return sorted(filtered_msgs, key=lambda x: x['timestamp'])
+
 # ============ GROUP CHAT FUNCTIONS ============
 def create_group_chat(school_code, group_name, created_by, members):
     group_chats = load_school_data(school_code, "group_chats.json", [])
@@ -973,24 +1250,81 @@ def create_group_chat(school_code, group_name, created_by, members):
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "members": members,
         "messages": [],
-        "admins": [created_by]
+        "admins": [created_by],
+        "deleted_messages": []
     }
     group_chats.append(group_chat)
     save_school_data(school_code, "group_chats.json", group_chats)
+    
+    # Notify all members
+    users = load_school_data(school_code, "users.json", [])
+    creator = next((u for u in users if u['email'] == created_by), None)
+    creator_name = creator['fullname'] if creator else created_by
+    
+    for member in members:
+        if member != created_by:
+            create_notification(
+                school_code,
+                member,
+                "group_created",
+                "👥 Added to Group",
+                f"{creator_name} added you to '{group_name}'",
+                {"group_id": group_chat['id']}
+            )
+    
     return group_chat['id']
 
 def send_group_message(school_code, group_id, sender_email, message, attachment=None):
     group_chats = load_school_data(school_code, "group_chats.json", [])
+    message_id = generate_id("GPM")
+    
     for group in group_chats:
         if group['id'] == group_id:
             group['messages'].append({
-                "id": generate_id("GPM"),
+                "id": message_id,
                 "sender": sender_email,
                 "message": message,
                 "attachment": attachment,
                 "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "read_by": [sender_email]
+                "read_by": [sender_email],
+                "deleted": False,
+                "deleted_by": []
             })
+            
+            # Notify all members
+            users = load_school_data(school_code, "users.json", [])
+            sender = next((u for u in users if u['email'] == sender_email), None)
+            sender_name = sender['fullname'] if sender else sender_email
+            
+            for member in group['members']:
+                if member != sender_email:
+                    create_notification(
+                        school_code,
+                        member,
+                        "group_message",
+                        f"👥 {group['name']}",
+                        f"{sender_name}: {message[:50]}..." if len(message) > 50 else message,
+                        {"group_id": group_id, "message_id": message_id}
+                    )
+            break
+    
+    save_school_data(school_code, "group_chats.json", group_chats)
+
+def delete_group_message(school_code, group_id, message_id, user_email):
+    """Delete a message in group chat"""
+    group_chats = load_school_data(school_code, "group_chats.json", [])
+    for group in group_chats:
+        if group['id'] == group_id:
+            for msg in group['messages']:
+                if msg['id'] == message_id:
+                    if 'deleted_by' not in msg:
+                        msg['deleted_by'] = []
+                    if user_email not in msg['deleted_by']:
+                        msg['deleted_by'].append(user_email)
+                    # If admin or sender, mark as deleted for all
+                    if user_email == msg['sender'] or user_email in group.get('admins', []):
+                        msg['deleted'] = True
+                    break
             break
     save_school_data(school_code, "group_chats.json", group_chats)
 
@@ -1155,6 +1489,40 @@ def add_parent_feedback(school_code, guardian_email, student_email, feedback_tex
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M")
     })
     save_school_data(school_code, "parent_feedback.json", feedback)
+
+def delete_user(school_code, user_email, admin_email):
+    """Admin function to delete a user from the community"""
+    if st.session_state.user['role'] != 'admin':
+        return False, "Only admins can delete users"
+    
+    users = load_school_data(school_code, "users.json", [])
+    users = [u for u in users if u['email'] != user_email]
+    save_school_data(school_code, "users.json", users)
+    
+    # Remove from all relationships
+    friendships = load_school_data(school_code, "friendships.json", [])
+    friendships = [f for f in friendships if f['user1'] != user_email and f['user2'] != user_email]
+    save_school_data(school_code, "friendships.json", friendships)
+    
+    friend_requests = load_school_data(school_code, "friend_requests.json", [])
+    friend_requests = [r for r in friend_requests if r['from'] != user_email and r['to'] != user_email]
+    save_school_data(school_code, "friend_requests.json", friend_requests)
+    
+    # Remove from groups
+    groups = load_school_data(school_code, "groups.json", [])
+    for group in groups:
+        if user_email in group.get('members', []):
+            group['members'].remove(user_email)
+    save_school_data(school_code, "groups.json", groups)
+    
+    # Remove from classes
+    classes = load_school_data(school_code, "classes.json", [])
+    for cls in classes:
+        if user_email in cls.get('students', []):
+            cls['students'].remove(user_email)
+    save_school_data(school_code, "classes.json", classes)
+    
+    return True, f"User {user_email} deleted successfully"
 
 # ============ LIBRARY MANAGEMENT FUNCTIONS ============
 def add_book(school_code, title, author, book_type, quantity, isbn=None, publisher=None, year=None):
@@ -1323,23 +1691,24 @@ def import_members_from_excel(school_code, uploaded_file):
         imported_count = 0
         
         for _, row in df.iterrows():
-            # Check if user exists in system
-            user = next((u for u in users if u['email'] == row['Email']), None)
-            if not user:
-                # Create basic user if not exists
-                new_user = {
-                    "user_id": generate_id("USR"),
-                    "email": row['Email'],
-                    "fullname": row['Name'],
-                    "password": hashlib.sha256("default123".encode()).hexdigest(),
-                    "role": row['Type'].lower(),
-                    "joined": datetime.now().strftime("%Y-%m-%d"),
-                    "school_code": school_code,
-                    "profile_pic": None,
-                    "bio": "",
-                    "phone": ""
-                }
-                users.append(new_user)
+            # Check if email already exists
+            if any(u['email'] == row['Email'] for u in users):
+                continue
+            
+            # Create user
+            new_user = {
+                "user_id": generate_id("USR"),
+                "email": row['Email'],
+                "fullname": row['Name'],
+                "password": hashlib.sha256("default123".encode()).hexdigest(),
+                "role": row['Type'].lower(),
+                "joined": datetime.now().strftime("%Y-%m-%d"),
+                "school_code": school_code,
+                "profile_pic": None,
+                "bio": "",
+                "phone": ""
+            }
+            users.append(new_user)
             
             # Add to library members
             if not any(m['email'] == row['Email'] for m in members):
@@ -1359,7 +1728,7 @@ def import_members_from_excel(school_code, uploaded_file):
     except Exception as e:
         return False, f"Error importing members: {str(e)}"
 
-# ============ NEW FEATURE FUNCTIONS (ADDED HERE) ============
+# ============ NEW FEATURE FUNCTIONS ============
 
 # ============ MULTI-LANGUAGE SUPPORT ============
 TRANSLATIONS = {
@@ -1724,16 +2093,14 @@ def add_wellness_checkin(user_email: str, school_code: str, mood: int, stress: i
             # Alert counselor
             counselors = [u for u in load_school_data(school_code, "users.json", []) if u['role'] == 'counselor']
             for counselor in counselors:
-                # Use your existing notification system
-                if 'send_notification' in globals():
-                    send_notification(
-                        school_code,
-                        counselor['email'],
-                        "wellness_alert",
-                        "⚠️ Student Wellness Alert",
-                        f"Student {user_email} showing high stress/anxiety levels",
-                        {"student": user_email, "avg_stress": avg_stress, "avg_anxiety": avg_anxiety}
-                    )
+                create_notification(
+                    school_code,
+                    counselor['email'],
+                    "wellness_alert",
+                    "⚠️ Student Wellness Alert",
+                    f"Student {user_email} showing high stress/anxiety levels",
+                    {"student": user_email, "avg_stress": avg_stress, "avg_anxiety": avg_anxiety}
+                )
     
     return checkin
 
@@ -1755,6 +2122,21 @@ def create_study_group(school_code: str, name: str, subject: str, created_by: st
     }
     groups.append(group)
     save_school_data(school_code, "study_groups.json", groups)
+    
+    # Notify potential members (students in same class)
+    users = load_school_data(school_code, "users.json", [])
+    students = [u for u in users if u['role'] == 'student']
+    
+    for student in students[:10]:
+        create_notification(
+            school_code,
+            student['email'],
+            "study_group_created",
+            "📚 New Study Group",
+            f"A new {subject} study group '{name}' has been created",
+            {"group_id": group['id']}
+        )
+    
     return group['id']
 
 def join_study_group(school_code: str, group_id: str, user_email: str) -> bool:
@@ -1767,6 +2149,16 @@ def join_study_group(school_code: str, group_id: str, user_email: str) -> bool:
             if user_email not in group['members']:
                 group['members'].append(user_email)
                 save_school_data(school_code, "study_groups.json", groups)
+                
+                # Notify group creator
+                create_notification(
+                    school_code,
+                    group['created_by'],
+                    "group_join",
+                    "👥 New Group Member",
+                    f"{user_email} joined your study group '{group['name']}'",
+                    {"group_id": group_id}
+                )
                 return True
     return False
 
@@ -1867,28 +2259,46 @@ def send_emergency_alert(user_email: str, school_code: str, alert_type: str,
     alert_info = EMERGENCY_TYPES.get(alert_type, EMERGENCY_TYPES['other'])
     
     for contact in emergency_contacts:
-        # Use your existing notification system
-        if 'send_notification' in globals():
-            send_notification(
-                school_code,
-                contact['email'],
-                "emergency_alert",
-                f"{alert_info['icon']} EMERGENCY ALERT",
-                f"{alert_info['message']} at {location}\nReported by: {user_email}\nDetails: {description}",
-                {"alert_id": alert['id'], "priority": alert_info['priority']}
-            )
+        create_notification(
+            school_code,
+            contact['email'],
+            "emergency_alert",
+            f"{alert_info['icon']} EMERGENCY ALERT",
+            f"{alert_info['message']} at {location}\nReported by: {user_email}\nDetails: {description}",
+            {"alert_id": alert['id'], "priority": alert_info['priority']}
+        )
     
     return True, "Emergency alert sent successfully"
+
+def respond_to_emergency(alert_id: str, responder_email: str, school_code: str):
+    """Mark emergency as responded"""
+    alerts = load_school_data(school_code, "emergency_alerts.json", [])
+    for alert in alerts:
+        if alert['id'] == alert_id:
+            alert['status'] = 'responded'
+            alert['responded_by'] = responder_email
+            alert['response_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            break
+    save_school_data(school_code, "emergency_alerts.json", alerts)
+    
+    # Notify the reporter
+    create_notification(
+        school_code,
+        alert['user_email'],
+        "emergency_responded",
+        "✅ Emergency Responded",
+        f"Your emergency has been responded to by {responder_email}",
+        {"alert_id": alert_id}
+    )
 
 # ============ VIDEO CONFERENCING ============
 def create_video_meeting(school_code: str, room_name: str, created_by: str,
                          meeting_type: str, scheduled_for: datetime = None) -> dict:
-    """Create a Jitsi Meet video conference"""
+    """Create a video meeting"""
     meetings = load_school_data(school_code, "video_meetings.json", [])
     
     # Generate unique room name
     room_id = generate_id("VID")
-    jitsi_url = f"https://meet.jit.si/{school_code}_{room_id}"
     
     meeting = {
         "id": room_id,
@@ -1897,14 +2307,88 @@ def create_video_meeting(school_code: str, room_name: str, created_by: str,
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "scheduled_for": scheduled_for.strftime("%Y-%m-%d %H:%M:%S") if scheduled_for else None,
         "participants": [created_by],
-        "meeting_type": meeting_type,  # class, parent_teacher, study_group
-        "link": jitsi_url,
-        "status": "scheduled" if scheduled_for else "active"
+        "meeting_type": meeting_type,  # class, parent_teacher, study_group, group_call, personal_call
+        "status": "scheduled" if scheduled_for else "active",
+        "call_type": "video",  # video or audio
+        "active_call": False
     }
     meetings.append(meeting)
     save_school_data(school_code, "video_meetings.json", meetings)
     
     return meeting
+
+def create_call_room(school_code: str, created_by: str, call_type: str, 
+                     recipients: list, room_name: str = None) -> dict:
+    """Create a call room (audio/video)"""
+    if not room_name:
+        room_name = f"call_{generate_id('CAL')}"
+    
+    call_room = {
+        "id": generate_id("CAL"),
+        "room_name": room_name,
+        "created_by": created_by,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "recipients": recipients,
+        "call_type": call_type,  # audio or video
+        "status": "ringing",
+        "active": False,
+        "answered_by": []
+    }
+    
+    calls = load_school_data(school_code, "calls.json", [])
+    calls.append(call_room)
+    save_school_data(school_code, "calls.json", calls)
+    
+    return call_room
+
+def answer_call_room(school_code: str, call_id: str, user_email: str) -> bool:
+    """Answer a call"""
+    calls = load_school_data(school_code, "calls.json", [])
+    for call in calls:
+        if call['id'] == call_id:
+            if call['status'] == 'ringing':
+                call['status'] = 'active'
+                call['active'] = True
+                if user_email not in call['answered_by']:
+                    call['answered_by'].append(user_email)
+                save_school_data(school_code, "calls.json", calls)
+                
+                # Notify caller
+                create_notification(
+                    school_code,
+                    call['created_by'],
+                    "call_answered",
+                    "📞 Call Answered",
+                    f"{user_email} answered the call",
+                    {"call_id": call_id}
+                )
+                return True
+    return False
+
+def end_call_room(school_code: str, call_id: str, user_email: str) -> bool:
+    """End a call"""
+    calls = load_school_data(school_code, "calls.json", [])
+    for call in calls:
+        if call['id'] == call_id:
+            call['status'] = 'ended'
+            call['active'] = False
+            call['ended_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            save_school_data(school_code, "calls.json", calls)
+            
+            # Notify all participants
+            all_participants = [call['created_by']] + call['recipients']
+            for participant in all_participants:
+                if participant != user_email:
+                    create_notification(
+                        school_code,
+                        participant,
+                        "call_ended",
+                        "📞 Call Ended",
+                        f"Call ended by {user_email}",
+                        {"call_id": call_id}
+                    )
+            return True
+    return False
 
 # ============ QR CODE GENERATOR ============
 def generate_qr_code(data: str, size: int = 200) -> str:
@@ -1934,7 +2418,7 @@ def add_portfolio_project(user_email: str, school_code: str, title: str,
     
     # Process uploaded files using your existing save_attachment function
     file_data = []
-    if files and 'save_attachment' in globals():
+    if files:
         for file in files:
             attachment = save_attachment(file)
             if attachment:
@@ -1954,6 +2438,38 @@ def add_portfolio_project(user_email: str, school_code: str, title: str,
     save_school_data(school_code, "portfolio_projects.json", projects)
     
     return project
+
+def add_portfolio_skill(user_email: str, school_code: str, skill: str, level: int, endorsements: list = None):
+    """Add a skill to user's portfolio"""
+    skills = load_school_data(school_code, "portfolio_skills.json", [])
+    skill_entry = {
+        "id": generate_id("PFS"),
+        "user_email": user_email,
+        "skill": skill,
+        "level": level,  # 1-5
+        "endorsements": endorsements or [],
+        "added_at": datetime.now().strftime("%Y-%m-%d")
+    }
+    skills.append(skill_entry)
+    save_school_data(school_code, "portfolio_skills.json", skills)
+    return skill_entry
+
+def get_user_skills(user_email: str, school_code: str) -> list:
+    """Get all skills for a user"""
+    skills = load_school_data(school_code, "portfolio_skills.json", [])
+    return [s for s in skills if s['user_email'] == user_email]
+
+# ============ ANNOUNCEMENT FUNCTIONS ============
+def delete_announcement(school_code: str, announcement_id: str, user_email: str) -> bool:
+    """Delete an announcement (admin or creator only)"""
+    announcements = load_school_data(school_code, "announcements.json", [])
+    for i, ann in enumerate(announcements):
+        if ann['id'] == announcement_id:
+            if user_email == ann['author_email'] or st.session_state.user['role'] == 'admin':
+                announcements.pop(i)
+                save_school_data(school_code, "announcements.json", announcements)
+                return True
+    return False
 
 # ============ RENDER FUNCTIONS FOR NEW UI ELEMENTS ============
 def render_language_selector():
@@ -2352,54 +2868,307 @@ def render_portfolio():
     
     with tab2:
         st.markdown("#### Skills")
-        st.info("Skills tracking feature coming soon!")
+        
+        col1, col2 = st.columns([1, 1])
+        
+        with col1:
+            with st.form("add_skill"):
+                skill = st.text_input("Skill Name", placeholder="e.g., Python, Leadership")
+                level = st.slider("Proficiency Level", 1, 5, 3, 
+                                 help="1=Beginner, 5=Expert")
+                
+                if st.form_submit_button("Add Skill", use_container_width=True):
+                    add_portfolio_skill(
+                        st.session_state.user['email'],
+                        st.session_state.current_school['code'],
+                        skill,
+                        level
+                    )
+                    st.success("Skill added!")
+                    st.rerun()
+        
+        with col2:
+            skills = get_user_skills(
+                st.session_state.user['email'],
+                st.session_state.current_school['code']
+            )
+            
+            if skills:
+                for skill in skills:
+                    st.markdown(f"""
+                    <div style="margin: 10px 0;">
+                        <strong>{skill['skill']}</strong>
+                        <div style="background: rgba(255,255,255,0.2); height: 20px; border-radius: 10px; margin: 5px 0;">
+                            <div style="background: #FFD700; width: {skill['level']*20}%; 
+                                      height: 20px; border-radius: 10px; text-align: center; 
+                                      color: black; line-height: 20px;">
+                                {skill['level']}/5
+                            </div>
+                        </div>
+                    </div>
+                    """, unsafe_allow_html=True)
+            else:
+                st.info("No skills added yet")
 
 def render_video_meeting():
     """Render video conferencing interface"""
-    st.markdown("### 🎥 Video Meeting")
+    st.markdown("### 🎥 Video/Audio Calls")
     
-    col1, col2 = st.columns([1, 2])
+    tab1, tab2, tab3 = st.tabs(["📞 Make a Call", "📋 Active Calls", "📅 Scheduled Meetings"])
     
-    with col1:
-        st.markdown("#### Create Meeting")
-        with st.form("create_meeting"):
-            room_name = st.text_input("Meeting Name", placeholder="e.g., Math Class")
-            meeting_type = st.selectbox("Meeting Type", 
-                                      ["Class Session", "Study Group", "Parent-Teacher"])
+    with tab1:
+        st.markdown("#### Start a Call")
+        
+        if st.session_state.user and st.session_state.current_school:
+            users = load_school_data(st.session_state.current_school['code'], "users.json", [])
             
-            schedule = st.checkbox("Schedule for later")
-            if schedule:
-                scheduled_time = st.datetime_input("Scheduled Time", 
-                                                 min_value=datetime.now())
-            else:
-                scheduled_time = datetime.now()
+            # Filter users based on role for different call types
+            all_users = [u for u in users if u['email'] != st.session_state.user['email']]
             
-            if st.form_submit_button("Create Meeting", use_container_width=True):
-                if st.session_state.user and st.session_state.current_school:
-                    meeting = create_video_meeting(
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                call_type = st.radio("Call Type", ["🎧 Audio Call", "📹 Video Call"])
+                actual_call_type = "audio" if "Audio" in call_type else "video"
+            
+            with col2:
+                call_target = st.radio("Call Target", ["Individual", "Group", "Class"])
+            
+            recipients = []
+            
+            if call_target == "Individual":
+                selected_users = st.multiselect(
+                    "Select recipients (max 1 for individual)",
+                    [f"{u['fullname']} ({u['role']})" for u in all_users],
+                    max_selections=1
+                )
+                recipients = [u.split('(')[1].rstrip(')').strip() for u in selected_users]
+            
+            elif call_target == "Group":
+                selected_users = st.multiselect(
+                    "Select recipients",
+                    [f"{u['fullname']} ({u['role']})" for u in all_users]
+                )
+                recipients = [u.split('(')[1].rstrip(')').strip() for u in selected_users]
+            
+            elif call_target == "Class":
+                classes = load_school_data(st.session_state.current_school['code'], "classes.json", [])
+                if st.session_state.user['role'] == 'teacher':
+                    my_classes = [c for c in classes if c.get('teacher') == st.session_state.user['email']]
+                    if my_classes:
+                        selected_class = st.selectbox("Select Class", [c['name'] for c in my_classes])
+                        class_obj = next((c for c in my_classes if c['name'] == selected_class), None)
+                        if class_obj:
+                            recipients = class_obj.get('students', [])
+                    else:
+                        st.warning("You don't have any classes")
+                else:
+                    selected_class = st.selectbox("Select Class", [c['name'] for c in classes])
+                    class_obj = next((c for c in classes if c['name'] == selected_class), None)
+                    if class_obj:
+                        recipients = class_obj.get('students', [])
+            
+            room_name = st.text_input("Room Name (optional)", placeholder="Leave empty for auto-generated")
+            
+            if st.button("🚀 Start Call", use_container_width=True, type="primary"):
+                if recipients:
+                    call_room = create_call_room(
                         st.session_state.current_school['code'],
-                        room_name,
                         st.session_state.user['email'],
-                        meeting_type.lower().replace(' ', '_'),
-                        scheduled_time if schedule else None
+                        actual_call_type,
+                        recipients,
+                        room_name if room_name else None
                     )
                     
-                    st.session_state.current_meeting = meeting
-                    st.success(f"Meeting created!")
+                    st.success(f"Call initiated! Ringing {len(recipients)} participant(s)...")
+                    st.session_state.current_call = call_room
                     st.rerun()
+                else:
+                    st.error("Please select at least one recipient")
+    
+    with tab2:
+        st.markdown("#### Active Calls")
+        
+        if st.session_state.user and st.session_state.current_school:
+            calls = load_school_data(st.session_state.current_school['code'], "calls.json", [])
+            
+            # Find calls where user is involved and call is active
+            active_calls = []
+            for call in calls:
+                if call['status'] in ['ringing', 'active']:
+                    if st.session_state.user['email'] in [call['created_by']] + call.get('recipients', []):
+                        active_calls.append(call)
+            
+            if active_calls:
+                for call in active_calls:
+                    with st.container():
+                        caller = next((u for u in users if u['email'] == call['created_by']), None)
+                        caller_name = caller['fullname'] if caller else call['created_by']
+                        
+                        call_icon = "🎧" if call['call_type'] == 'audio' else "📹"
+                        
+                        col1, col2, col3, col4 = st.columns([2, 2, 1, 1])
+                        
+                        with col1:
+                            status_emoji = "🔔" if call['status'] == 'ringing' else "🟢"
+                            st.markdown(f"{status_emoji} {call_icon} {call['room_name']}")
+                        
+                        with col2:
+                            st.markdown(f"By: {caller_name}")
+                            st.markdown(f"Participants: {len(call.get('answered_by', []))}/{len(call.get('recipients', [])) + 1}")
+                        
+                        with col3:
+                            if st.button("Answer", key=f"answer_{call['id']}", use_container_width=True):
+                                if answer_call_room(
+                                    st.session_state.current_school['code'],
+                                    call['id'],
+                                    st.session_state.user['email']
+                                ):
+                                    st.session_state.current_call = call
+                                    st.rerun()
+                        
+                        with col4:
+                            if st.button("End", key=f"end_{call['id']}", use_container_width=True):
+                                end_call_room(
+                                    st.session_state.current_school['code'],
+                                    call['id'],
+                                    st.session_state.user['email']
+                                )
+                                st.rerun()
+                        
+                        st.divider()
+            else:
+                st.info("No active calls")
+    
+    with tab3:
+        st.markdown("#### Scheduled Meetings")
+        
+        meetings = load_school_data(st.session_state.current_school['code'], "video_meetings.json", [])
+        user_meetings = [m for m in meetings if st.session_state.user['email'] in m.get('participants', [])]
+        
+        if user_meetings:
+            for meeting in user_meetings:
+                if meeting['scheduled_for']:
+                    scheduled_time = datetime.strptime(meeting['scheduled_for'], "%Y-%m-%d %H:%M:%S")
+                    if scheduled_time > datetime.now():
+                        with st.container():
+                            col1, col2 = st.columns([3, 1])
+                            with col1:
+                                st.markdown(f"**{meeting['room_name']}**")
+                                st.markdown(f"Type: {meeting['meeting_type']}")
+                                st.markdown(f"Time: {meeting['scheduled_for']}")
+                            with col2:
+                                if st.button("Join", key=f"join_sched_{meeting['id']}", use_container_width=True):
+                                    st.session_state.current_meeting = meeting
+                                    st.rerun()
+                            st.divider()
+        else:
+            st.info("No scheduled meetings")
+
+def render_call_room():
+    """Render the call room interface"""
+    if 'current_call' not in st.session_state:
+        return
+    
+    call = st.session_state.current_call
+    
+    st.markdown(f"### {call['room_name']}")
+    
+    col1, col2 = st.columns([3, 1])
+    
+    with col1:
+        # Simulated call interface
+        call_icon = "🎧" if call['call_type'] == 'audio' else "📹"
+        st.markdown(f"## {call_icon} {call['call_type'].title()} Call")
+        
+        # Participants
+        st.markdown("#### Participants")
+        
+        users = load_school_data(st.session_state.current_school['code'], "users.json", [])
+        all_participants = [call['created_by']] + call.get('recipients', [])
+        
+        for participant in all_participants:
+            user = next((u for u in users if u['email'] == participant), None)
+            name = user['fullname'] if user else participant
+            if participant in call.get('answered_by', []):
+                st.markdown(f"🟢 {name} (Connected)")
+            else:
+                st.markdown(f"🔴 {name} (Ringing...)")
+        
+        # Call controls
+        st.markdown("---")
+        col_a, col_b, col_c = st.columns(3)
+        
+        with col_a:
+            if st.button("🔇 Mute", use_container_width=True):
+                st.info("Muted (simulated)")
+        
+        with col_b:
+            if st.button("🎤 Unmute", use_container_width=True):
+                st.info("Unmuted (simulated)")
+        
+        with col_c:
+            if st.button("📹 Camera", use_container_width=True):
+                st.info("Camera toggled (simulated)")
+        
+        if st.button("🚫 End Call", use_container_width=True, type="primary"):
+            end_call_room(
+                st.session_state.current_school['code'],
+                call['id'],
+                st.session_state.user['email']
+            )
+            del st.session_state.current_call
+            st.rerun()
     
     with col2:
-        if 'current_meeting' in st.session_state:
-            meeting = st.session_state.current_meeting
-            st.markdown(f"#### {meeting['room_name']}")
-            st.markdown(f"**Meeting Link:** {meeting['link']}")
-            st.markdown("Open this link in a new tab to join the meeting.")
+        st.markdown("#### Call Info")
+        st.markdown(f"**Type:** {call['call_type'].title()}")
+        st.markdown(f"**Started:** {call['created_at']}")
+        st.markdown(f"**Status:** {call['status'].title()}")
+        st.markdown(f"**Room:** {call['room_name']}")
+        
+        if call['call_type'] == 'video':
+            # Simulated video feed
+            st.markdown("### 📹 Your Video")
+            st.markdown("""
+            <div style="background: rgba(0,0,0,0.5); height: 200px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                <span style="color: white;">Video Feed (Simulated)</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+def render_notifications():
+    """Render notifications panel"""
+    if st.session_state.user and st.session_state.current_school:
+        unread_count = get_unread_notifications_count(
+            st.session_state.current_school['code'],
+            st.session_state.user['email']
+        )
+        
+        with st.sidebar.expander(f"🔔 Notifications {f'({unread_count})' if unread_count > 0 else ''}", expanded=False):
+            notifications = get_user_notifications(
+                st.session_state.current_school['code'],
+                st.session_state.user['email'],
+                include_read=False
+            )
             
-            if st.button("Leave Meeting", use_container_width=True):
-                del st.session_state.current_meeting
-                st.rerun()
-        else:
-            st.info("Create a meeting to start")
+            if notifications:
+                for notification in notifications[:10]:
+                    with st.container():
+                        col1, col2 = st.columns([4, 1])
+                        with col1:
+                            st.markdown(f"**{notification['title']}**")
+                            st.markdown(f"<small>{notification['message']}</small>", unsafe_allow_html=True)
+                            st.markdown(f"<small>{notification['created_at'][:16]}</small>", unsafe_allow_html=True)
+                        with col2:
+                            if st.button("✓", key=f"mark_read_{notification['id']}"):
+                                mark_notification_read(
+                                    st.session_state.current_school['code'],
+                                    notification['id']
+                                )
+                                st.rerun()
+                        st.divider()
+            else:
+                st.info("No new notifications")
 
 def render_mobile_qr():
     """Render mobile app QR code"""
@@ -2414,6 +3183,71 @@ def render_mobile_qr():
     else:
         st.sidebar.info("Install qrcode package to enable QR features")
 
+def render_requests_section():
+    """Render requests section for admins"""
+    if st.session_state.user['role'] != 'admin':
+        return
+    
+    with st.sidebar.expander("📋 Pending Requests", expanded=False):
+        school_code = st.session_state.current_school['code']
+        
+        # Class requests
+        class_requests = load_school_data(school_code, "class_requests.json", [])
+        pending_class = [r for r in class_requests if r['status'] == 'pending']
+        
+        if pending_class:
+            st.markdown("#### Class Enrollment Requests")
+            for req in pending_class[:5]:
+                with st.container():
+                    st.markdown(f"**{req['student_name']}** wants to join")
+                    st.markdown(f"Class: {req['class_code']}")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅", key=f"accept_class_{req['id']}"):
+                            # Accept logic
+                            req['status'] = 'accepted'
+                            classes = load_school_data(school_code, "classes.json", [])
+                            for cls in classes:
+                                if cls['code'] == req['class_code']:
+                                    cls.setdefault('students', []).append(req['student_email'])
+                            save_school_data(school_code, "classes.json", classes)
+                            save_school_data(school_code, "class_requests.json", class_requests)
+                            st.rerun()
+                    with col2:
+                        if st.button("❌", key=f"decline_class_{req['id']}"):
+                            req['status'] = 'declined'
+                            save_school_data(school_code, "class_requests.json", class_requests)
+                            st.rerun()
+                    st.divider()
+        
+        # Group requests
+        group_requests = load_school_data(school_code, "group_requests.json", [])
+        pending_group = [r for r in group_requests if r['status'] == 'pending']
+        
+        if pending_group:
+            st.markdown("#### Group Join Requests")
+            for req in pending_group[:5]:
+                with st.container():
+                    st.markdown(f"**{req.get('user_name', 'Someone')}** wants to join")
+                    st.markdown(f"Group: {req.get('group_name', req['group_code'])}")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅", key=f"accept_group_{req['id']}"):
+                            req['status'] = 'accepted'
+                            groups = load_school_data(school_code, "groups.json", [])
+                            for group in groups:
+                                if group['code'] == req['group_code']:
+                                    group.setdefault('members', []).append(req['user_email'])
+                            save_school_data(school_code, "groups.json", groups)
+                            save_school_data(school_code, "group_requests.json", group_requests)
+                            st.rerun()
+                    with col2:
+                        if st.button("❌", key=f"decline_group_{req['id']}"):
+                            req['status'] = 'declined'
+                            save_school_data(school_code, "group_requests.json", group_requests)
+                            st.rerun()
+                    st.divider()
+
 # ============ UPDATE SESSION STATE WITH NEW VARIABLES ============
 if 'language' not in st.session_state:
     st.session_state.language = 'en'
@@ -2425,6 +3259,10 @@ if 'career_recommendations' not in st.session_state:
     st.session_state.career_recommendations = None
 if 'current_meeting' not in st.session_state:
     st.session_state.current_meeting = None
+if 'current_call' not in st.session_state:
+    st.session_state.current_call = None
+if 'last_refresh' not in st.session_state:
+    st.session_state.last_refresh = time.time()
 
 # ============ NEW SIDEBAR ENHANCEMENTS ============
 def render_enhanced_sidebar_additions():
@@ -2432,11 +3270,17 @@ def render_enhanced_sidebar_additions():
     if st.session_state.user:
         st.sidebar.divider()
         
+        # Notifications
+        render_notifications()
+        
         # Language selector
         render_language_selector()
         
         # Accessibility panel
         render_accessibility_panel()
+        
+        # Requests section for admins
+        render_requests_section()
         
         st.sidebar.divider()
         
@@ -2464,7 +3308,7 @@ def render_enhanced_sidebar_additions():
             st.rerun()
         
         # Video Meeting
-        if st.sidebar.button("🎥 Video Meeting", key="nav_video", use_container_width=True):
+        if st.sidebar.button("🎥 Video/Audio Calls", key="nav_video", use_container_width=True):
             st.session_state.current_feature = 'video'
             st.rerun()
         
@@ -2491,13 +3335,19 @@ def render_selected_feature():
         elif st.session_state.current_feature == 'portfolio':
             render_portfolio()
         elif st.session_state.current_feature == 'video':
-            render_video_meeting()
+            if 'current_call' in st.session_state and st.session_state.current_call:
+                render_call_room()
+            else:
+                render_video_meeting()
         elif st.session_state.current_feature == 'emergency':
             render_emergency_alerts()
         
-        if st.button("← Back to Dashboard", key="back_to_dash", use_container_width=True):
-            st.session_state.current_feature = None
-            st.rerun()
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            if st.button("← Back to Dashboard", key="back_to_dash", use_container_width=True):
+                st.session_state.current_feature = None
+                st.session_state.current_call = None
+                st.rerun()
         return True
     return False
 
@@ -2621,6 +3471,8 @@ if 'theme' not in st.session_state:
     st.session_state.theme = "Sunrise Glow"
 if 'wallpaper' not in st.session_state:
     st.session_state.wallpaper = "None"
+if 'viewing_student' not in st.session_state:
+    st.session_state.viewing_student = None
 
 # ============ MAIN APP ============
 
@@ -2720,7 +3572,18 @@ if st.session_state.page == 'welcome':
                         elif password != confirm:
                             st.error("Passwords do not match")
                         else:
+                            # Check if email already exists in any school
                             all_schools = load_all_schools()
+                            email_exists = False
+                            for s_code, s_data in all_schools.items():
+                                if s_data['admin_email'] == admin_email:
+                                    email_exists = True
+                                    break
+                            
+                            if email_exists:
+                                st.error("This email is already registered with another school")
+                                st.stop()
+                            
                             code = generate_school_code()
                             while code in all_schools:
                                 code = generate_school_code()
@@ -2778,6 +3641,15 @@ if st.session_state.page == 'welcome':
                             save_school_data(code, "library_members.json", [])
                             save_school_data(code, "library_transactions.json", [])
                             save_school_data(code, "user_settings.json", {})
+                            save_school_data(code, "notifications.json", [])
+                            save_school_data(code, "calls.json", [])
+                            save_school_data(code, "portfolio_projects.json", [])
+                            save_school_data(code, "portfolio_skills.json", [])
+                            save_school_data(code, "wellness_checkins.json", [])
+                            save_school_data(code, "study_groups.json", [])
+                            save_school_data(code, "career_assessments.json", [])
+                            save_school_data(code, "emergency_alerts.json", [])
+                            save_school_data(code, "video_meetings.json", [])
                             
                             st.session_state.current_school = new_school
                             st.session_state.user = users[0]
@@ -3153,6 +4025,12 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     user_member = next((m for m in library_members if m['email'] == user['email']), None)
     borrowed_books = user_member.get('borrowed_books', []) if user_member else []
     
+    # Auto-refresh check
+    current_time = time.time()
+    if current_time - st.session_state.last_refresh > 5:  # Refresh every 5 seconds
+        st.session_state.last_refresh = current_time
+        # No need to rerun, just update the last_refresh time
+    
     # ============ GOLDEN SIDEBAR ============
     with st.sidebar:
         st.markdown(f"""
@@ -3331,17 +4209,26 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 
                 if show:
                     with st.container():
-                        st.markdown(f"""
-                        <div class="golden-card">
-                            <h4>{ann['title']}{' ⭐' if ann.get('important') else ''}</h4>
-                            <p><small>By {ann['author']} • {ann['date'][:16]}</small></p>
-                            <p>{ann['content']}</p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        if ann.get('attachment'):
-                            st.markdown("**📎 Attachment:**")
-                            display_attachment(ann['attachment'])
+                        col1, col2 = st.columns([5, 1])
+                        with col1:
+                            st.markdown(f"""
+                            <div class="golden-card">
+                                <h4>{ann['title']}{' ⭐' if ann.get('important') else ''}</h4>
+                                <p><small>By {ann['author']} • {ann['date'][:16]}</small></p>
+                                <p>{ann['content']}</p>
+                            </div>
+                            """, unsafe_allow_html=True)
+                            
+                            if ann.get('attachment'):
+                                st.markdown("**📎 Attachment:**")
+                                display_attachment(ann['attachment'])
+                        with col2:
+                            # Delete button for admins or author
+                            if user['role'] == 'admin' or user['email'] == ann['author_email']:
+                                if st.button("🗑️", key=f"del_ann_{ann['id']}"):
+                                    if delete_announcement(school_code, ann['id'], user['email']):
+                                        st.success("Announcement deleted!")
+                                        st.rerun()
         else:
             st.info("No announcements yet")
     
@@ -3458,7 +4345,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             request_received = any(r['from'] == member['email'] for r in pending_requests)
             
             with st.container():
-                col1, col2, col3, col4 = st.columns([1, 2, 2, 2])
+                col1, col2, col3, col4, col5 = st.columns([1, 2, 2, 2, 1])
                 
                 with col1:
                     if member.get('profile_pic'):
@@ -3501,6 +4388,17 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 st.session_state.menu_index = options.index(chat_options[0])
                                 st.rerun()
                 
+                with col5:
+                    # Delete user button (admin only)
+                    if user['role'] == 'admin':
+                        if st.button("🗑️", key=f"del_user_{member['email']}"):
+                            success, message = delete_user(school_code, member['email'], user['email'])
+                            if success:
+                                st.success(message)
+                                st.rerun()
+                            else:
+                                st.error(message)
+                
                 st.divider()
     
     elif menu.startswith("Friends"):
@@ -3515,7 +4413,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     friend = next((u for u in users if u['email'] == friend_email), None)
                     if friend:
                         with st.container():
-                            col1, col2, col3 = st.columns([1, 3, 1])
+                            col1, col2, col3, col4 = st.columns([1, 3, 1, 1])
                             with col1:
                                 if friend.get('profile_pic'):
                                     st.image(friend['profile_pic'], width=40)
@@ -3531,6 +4429,18 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                     if chat_options:
                                         st.session_state.menu_index = options.index(chat_options[0])
                                         st.rerun()
+                            with col4:
+                                if st.button("📞 Call", key=f"call_friend_{friend_email}"):
+                                    # Initiate call to friend
+                                    create_call_room(
+                                        school_code,
+                                        user['email'],
+                                        "audio",  # Default to audio, can add video option
+                                        [friend_email],
+                                        f"Call with {friend['fullname']}"
+                                    )
+                                    st.success(f"Calling {friend['fullname']}...")
+                                    st.rerun()
                             st.divider()
             else:
                 st.info("No friends yet")
@@ -3602,11 +4512,9 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 for friend_email in friends:
                     friend = next((u for u in users if u['email'] == friend_email), None)
                     if friend:
-                        conv_id = f"{min(user['email'], friend_email)}_{max(user['email'], friend_email)}"
-                        messages = load_school_data(school_code, "messages.json", [])
-                        conv_msgs = [m for m in messages if m['conversation_id'] == conv_id and not m.get('deleted', False)]
-                        last_msg = conv_msgs[-1]['message'][:20] + "..." if conv_msgs else ""
-                        unread = len([m for m in conv_msgs if m['recipient'] == user['email'] and not m.get('read', False)])
+                        messages = get_conversation_messages(school_code, user['email'], friend_email)
+                        last_msg = messages[-1]['message'][:20] + "..." if messages else ""
+                        unread = len([m for m in messages if m['recipient'] == user['email'] and not m.get('read', False)])
                         
                         with st.container():
                             col_a, col_b = st.columns([1, 3])
@@ -3637,35 +4545,66 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 if other_user:
                     st.markdown(f"### Chat with {other_user['fullname']}")
                     
-                    conv_id = f"{min(user['email'], other_email)}_{max(user['email'], other_email)}"
-                    messages = load_school_data(school_code, "messages.json", [])
-                    conv_msgs = [m for m in messages if m['conversation_id'] == conv_id and not m.get('deleted', False)]
-                    conv_msgs.sort(key=lambda x: x['timestamp'])
+                    # Add call buttons
+                    col_a, col_b, col_c = st.columns([2, 1, 1])
+                    with col_b:
+                        if st.button("🎧 Audio Call", use_container_width=True):
+                            create_call_room(
+                                school_code,
+                                user['email'],
+                                "audio",
+                                [other_email],
+                                f"Call with {other_user['fullname']}"
+                            )
+                            st.success(f"Calling {other_user['fullname']}...")
+                            st.rerun()
+                    with col_c:
+                        if st.button("📹 Video Call", use_container_width=True):
+                            create_call_room(
+                                school_code,
+                                user['email'],
+                                "video",
+                                [other_email],
+                                f"Video call with {other_user['fullname']}"
+                            )
+                            st.success(f"Video calling {other_user['fullname']}...")
+                            st.rerun()
+                    
+                    messages = get_conversation_messages(school_code, user['email'], other_email)
                     
                     st.markdown('<div class="chat-container">', unsafe_allow_html=True)
                     
-                    for msg in conv_msgs:
+                    for msg in messages:
                         if msg['recipient'] == user['email'] and not msg.get('read', False):
                             mark_as_read(msg['id'], school_code)
                         
                         is_sent = msg['sender'] == user['email']
                         sender_user = user if is_sent else other_user
                         
-                        st.markdown(f"""
-                        <div class="chat-message-wrapper {'chat-message-sent' if is_sent else 'chat-message-received'}">
-                            <div class="chat-bubble {'chat-bubble-sent' if is_sent else 'chat-bubble-received'}">
-                                <div class="chat-sender-info">
-                                    <span class="chat-sender-name">{sender_user['fullname']}</span>
+                        col1, col2 = st.columns([5, 1])
+                        with col1:
+                            st.markdown(f"""
+                            <div class="chat-message-wrapper {'chat-message-sent' if is_sent else 'chat-message-received'}">
+                                <div class="chat-bubble {'chat-bubble-sent' if is_sent else 'chat-bubble-received'}">
+                                    <div class="chat-sender-info">
+                                        <span class="chat-sender-name">{sender_user['fullname']}</span>
+                                    </div>
+                                    <div>{msg['message']}</div>
+                                    <div class="chat-time">{msg['timestamp'][:16]}</div>
                                 </div>
-                                <div>{msg['message']}</div>
-                                <div class="chat-time">{msg['timestamp'][:16]}</div>
                             </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                            """, unsafe_allow_html=True)
+                            
+                            if msg.get('attachment'):
+                                with st.expander("📎 Attachment"):
+                                    display_attachment(msg['attachment'])
                         
-                        if msg.get('attachment'):
-                            with st.expander("📎 Attachment"):
-                                display_attachment(msg['attachment'])
+                        # Delete message button
+                        if msg['sender'] == user['email'] or user['role'] == 'admin':
+                            with col2:
+                                if st.button("🗑️", key=f"del_msg_{msg['id']}"):
+                                    delete_message(school_code, msg['id'], user['email'])
+                                    st.rerun()
                     
                     st.markdown('</div>', unsafe_allow_html=True)
                     
@@ -3731,30 +4670,54 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 role_badge = " (Admin)" if member_email in current_group.get('admins', []) else ""
                                 st.write(f"{member['fullname']}{role_badge}")
                     
+                    # Add group call button
+                    if st.button("📞 Start Group Call", use_container_width=True):
+                        create_call_room(
+                            school_code,
+                            user['email'],
+                            "audio",
+                            [m for m in current_group['members'] if m != user['email']],
+                            f"Group call: {current_group['name']}"
+                        )
+                        st.success(f"Initiating group call with {len(current_group['members'])-1} participants...")
+                        st.rerun()
+                    
                     st.markdown('<div class="chat-container" style="height: 400px;">', unsafe_allow_html=True)
                     
                     messages = current_group.get('messages', [])
                     for msg in messages:
+                        if msg.get('deleted', False):
+                            continue
+                        
                         sender = next((u for u in users if u['email'] == msg['sender']), None)
                         sender_name = sender['fullname'] if sender else msg['sender']
                         
                         is_sent = msg['sender'] == user['email']
                         
-                        st.markdown(f"""
-                        <div class="chat-message-wrapper {'chat-message-sent' if is_sent else 'chat-message-received'}">
-                            <div class="chat-bubble {'chat-bubble-sent' if is_sent else 'chat-bubble-received'}">
-                                <div class="chat-sender-info">
-                                    <span class="chat-sender-name">{sender_name}</span>
+                        col1, col2 = st.columns([5, 1])
+                        with col1:
+                            st.markdown(f"""
+                            <div class="chat-message-wrapper {'chat-message-sent' if is_sent else 'chat-message-received'}">
+                                <div class="chat-bubble {'chat-bubble-sent' if is_sent else 'chat-bubble-received'}">
+                                    <div class="chat-sender-info">
+                                        <span class="chat-sender-name">{sender_name}</span>
+                                    </div>
+                                    <div>{msg['message']}</div>
+                                    <div class="chat-time">{msg['timestamp'][:16]}</div>
                                 </div>
-                                <div>{msg['message']}</div>
-                                <div class="chat-time">{msg['timestamp'][:16]}</div>
                             </div>
-                        </div>
-                        """, unsafe_allow_html=True)
+                            """, unsafe_allow_html=True)
+                            
+                            if msg.get('attachment'):
+                                with st.expander("📎 Attachment"):
+                                    display_attachment(msg['attachment'])
                         
-                        if msg.get('attachment'):
-                            with st.expander("📎 Attachment"):
-                                display_attachment(msg['attachment'])
+                        # Delete message button
+                        if msg['sender'] == user['email'] or user['role'] == 'admin':
+                            with col2:
+                                if st.button("🗑️", key=f"del_group_msg_{msg['id']}"):
+                                    delete_group_message(school_code, current_group['id'], msg['id'], user['email'])
+                                    st.rerun()
                     
                     st.markdown('</div>', unsafe_allow_html=True)
                     
@@ -3825,19 +4788,32 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        col1, col2, col3 = st.columns(3)
+                        col1, col2, col3, col4 = st.columns(4)
                         with col1:
                             if st.button("📝 Manage", key=f"manage_{cls['code']}"):
                                 st.session_state.selected_class = cls['code']
                                 st.rerun()
                         with col2:
-                            if st.button("👥 View Students", key=f"students_{cls['code']}"):
+                            if st.button("👥 Students", key=f"students_{cls['code']}"):
                                 st.session_state.selected_class = cls['code']
                                 st.rerun()
                         with col3:
                             if st.button("📊 Performance", key=f"perf_{cls['code']}"):
                                 st.session_state.selected_class = cls['code']
                                 st.rerun()
+                        with col4:
+                            if st.button("📞 Call Class", key=f"call_class_{cls['code']}"):
+                                students = cls.get('students', [])
+                                if students:
+                                    create_call_room(
+                                        school_code,
+                                        user['email'],
+                                        "audio",
+                                        students,
+                                        f"Class call: {cls['name']}"
+                                    )
+                                    st.success(f"Initiating call with {len(students)} students...")
+                                    st.rerun()
                         st.divider()
             else:
                 st.info("No classes created yet")
@@ -3857,7 +4833,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        col1, col2, col3 = st.columns(3)
+                        col1, col2, col3, col4 = st.columns(4)
                         with col1:
                             if st.button("📝 Manage", key=f"manage_{cls['code']}"):
                                 st.session_state.selected_class = cls['code']
@@ -3870,6 +4846,19 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             if st.button("📊 Add Grades", key=f"grades_{cls['code']}"):
                                 st.session_state.selected_class = cls['code']
                                 st.rerun()
+                        with col4:
+                            if st.button("📞 Call Class", key=f"call_class_{cls['code']}"):
+                                students = cls.get('students', [])
+                                if students:
+                                    create_call_room(
+                                        school_code,
+                                        user['email'],
+                                        "audio",
+                                        students,
+                                        f"Class call: {cls['name']}"
+                                    )
+                                    st.success(f"Initiating call with {len(students)} students...")
+                                    st.rerun()
                         st.divider()
             else:
                 st.info("You haven't been assigned any classes yet")
@@ -3888,9 +4877,14 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         </div>
                         """, unsafe_allow_html=True)
                         
-                        if st.button("📊 View My Performance", key=f"perf_{cls['code']}"):
-                            st.session_state.selected_class = cls['code']
-                            st.rerun()
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            if st.button("📊 View My Performance", key=f"perf_{cls['code']}"):
+                                st.session_state.selected_class = cls['code']
+                                st.rerun()
+                        with col2:
+                            if st.button("📞 Join Class Call", key=f"join_call_{cls['code']}"):
+                                st.info("Check active calls for incoming class calls")
                         st.divider()
             else:
                 st.info("You're not enrolled in any classes yet")
@@ -3992,7 +4986,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     
                     is_member = user['email'] in grp.get('members', [])
                     
-                    col1, col2 = st.columns(2)
+                    col1, col2, col3 = st.columns(3)
                     with col1:
                         if is_member:
                             if st.button("🚪 Leave Group", key=f"leave_{grp['code']}"):
@@ -4008,6 +5002,19 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         if st.button("👥 View Members", key=f"members_{grp['code']}"):
                             st.session_state.selected_group = grp['code']
                             st.rerun()
+                    with col3:
+                        if st.button("📞 Call Group", key=f"call_group_{grp['code']}"):
+                            members = grp.get('members', [])
+                            if members:
+                                create_call_room(
+                                    school_code,
+                                    user['email'],
+                                    "audio",
+                                    [m for m in members if m != user['email']],
+                                    f"Group call: {grp['name']}"
+                                )
+                                st.success(f"Initiating call with {len(members)-1} members...")
+                                st.rerun()
                     st.divider()
         else:
             st.info("No groups created yet")
@@ -4046,7 +5053,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         if teacher_users:
             for teacher in teacher_users:
                 with st.container():
-                    col1, col2, col3 = st.columns([1, 3, 2])
+                    col1, col2, col3, col4 = st.columns([1, 3, 2, 1])
                     with col1:
                         if teacher.get('profile_pic'):
                             st.image(teacher['profile_pic'], width=40)
@@ -4058,6 +5065,13 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     with col3:
                         teacher_classes = [c['name'] for c in classes if c.get('teacher') == teacher['email']]
                         st.markdown(f"Classes: {', '.join(teacher_classes) if teacher_classes else 'None'}")
+                    with col4:
+                        if user['role'] == 'admin':
+                            if st.button("🗑️", key=f"del_teacher_{teacher['email']}"):
+                                success, message = delete_user(school_code, teacher['email'], user['email'])
+                                if success:
+                                    st.success(message)
+                                    st.rerun()
                     st.divider()
         else:
             st.info("No teachers registered yet")
@@ -4079,7 +5093,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             
             for student in filtered_students:
                 with st.container():
-                    col1, col2, col3, col4 = st.columns([1, 2, 2, 2])
+                    col1, col2, col3, col4, col5 = st.columns([1, 2, 2, 2, 1])
                     with col1:
                         if student.get('profile_pic'):
                             st.image(student['profile_pic'], width=40)
@@ -4092,11 +5106,17 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     with col4:
                         student_classes = [c['name'] for c in classes if student['email'] in c.get('students', [])]
                         st.markdown(f"Classes: {len(student_classes)}")
-                    
-                    if user['role'] == 'admin' or user['role'] == 'teacher':
-                        if st.button("📊 View Performance", key=f"student_perf_{student['email']}"):
-                            st.session_state.viewing_student = student['email']
-                            st.rerun()
+                    with col5:
+                        if user['role'] == 'admin' or user['role'] == 'teacher':
+                            if st.button("📊 View", key=f"student_perf_{student['email']}"):
+                                st.session_state.viewing_student = student['email']
+                                st.rerun()
+                            if user['role'] == 'admin':
+                                if st.button("🗑️", key=f"del_student_{student['email']}"):
+                                    success, message = delete_user(school_code, student['email'], user['email'])
+                                    if success:
+                                        st.success(message)
+                                        st.rerun()
                     st.divider()
         else:
             st.info("No students registered yet")
@@ -4110,7 +5130,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         if guardian_users:
             for guardian in guardian_users:
                 with st.container():
-                    col1, col2, col3 = st.columns([1, 3, 3])
+                    col1, col2, col3, col4 = st.columns([1, 3, 3, 1])
                     with col1:
                         if guardian.get('profile_pic'):
                             st.image(guardian['profile_pic'], width=40)
@@ -4127,6 +5147,13 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             if student:
                                 linked_names.append(student['fullname'])
                         st.markdown(f"Linked to: {', '.join(linked_names) if linked_names else 'None'}")
+                    with col4:
+                        if user['role'] == 'admin':
+                            if st.button("🗑️", key=f"del_guardian_{guardian['email']}"):
+                                success, message = delete_user(school_code, guardian['email'], user['email'])
+                                if success:
+                                    st.success(message)
+                                    st.rerun()
                     st.divider()
         else:
             st.info("No guardians registered yet")
@@ -4167,9 +5194,26 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         for cls in student_classes:
                             st.write(f"- {cls['name']} ({cls['grade']})")
                     
-                    if st.button("📊 View Full Performance", key=f"view_perf_{student['email']}"):
-                        st.session_state.viewing_student = student['email']
-                        st.rerun()
+                    col_a, col_b = st.columns(2)
+                    with col_a:
+                        if st.button("📊 View Full Performance", key=f"view_perf_{student['email']}"):
+                            st.session_state.viewing_student = student['email']
+                            st.rerun()
+                    with col_b:
+                        if st.button("📞 Call Teacher", key=f"call_teacher_{student['email']}"):
+                            # Find class teacher
+                            for cls in student_classes:
+                                if cls.get('teacher'):
+                                    create_call_room(
+                                        school_code,
+                                        user['email'],
+                                        "audio",
+                                        [cls['teacher']],
+                                        f"Parent-Teacher meeting for {student['fullname']}"
+                                    )
+                                    st.success(f"Calling teacher...")
+                                    st.rerun()
+                                    break
         else:
             st.info("No linked students found")
     
