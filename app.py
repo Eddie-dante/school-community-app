@@ -21,24 +21,6 @@ try:
 except ImportError:
     QRCODE_AVAILABLE = False
 
-try:
-    import redis
-    REDIS_AVAILABLE = True
-except ImportError:
-    REDIS_AVAILABLE = False
-
-try:
-    import openai
-    OPENAI_AVAILABLE = True
-except ImportError:
-    OPENAI_AVAILABLE = False
-
-try:
-    from twilio.rest import Client
-    TWILIO_AVAILABLE = True
-except ImportError:
-    TWILIO_AVAILABLE = False
-
 # ============ PAGE CONFIG ============
 st.set_page_config(
     page_title="✨ School Community Hub ✨",
@@ -1329,6 +1311,1247 @@ def import_members_from_excel(school_code, uploaded_file):
     except Exception as e:
         return False, f"Error importing members: {str(e)}"
 
+# ============ NEW FEATURE FUNCTIONS (ADDED HERE) ============
+
+# ============ MULTI-LANGUAGE SUPPORT ============
+TRANSLATIONS = {
+    "en": {  # English
+        "welcome": "✨ School Community Hub ✨",
+        "connect": "Connect • Collaborate • Manage • Shine",
+        "school_community": "🏫 School Community",
+        "school_management": "📊 School Management",
+        "personal_dashboard": "👤 Personal Dashboard",
+        "admin_login": "👑 Admin Login",
+        "teacher_login": "👨‍🏫 Teacher Login",
+        "student_login": "👨‍🎓 Student Login",
+        "guardian_login": "👪 Guardian Login",
+        "create_school": "🏫 Create New School",
+        "login": "Login",
+        "register": "Register",
+        "email": "Email",
+        "password": "Password",
+        "school_code": "School Code",
+        "full_name": "Full Name",
+        "phone": "Phone",
+        "admission_number": "Admission Number",
+        "dashboard": "Dashboard",
+        "announcements": "Announcements",
+        "community": "Community",
+        "chat": "Chat",
+        "friends": "Friends",
+        "classes": "Classes",
+        "groups": "Groups",
+        "assignments": "Assignments",
+        "library": "Library",
+        "settings": "Settings",
+        "profile": "Profile",
+        "logout": "Logout",
+        "submit": "Submit",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete",
+        "edit": "Edit",
+        "search": "Search",
+        "filter": "Filter",
+        "loading": "Loading...",
+        "error": "Error",
+        "success": "Success",
+        "warning": "Warning",
+        "info": "Info",
+        "confirm": "Confirm",
+        "yes": "Yes",
+        "no": "No",
+        "welcome_back": "Welcome back, {name}!",
+        "no_data": "No data available",
+        "please_wait": "Please wait...",
+        "processing": "Processing...",
+        "completed": "Completed",
+        "pending": "Pending",
+        "failed": "Failed",
+    },
+    "sw": {  # Kiswahili
+        "welcome": "✨ Kituo cha Jumuiya ya Shule ✨",
+        "connect": "Unganisha • Shirikiana • Simamia • Angaza",
+        "school_community": "🏫 Jumuiya ya Shule",
+        "school_management": "📊 Usimamizi wa Shule",
+        "personal_dashboard": "👤 Dashbodi ya Kibinafsi",
+        "admin_login": "👑 Kuingia kwa Msimamizi",
+        "teacher_login": "👨‍🏫 Kuingia kwa Mwalimu",
+        "student_login": "👨‍🎓 Kuingia kwa Mwanafunzi",
+        "guardian_login": "👪 Kuingia kwa Mlezi",
+        "create_school": "🏫 Unda Shule Mpya",
+        "login": "Ingia",
+        "register": "Jisajili",
+        "email": "Barua pepe",
+        "password": "Nywila",
+        "school_code": "Msimbo wa Shule",
+        "full_name": "Jina Kamili",
+        "phone": "Simu",
+        "admission_number": "Nambari ya Udahili",
+        "dashboard": "Dashbodi",
+        "announcements": "Matangazo",
+        "community": "Jumuiya",
+        "chat": "Mazungumzo",
+        "friends": "Marafiki",
+        "classes": "Madarasa",
+        "groups": "Vikundi",
+        "assignments": "Kazi",
+        "library": "Maktaba",
+        "settings": "Mipangilio",
+        "profile": "Wasifu",
+        "logout": "Toka",
+        "submit": "Wasilisha",
+        "cancel": "Ghairi",
+        "save": "Hifadhi",
+        "delete": "Futa",
+        "edit": "Hariri",
+        "search": "Tafuta",
+        "filter": "Chuja",
+        "loading": "Inapakia...",
+        "error": "Hitilafu",
+        "success": "Imefaulu",
+        "warning": "Onyo",
+        "info": "Taarifa",
+        "confirm": "Thibitisha",
+        "yes": "Ndiyo",
+        "no": "Hapana",
+        "welcome_back": "Karibu tena, {name}!",
+        "no_data": "Hakuna data",
+        "please_wait": "Tafadhali subiri...",
+        "processing": "Inachakatwa...",
+        "completed": "Imekamilika",
+        "pending": "Inasubiri",
+        "failed": "Imeshindwa",
+    },
+    "fr": {  # French
+        "welcome": "✨ Centre Communautaire Scolaire ✨",
+        "connect": "Connecter • Collaborer • Gérer • Briller",
+        "school_community": "🏫 Communauté Scolaire",
+        "school_management": "📊 Gestion Scolaire",
+        "personal_dashboard": "👤 Tableau de Bord Personnel",
+        "admin_login": "👑 Connexion Admin",
+        "teacher_login": "👨‍🏫 Connexion Enseignant",
+        "student_login": "👨‍🎓 Connexion Élève",
+        "guardian_login": "👪 Connexion Parent",
+        "create_school": "🏫 Créer une École",
+        "login": "Connexion",
+        "register": "S'inscrire",
+        "email": "Email",
+        "password": "Mot de passe",
+        "school_code": "Code de l'école",
+        "full_name": "Nom Complet",
+        "phone": "Téléphone",
+        "admission_number": "Numéro d'admission",
+        "dashboard": "Tableau de Bord",
+        "announcements": "Annonces",
+        "community": "Communauté",
+        "chat": "Discussion",
+        "friends": "Amis",
+        "classes": "Classes",
+        "groups": "Groupes",
+        "assignments": "Devoirs",
+        "library": "Bibliothèque",
+        "settings": "Paramètres",
+        "profile": "Profil",
+        "logout": "Déconnexion",
+        "submit": "Soumettre",
+        "cancel": "Annuler",
+        "save": "Enregistrer",
+        "delete": "Supprimer",
+        "edit": "Modifier",
+        "search": "Rechercher",
+        "filter": "Filtrer",
+        "loading": "Chargement...",
+        "error": "Erreur",
+        "success": "Succès",
+        "warning": "Avertissement",
+        "info": "Info",
+        "confirm": "Confirmer",
+        "yes": "Oui",
+        "no": "Non",
+        "welcome_back": "Bon retour, {name}!",
+        "no_data": "Aucune donnée",
+        "please_wait": "Veuillez patienter...",
+        "processing": "Traitement...",
+        "completed": "Terminé",
+        "pending": "En attente",
+        "failed": "Échoué",
+    },
+    "ar": {  # Arabic
+        "welcome": "✨ مركز المجتمع المدرسي ✨",
+        "connect": "تواصل • تعاون • إدارة • تألق",
+        "school_community": "🏫 المجتمع المدرسي",
+        "school_management": "📊 إدارة المدرسة",
+        "personal_dashboard": "👤 لوحة التحكم الشخصية",
+        "admin_login": "👑 تسجيل دخول المدير",
+        "teacher_login": "👨‍🏫 تسجيل دخول المعلم",
+        "student_login": "👨‍🎓 تسجيل دخول الطالب",
+        "guardian_login": "👪 تسجيل دخول ولي الأمر",
+        "create_school": "🏫 إنشاء مدرسة جديدة",
+        "login": "تسجيل الدخول",
+        "register": "التسجيل",
+        "email": "البريد الإلكتروني",
+        "password": "كلمة المرور",
+        "school_code": "رمز المدرسة",
+        "full_name": "الاسم الكامل",
+        "phone": "الهاتف",
+        "admission_number": "رقم القبول",
+        "dashboard": "لوحة التحكم",
+        "announcements": "الإعلانات",
+        "community": "المجتمع",
+        "chat": "الدردشة",
+        "friends": "الأصدقاء",
+        "classes": "الفصول",
+        "groups": "المجموعات",
+        "assignments": "الواجبات",
+        "library": "المكتبة",
+        "settings": "الإعدادات",
+        "profile": "الملف الشخصي",
+        "logout": "تسجيل الخروج",
+        "submit": "إرسال",
+        "cancel": "إلغاء",
+        "save": "حفظ",
+        "delete": "حذف",
+        "edit": "تعديل",
+        "search": "بحث",
+        "filter": "تصفية",
+        "loading": "جاري التحميل...",
+        "error": "خطأ",
+        "success": "نجاح",
+        "warning": "تحذير",
+        "info": "معلومات",
+        "confirm": "تأكيد",
+        "yes": "نعم",
+        "no": "لا",
+        "welcome_back": "مرحباً بعودتك، {name}!",
+        "no_data": "لا توجد بيانات",
+        "please_wait": "الرجاء الانتظار...",
+        "processing": "جاري المعالجة...",
+        "completed": "مكتمل",
+        "pending": "قيد الانتظار",
+        "failed": "فشل",
+    }
+}
+
+def get_text(key: str, **kwargs) -> str:
+    """Get translated text"""
+    if 'language' not in st.session_state:
+        st.session_state.language = 'en'
+    lang = st.session_state.language
+    text = TRANSLATIONS.get(lang, TRANSLATIONS['en']).get(key, key)
+    if kwargs:
+        text = text.format(**kwargs)
+    return text
+
+# ============ ACCESSIBILITY FEATURES ============
+ACCESSIBILITY_PRESETS = {
+    "Default": {
+        "text_size": "Medium",
+        "contrast_mode": False,
+        "dyslexia_font": False,
+        "color_blind_mode": "None",
+        "reduced_motion": False
+    },
+    "Large Text": {
+        "text_size": "Large",
+        "contrast_mode": False,
+        "dyslexia_font": False,
+        "color_blind_mode": "None",
+        "reduced_motion": False
+    },
+    "High Contrast": {
+        "text_size": "Medium",
+        "contrast_mode": True,
+        "dyslexia_font": False,
+        "color_blind_mode": "None",
+        "reduced_motion": False
+    },
+    "Dyslexia Friendly": {
+        "text_size": "Medium",
+        "contrast_mode": False,
+        "dyslexia_font": True,
+        "color_blind_mode": "None",
+        "reduced_motion": False
+    }
+}
+
+COLOR_BLIND_FILTERS = {
+    "None": "",
+    "Protanopia": "protanopia",
+    "Deuteranopia": "deuteranopia",
+    "Tritanopia": "tritanopia"
+}
+
+# ============ BADGES & ACHIEVEMENTS ============
+BADGES = {
+    "perfect_attendance": {
+        "name": "Perfect Attendance",
+        "description": "Achieved 100% attendance for a term",
+        "icon": "📅",
+        "color": "gold"
+    },
+    "homework_streak": {
+        "name": "Homework Streak",
+        "description": "Completed all assignments for 30 days",
+        "icon": "📚",
+        "color": "silver"
+    },
+    "helpful_peer": {
+        "name": "Helpful Peer",
+        "description": "Helped 10 classmates with their studies",
+        "icon": "🤝",
+        "color": "blue"
+    },
+    "math_wizard": {
+        "name": "Math Wizard",
+        "description": "Scored 90%+ in all math tests",
+        "icon": "🧮",
+        "color": "purple"
+    },
+    "science_whiz": {
+        "name": "Science Whiz",
+        "description": "Excellent performance in science subjects",
+        "icon": "🔬",
+        "color": "green"
+    },
+    "library_enthusiast": {
+        "name": "Library Enthusiast",
+        "description": "Borrowed 20+ books from the library",
+        "icon": "📖",
+        "color": "brown"
+    },
+    "sports_champion": {
+        "name": "Sports Champion",
+        "description": "Participated in 5+ sports events",
+        "icon": "⚽",
+        "color": "orange"
+    },
+    "artistic_talent": {
+        "name": "Artistic Talent",
+        "description": "Showcased artwork in school exhibitions",
+        "icon": "🎨",
+        "color": "pink"
+    },
+    "leadership_excellence": {
+        "name": "Leadership Excellence",
+        "description": "Led a group or club successfully",
+        "icon": "👑",
+        "color": "gold"
+    },
+    "community_service": {
+        "name": "Community Service",
+        "description": "Volunteered for 20+ hours",
+        "icon": "❤️",
+        "color": "red"
+    }
+}
+
+# ============ WELLNESS CENTER FUNCTIONS ============
+def add_wellness_checkin(user_email: str, school_code: str, mood: int, stress: int, 
+                         sleep: float, anxiety: int, energy: int, social: int, notes: str = ""):
+    """Add a wellness check-in"""
+    checkins = load_school_data(school_code, "wellness_checkins.json", [])
+    checkin = {
+        "id": generate_id("WEL"),
+        "user_email": user_email,
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "mood": mood,  # 1-10
+        "stress": stress,  # 1-10
+        "sleep": sleep,  # hours
+        "anxiety": anxiety,  # 1-10
+        "energy": energy,  # 1-10
+        "social": social,  # 1-10
+        "notes": notes
+    }
+    checkins.append(checkin)
+    save_school_data(school_code, "wellness_checkins.json", checkins)
+    
+    # Check for concerning patterns
+    recent_checkins = [c for c in checkins if c['user_email'] == user_email][-5:]
+    if len(recent_checkins) >= 3:
+        avg_stress = sum(c['stress'] for c in recent_checkins) / len(recent_checkins)
+        avg_anxiety = sum(c['anxiety'] for c in recent_checkins) / len(recent_checkins)
+        
+        if avg_stress > 7 or avg_anxiety > 7:
+            # Alert counselor
+            counselors = [u for u in load_school_data(school_code, "users.json", []) if u['role'] == 'counselor']
+            for counselor in counselors:
+                # Use your existing notification system
+                if 'send_notification' in globals():
+                    send_notification(
+                        school_code,
+                        counselor['email'],
+                        "wellness_alert",
+                        "⚠️ Student Wellness Alert",
+                        f"Student {user_email} showing high stress/anxiety levels",
+                        {"student": user_email, "avg_stress": avg_stress, "avg_anxiety": avg_anxiety}
+                    )
+    
+    return checkin
+
+# ============ STUDY GROUPS FUNCTIONS ============
+def create_study_group(school_code: str, name: str, subject: str, created_by: str,
+                       schedule: str, max_participants: int = 10) -> str:
+    """Create a study group"""
+    groups = load_school_data(school_code, "study_groups.json", [])
+    group = {
+        "id": generate_id("STG"),
+        "name": name,
+        "subject": subject,
+        "created_by": created_by,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "members": [created_by],
+        "schedule": schedule,
+        "max_participants": max_participants,
+        "status": "active"
+    }
+    groups.append(group)
+    save_school_data(school_code, "study_groups.json", groups)
+    return group['id']
+
+def join_study_group(school_code: str, group_id: str, user_email: str) -> bool:
+    """Join a study group"""
+    groups = load_school_data(school_code, "study_groups.json", [])
+    for group in groups:
+        if group['id'] == group_id:
+            if len(group['members']) >= group['max_participants']:
+                return False
+            if user_email not in group['members']:
+                group['members'].append(user_email)
+                save_school_data(school_code, "study_groups.json", groups)
+                return True
+    return False
+
+# ============ CAREER GUIDANCE FUNCTIONS ============
+CAREER_INTERESTS = {
+    "science": ["Medicine", "Engineering", "Research", "Pharmacy", "Environmental Science"],
+    "arts": ["Graphic Design", "Photography", "Fine Arts", "Animation", "Fashion Design"],
+    "business": ["Accounting", "Marketing", "Entrepreneurship", "Finance", "Human Resources"],
+    "technology": ["Software Development", "Data Science", "Cybersecurity", "AI/ML", "IT Management"],
+    "humanities": ["Law", "Journalism", "Psychology", "Education", "Social Work"],
+    "trades": ["Electrician", "Plumbing", "Carpentry", "Welding", "Automotive"]
+}
+
+def career_quiz(answers: dict) -> list:
+    """Process career quiz and return recommendations"""
+    interests = []
+    
+    # Q1: What subjects do you enjoy?
+    if answers.get('q1') in ['math', 'science']:
+        interests.extend(['science', 'technology'])
+    elif answers.get('q1') in ['english', 'history']:
+        interests.extend(['humanities', 'arts'])
+    elif answers.get('q1') == 'business':
+        interests.extend(['business', 'trades'])
+    
+    # Q2: How do you like to work?
+    if answers.get('q2') == 'alone':
+        interests.extend(['technology', 'research'])
+    elif answers.get('q2') == 'team':
+        interests.extend(['business', 'healthcare'])
+    elif answers.get('q2') == 'creative':
+        interests.extend(['arts', 'design'])
+    
+    # Q3: What's your problem-solving style?
+    if answers.get('q3') == 'analytical':
+        interests.extend(['science', 'engineering'])
+    elif answers.get('q3') == 'creative':
+        interests.extend(['arts', 'marketing'])
+    elif answers.get('q3') == 'practical':
+        interests.extend(['trades', 'business'])
+    
+    # Q4: What's important in your career?
+    if answers.get('q4') == 'money':
+        interests.extend(['business', 'technology'])
+    elif answers.get('q4') == 'helping':
+        interests.extend(['healthcare', 'education'])
+    elif answers.get('q4') == 'creativity':
+        interests.extend(['arts', 'design'])
+    elif answers.get('q4') == 'stability':
+        interests.extend(['government', 'trades'])
+    
+    # Get unique interests and map to careers
+    unique_interests = list(set(interests))
+    recommendations = []
+    for interest in unique_interests[:3]:
+        recommendations.extend(CAREER_INTERESTS.get(interest, []))
+    
+    return recommendations[:5]  # Return top 5
+
+# ============ EMERGENCY ALERT SYSTEM ============
+EMERGENCY_TYPES = {
+    "medical": {"icon": "🚑", "priority": 1, "message": "Medical Emergency"},
+    "security": {"icon": "🚨", "priority": 2, "message": "Security Threat"},
+    "fire": {"icon": "🔥", "priority": 1, "message": "Fire Emergency"},
+    "accident": {"icon": "⚠️", "priority": 2, "message": "Accident Reported"},
+    "other": {"icon": "🆘", "priority": 3, "message": "Other Emergency"}
+}
+
+def send_emergency_alert(user_email: str, school_code: str, alert_type: str, 
+                         location: str = "", description: str = ""):
+    """Send an emergency alert"""
+    alerts = load_school_data(school_code, "emergency_alerts.json", [])
+    
+    # Check for recent similar alerts to prevent spam
+    recent = [a for a in alerts if a['user_email'] == user_email and 
+              a['timestamp'].startswith(datetime.now().strftime("%Y-%m-%d"))]
+    if len(recent) > 3:
+        return False, "Too many alerts from this user today"
+    
+    alert = {
+        "id": generate_id("EMA"),
+        "user_email": user_email,
+        "alert_type": alert_type,
+        "location": location,
+        "description": description,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "status": "active",
+        "responded_by": None,
+        "response_time": None
+    }
+    alerts.append(alert)
+    save_school_data(school_code, "emergency_alerts.json", alerts)
+    
+    # Get emergency contacts (admins, security)
+    users = load_school_data(school_code, "users.json", [])
+    emergency_contacts = [u for u in users if u['role'] in ['admin', 'security']]
+    
+    alert_info = EMERGENCY_TYPES.get(alert_type, EMERGENCY_TYPES['other'])
+    
+    for contact in emergency_contacts:
+        # Use your existing notification system
+        if 'send_notification' in globals():
+            send_notification(
+                school_code,
+                contact['email'],
+                "emergency_alert",
+                f"{alert_info['icon']} EMERGENCY ALERT",
+                f"{alert_info['message']} at {location}\nReported by: {user_email}\nDetails: {description}",
+                {"alert_id": alert['id'], "priority": alert_info['priority']}
+            )
+    
+    return True, "Emergency alert sent successfully"
+
+# ============ VIDEO CONFERENCING ============
+def create_video_meeting(school_code: str, room_name: str, created_by: str,
+                         meeting_type: str, scheduled_for: datetime = None) -> dict:
+    """Create a Jitsi Meet video conference"""
+    meetings = load_school_data(school_code, "video_meetings.json", [])
+    
+    # Generate unique room name
+    room_id = generate_id("VID")
+    jitsi_url = f"https://meet.jit.si/{school_code}_{room_id}"
+    
+    meeting = {
+        "id": room_id,
+        "room_name": room_name,
+        "created_by": created_by,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "scheduled_for": scheduled_for.strftime("%Y-%m-%d %H:%M:%S") if scheduled_for else None,
+        "participants": [created_by],
+        "meeting_type": meeting_type,  # class, parent_teacher, study_group
+        "link": jitsi_url,
+        "status": "scheduled" if scheduled_for else "active"
+    }
+    meetings.append(meeting)
+    save_school_data(school_code, "video_meetings.json", meetings)
+    
+    return meeting
+
+# ============ QR CODE GENERATOR ============
+def generate_qr_code(data: str, size: int = 200) -> str:
+    """Generate QR code and return as base64 image (if qrcode is available)"""
+    if not QRCODE_AVAILABLE:
+        return ""
+    
+    try:
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(data)
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        buffered = BytesIO()
+        img.save(buffered, format="PNG")
+        img_str = base64.b64encode(buffered.getvalue()).decode()
+        
+        return f"data:image/png;base64,{img_str}"
+    except Exception as e:
+        return ""
+
+# ============ E-PORTFOLIO FUNCTIONS ============
+def add_portfolio_project(user_email: str, school_code: str, title: str, 
+                          description: str, skills: list, files: list = None):
+    """Add a project to user's portfolio"""
+    projects = load_school_data(school_code, "portfolio_projects.json", [])
+    
+    # Process uploaded files using your existing save_attachment function
+    file_data = []
+    if files and 'save_attachment' in globals():
+        for file in files:
+            attachment = save_attachment(file)
+            if attachment:
+                file_data.append(attachment)
+    
+    project = {
+        "id": generate_id("PFP"),
+        "user_email": user_email,
+        "title": title,
+        "description": description,
+        "skills": skills,
+        "files": file_data,
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    }
+    projects.append(project)
+    save_school_data(school_code, "portfolio_projects.json", projects)
+    
+    return project
+
+# ============ RENDER FUNCTIONS FOR NEW UI ELEMENTS ============
+def render_language_selector():
+    """Render language selection dropdown"""
+    st.sidebar.markdown("### 🌐 Language")
+    col1, col2, col3, col4 = st.sidebar.columns(4)
+    with col1:
+        if st.sidebar.button("🇬🇧 EN", key="lang_en", use_container_width=True):
+            st.session_state.language = 'en'
+            st.rerun()
+    with col2:
+        if st.sidebar.button("🇰🇪 SW", key="lang_sw", use_container_width=True):
+            st.session_state.language = 'sw'
+            st.rerun()
+    with col3:
+        if st.sidebar.button("🇫🇷 FR", key="lang_fr", use_container_width=True):
+            st.session_state.language = 'fr'
+            st.rerun()
+    with col4:
+        if st.sidebar.button("🇸🇦 AR", key="lang_ar", use_container_width=True):
+            st.session_state.language = 'ar'
+            st.rerun()
+
+def render_accessibility_panel():
+    """Render accessibility settings panel"""
+    with st.sidebar.expander("♿ Accessibility", expanded=False):
+        if 'accessibility' not in st.session_state:
+            st.session_state.accessibility = ACCESSIBILITY_PRESETS["Default"]
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Text size
+            text_size = st.select_slider(
+                "Text Size",
+                options=["Small", "Medium", "Large", "Extra Large"],
+                value=st.session_state.accessibility.get('text_size', 'Medium'),
+                key="acc_text_size"
+            )
+            
+            # High contrast
+            high_contrast = st.checkbox(
+                "High Contrast Mode",
+                value=st.session_state.accessibility.get('contrast_mode', False),
+                key="acc_contrast"
+            )
+            
+            # Dyslexia font
+            dyslexia_font = st.checkbox(
+                "Dyslexia-Friendly Font",
+                value=st.session_state.accessibility.get('dyslexia_font', False),
+                key="acc_dyslexia"
+            )
+        
+        with col2:
+            # Color blind mode
+            color_blind = st.selectbox(
+                "Color Blindness Mode",
+                options=list(COLOR_BLIND_FILTERS.keys()),
+                index=list(COLOR_BLIND_FILTERS.keys()).index(
+                    st.session_state.accessibility.get('color_blind_mode', 'None')
+                ),
+                key="acc_color_blind"
+            )
+            
+            # Reduced motion
+            reduced_motion = st.checkbox(
+                "Reduced Motion",
+                value=st.session_state.accessibility.get('reduced_motion', False),
+                key="acc_motion"
+            )
+            
+            # Accessibility presets
+            preset = st.selectbox(
+                "Presets",
+                options=list(ACCESSIBILITY_PRESETS.keys()),
+                key="acc_preset"
+            )
+            if st.button("Apply Preset", key="acc_apply", use_container_width=True):
+                st.session_state.accessibility = ACCESSIBILITY_PRESETS[preset]
+                st.rerun()
+        
+        if st.button("💾 Save Settings", key="acc_save", use_container_width=True):
+            st.session_state.accessibility.update({
+                'text_size': text_size,
+                'contrast_mode': high_contrast,
+                'dyslexia_font': dyslexia_font,
+                'color_blind_mode': color_blind,
+                'reduced_motion': reduced_motion
+            })
+            st.success("Accessibility settings saved!")
+            st.rerun()
+
+def render_wellness_center():
+    """Render wellness center interface"""
+    st.markdown("### 🧠 Wellness Center")
+    
+    tab1, tab2, tab3 = st.tabs([
+        "📝 Daily Check-in",
+        "📊 My Wellness",
+        "🆘 Resources"
+    ])
+    
+    with tab1:
+        st.markdown("#### How are you feeling today?")
+        
+        with st.form("wellness_checkin"):
+            col1, col2 = st.columns(2)
+            
+            with col1:
+                mood = st.slider("Mood (1-10)", 1, 10, 7, help="1=Very Sad, 10=Very Happy")
+                stress = st.slider("Stress Level (1-10)", 1, 10, 5, help="1=No stress, 10=Extremely stressed")
+                sleep = st.number_input("Hours of Sleep", min_value=0.0, max_value=24.0, value=7.0, step=0.5)
+            
+            with col2:
+                anxiety = st.slider("Anxiety Level (1-10)", 1, 10, 5, help="1=No anxiety, 10=Extremely anxious")
+                energy = st.slider("Energy Level (1-10)", 1, 10, 6, help="1=Very low, 10=Very high")
+                social = st.slider("Social Connection (1-10)", 1, 10, 6, help="1=Isolated, 10=Very connected")
+            
+            notes = st.text_area("Notes (optional)", placeholder="Anything you'd like to share...")
+            
+            if st.form_submit_button("Submit Check-in", use_container_width=True):
+                if st.session_state.user and st.session_state.current_school:
+                    add_wellness_checkin(
+                        st.session_state.user['email'],
+                        st.session_state.current_school['code'],
+                        mood, stress, sleep, anxiety, energy, social, notes
+                    )
+                    st.success("Check-in recorded! Thank you for sharing.")
+                    
+                    if stress > 7 or anxiety > 7:
+                        st.warning("""
+                        ⚠️ Your stress/anxiety levels seem high. 
+                        Remember you can talk to our school counselor.
+                        """)
+    
+    with tab2:
+        if st.session_state.user and st.session_state.current_school:
+            checkins = load_school_data(
+                st.session_state.current_school['code'], 
+                "wellness_checkins.json", 
+                []
+            )
+            user_checkins = [c for c in checkins if c['user_email'] == st.session_state.user['email']]
+            
+            if user_checkins:
+                df = pd.DataFrame(user_checkins)
+                df['date'] = pd.to_datetime(df['date'])
+                df = df.sort_values('date')
+                
+                col1, col2, col3 = st.columns(3)
+                with col1:
+                    avg_mood = df['mood'].mean()
+                    st.metric("Average Mood", f"{avg_mood:.1f}/10")
+                with col2:
+                    avg_stress = df['stress'].mean()
+                    st.metric("Average Stress", f"{avg_stress:.1f}/10")
+                with col3:
+                    avg_sleep = df['sleep'].mean()
+                    st.metric("Average Sleep", f"{avg_sleep:.1f} hrs")
+                
+                # Trend graphs
+                fig = px.line(df, x='date', y=['mood', 'stress', 'anxiety', 'energy'],
+                              title="Wellness Trends Over Time",
+                              color_discrete_sequence=['#28a745', '#dc3545', '#ffc107', '#17a2b8'])
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("No check-in data yet. Start tracking your wellness today!")
+    
+    with tab3:
+        st.markdown("""
+        #### 📞 Emergency Contacts
+        - **School Counselor**: Room 101, Ext 123
+        - **Health Center**: Ext 456
+        - **Emergency**: 999 / 112
+        
+        #### 📚 Self-Help Resources
+        - Stress Management Guide
+        - Mindfulness Exercises
+        - Study-Life Balance Tips
+        - Peer Support Group Schedule
+        
+        #### 🗓️ Support Groups
+        - **Anxiety Support**: Mondays 4pm, Room 203
+        - **Study Stress**: Wednesdays 3pm, Library
+        - **Peer Connection**: Fridays 2pm, Student Lounge
+        """)
+
+def render_study_groups():
+    """Render study groups interface"""
+    st.markdown("### 📚 Study Groups")
+    
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown("#### Create Study Group")
+        with st.form("create_study_group"):
+            group_name = st.text_input("Group Name", placeholder="e.g., Math Masters")
+            subject = st.selectbox("Subject", PRIMARY_SUBJECTS)
+            schedule = st.text_input("Schedule", placeholder="e.g., Mon/Wed 3-4pm")
+            max_participants = st.number_input("Max Participants", min_value=2, max_value=20, value=10)
+            
+            if st.form_submit_button("Create Group", use_container_width=True):
+                if st.session_state.user and st.session_state.current_school:
+                    group_id = create_study_group(
+                        st.session_state.current_school['code'],
+                        group_name,
+                        subject,
+                        st.session_state.user['email'],
+                        schedule,
+                        max_participants
+                    )
+                    st.success(f"Study group '{group_name}' created!")
+                    st.rerun()
+    
+    with col2:
+        st.markdown("#### Available Study Groups")
+        if st.session_state.user and st.session_state.current_school:
+            groups = load_school_data(st.session_state.current_school['code'], "study_groups.json", [])
+            active_groups = [g for g in groups if g['status'] == 'active']
+            
+            if active_groups:
+                for group in active_groups:
+                    with st.container():
+                        col_a, col_b = st.columns([3, 1])
+                        with col_a:
+                            st.markdown(f"**{group['name']}** ({group['subject']})")
+                            st.markdown(f"Schedule: {group['schedule']}")
+                            st.markdown(f"Members: {len(group['members'])}/{group['max_participants']}")
+                        with col_b:
+                            if st.session_state.user['email'] not in group['members']:
+                                if len(group['members']) < group['max_participants']:
+                                    if st.button("Join", key=f"join_{group['id']}", use_container_width=True):
+                                        if join_study_group(
+                                            st.session_state.current_school['code'],
+                                            group['id'],
+                                            st.session_state.user['email']
+                                        ):
+                                            st.success(f"Joined {group['name']}!")
+                                            st.rerun()
+                        st.divider()
+            else:
+                st.info("No active study groups available")
+
+def render_career_guidance():
+    """Render career guidance interface"""
+    st.markdown("### 🎯 Career Guidance")
+    
+    tab1, tab2 = st.tabs(["🎯 Career Quiz", "💼 Recommendations"])
+    
+    with tab1:
+        st.markdown("#### Discover Your Career Path")
+        st.markdown("Answer a few questions to get personalized career recommendations.")
+        
+        with st.form("career_quiz"):
+            q1 = st.radio(
+                "1. What subjects do you enjoy most?",
+                ["Mathematics/Science", "Languages/Arts", "Business/Commerce", "Practical/Trades"]
+            )
+            
+            q2 = st.radio(
+                "2. How do you prefer to work?",
+                ["Independently", "In a team", "Creatively", "With my hands"]
+            )
+            
+            q3 = st.radio(
+                "3. How do you solve problems?",
+                ["Analytically - break them down", "Creatively - think outside box", 
+                 "Practically - try solutions", "Collaboratively - ask others"]
+            )
+            
+            q4 = st.radio(
+                "4. What's most important in your career?",
+                ["High income", "Helping others", "Creative expression", "Job stability"]
+            )
+            
+            if st.form_submit_button("Get Recommendations", use_container_width=True):
+                answers = {
+                    'q1': q1.lower().split('/')[0],
+                    'q2': q2.lower(),
+                    'q3': q3.lower().split()[0],
+                    'q4': q4.lower().split()[0]
+                }
+                
+                recommendations = career_quiz(answers)
+                st.session_state.career_recommendations = recommendations
+                st.rerun()
+    
+    with tab2:
+        if 'career_recommendations' in st.session_state and st.session_state.career_recommendations:
+            st.markdown("#### Your Career Recommendations")
+            
+            for i, career in enumerate(st.session_state.career_recommendations, 1):
+                with st.container():
+                    st.markdown(f"""
+                    <div class="golden-card">
+                        <h4>{i}. {career}</h4>
+                        <p>📚 Recommended subjects: Mathematics, Sciences, Languages</p>
+                        <p>🎓 Education path: Bachelor's degree in relevant field</p>
+                    </div>
+                    """, unsafe_allow_html=True)
+        else:
+            st.info("Take the career quiz to get personalized recommendations!")
+
+def render_emergency_alerts():
+    """Render emergency alert system"""
+    st.markdown("### 🚨 Emergency Alert System")
+    st.warning("Only use this for genuine emergencies!")
+    
+    with st.form("emergency_alert"):
+        alert_type = st.selectbox(
+            "Alert Type",
+            options=list(EMERGENCY_TYPES.keys()),
+            format_func=lambda x: EMERGENCY_TYPES[x]['message']
+        )
+        
+        location = st.text_input("Your Location", placeholder="e.g., Room 101, Library, Field")
+        description = st.text_area("Description", placeholder="Briefly describe the situation...")
+        
+        # Confirmation checkbox to prevent false alarms
+        confirm = st.checkbox("I confirm this is a genuine emergency")
+        
+        if st.form_submit_button("🚨 SEND EMERGENCY ALERT", use_container_width=True, type="primary"):
+            if not confirm:
+                st.error("Please confirm this is a genuine emergency")
+            elif st.session_state.user and st.session_state.current_school:
+                success, message = send_emergency_alert(
+                    st.session_state.user['email'],
+                    st.session_state.current_school['code'],
+                    alert_type,
+                    location,
+                    description
+                )
+                if success:
+                    st.error("🚨 EMERGENCY ALERT SENT - Help is on the way!")
+                    st.balloons()
+                else:
+                    st.error(message)
+
+def render_portfolio():
+    """Render e-portfolio interface"""
+    st.markdown("### 📁 My Portfolio")
+    
+    tab1, tab2 = st.tabs(["📁 Projects", "🎯 Skills"])
+    
+    with tab1:
+        st.markdown("#### My Projects")
+        
+        with st.expander("➕ Add New Project"):
+            with st.form("add_project"):
+                title = st.text_input("Project Title")
+                description = st.text_area("Description", height=100)
+                skills = st.multiselect("Skills Used", 
+                                       ["Python", "Java", "HTML/CSS", "JavaScript", "Design", 
+                                        "Research", "Writing", "Leadership", "Teamwork"])
+                files = st.file_uploader("Upload Files", accept_multiple_files=True)
+                
+                if st.form_submit_button("Save Project", use_container_width=True):
+                    if st.session_state.user and st.session_state.current_school:
+                        project = add_portfolio_project(
+                            st.session_state.user['email'],
+                            st.session_state.current_school['code'],
+                            title,
+                            description,
+                            skills,
+                            files
+                        )
+                        st.success("Project added to portfolio!")
+                        st.rerun()
+        
+        # Display projects
+        if st.session_state.user and st.session_state.current_school:
+            projects = load_school_data(st.session_state.current_school['code'], "portfolio_projects.json", [])
+            user_projects = [p for p in projects if p['user_email'] == st.session_state.user['email']]
+            
+            if user_projects:
+                for project in user_projects:
+                    with st.container():
+                        st.markdown(f"""
+                        <div class="golden-card">
+                            <h4>{project['title']}</h4>
+                            <p>{project['description']}</p>
+                            <p><strong>Skills:</strong> {', '.join(project['skills'])}</p>
+                            <p><small>Added: {project['created_at'][:10]}</small></p>
+                        </div>
+                        """, unsafe_allow_html=True)
+                        
+                        if project.get('files'):
+                            with st.expander("📎 Project Files"):
+                                for file in project['files']:
+                                    if 'display_attachment' in globals():
+                                        display_attachment(file)
+                        st.divider()
+            else:
+                st.info("No projects yet. Add your first project!")
+    
+    with tab2:
+        st.markdown("#### Skills")
+        st.info("Skills tracking feature coming soon!")
+
+def render_video_meeting():
+    """Render video conferencing interface"""
+    st.markdown("### 🎥 Video Meeting")
+    
+    col1, col2 = st.columns([1, 2])
+    
+    with col1:
+        st.markdown("#### Create Meeting")
+        with st.form("create_meeting"):
+            room_name = st.text_input("Meeting Name", placeholder="e.g., Math Class")
+            meeting_type = st.selectbox("Meeting Type", 
+                                      ["Class Session", "Study Group", "Parent-Teacher"])
+            
+            schedule = st.checkbox("Schedule for later")
+            if schedule:
+                scheduled_time = st.datetime_input("Scheduled Time", 
+                                                 min_value=datetime.now())
+            else:
+                scheduled_time = datetime.now()
+            
+            if st.form_submit_button("Create Meeting", use_container_width=True):
+                if st.session_state.user and st.session_state.current_school:
+                    meeting = create_video_meeting(
+                        st.session_state.current_school['code'],
+                        room_name,
+                        st.session_state.user['email'],
+                        meeting_type.lower().replace(' ', '_'),
+                        scheduled_time if schedule else None
+                    )
+                    
+                    st.session_state.current_meeting = meeting
+                    st.success(f"Meeting created!")
+                    st.rerun()
+    
+    with col2:
+        if 'current_meeting' in st.session_state:
+            meeting = st.session_state.current_meeting
+            st.markdown(f"#### {meeting['room_name']}")
+            st.markdown(f"**Meeting Link:** {meeting['link']}")
+            st.markdown("Open this link in a new tab to join the meeting.")
+            
+            if st.button("Leave Meeting", use_container_width=True):
+                del st.session_state.current_meeting
+                st.rerun()
+        else:
+            st.info("Create a meeting to start")
+
+def render_mobile_qr():
+    """Render mobile app QR code"""
+    st.sidebar.markdown("### 📱 Mobile App")
+    
+    if QRCODE_AVAILABLE and st.session_state.current_school:
+        qr = generate_qr_code(f"https://schoolhub.app/download?school={st.session_state.current_school['code']}")
+        if qr:
+            st.sidebar.image(qr, width=150)
+        else:
+            st.sidebar.info("QR code unavailable")
+    else:
+        st.sidebar.info("Install qrcode package to enable QR features")
+
+# ============ UPDATE SESSION STATE WITH NEW VARIABLES ============
+if 'language' not in st.session_state:
+    st.session_state.language = 'en'
+if 'accessibility' not in st.session_state:
+    st.session_state.accessibility = ACCESSIBILITY_PRESETS["Default"]
+if 'current_feature' not in st.session_state:
+    st.session_state.current_feature = None
+if 'career_recommendations' not in st.session_state:
+    st.session_state.career_recommendations = None
+if 'current_meeting' not in st.session_state:
+    st.session_state.current_meeting = None
+
+# ============ NEW SIDEBAR ENHANCEMENTS ============
+def render_enhanced_sidebar_additions():
+    """Add these elements to your existing sidebar - call this after your sidebar content"""
+    if st.session_state.user:
+        st.sidebar.divider()
+        
+        # Language selector
+        render_language_selector()
+        
+        # Accessibility panel
+        render_accessibility_panel()
+        
+        st.sidebar.divider()
+        
+        # New features section
+        st.sidebar.markdown("### 🆕 New Features")
+        
+        # Wellness Center
+        if st.sidebar.button("🧠 Wellness Center", key="nav_wellness", use_container_width=True):
+            st.session_state.current_feature = 'wellness'
+            st.rerun()
+        
+        # Study Groups
+        if st.sidebar.button("📚 Study Groups", key="nav_study", use_container_width=True):
+            st.session_state.current_feature = 'study_groups'
+            st.rerun()
+        
+        # Career Guidance
+        if st.sidebar.button("🎯 Career Guidance", key="nav_career", use_container_width=True):
+            st.session_state.current_feature = 'career'
+            st.rerun()
+        
+        # Portfolio
+        if st.sidebar.button("📁 Portfolio", key="nav_portfolio", use_container_width=True):
+            st.session_state.current_feature = 'portfolio'
+            st.rerun()
+        
+        # Video Meeting
+        if st.sidebar.button("🎥 Video Meeting", key="nav_video", use_container_width=True):
+            st.session_state.current_feature = 'video'
+            st.rerun()
+        
+        st.sidebar.divider()
+        
+        # Emergency Alert Button
+        if st.sidebar.button("🚨 EMERGENCY ALERT", key="nav_emergency", use_container_width=True, type="primary"):
+            st.session_state.current_feature = 'emergency'
+            st.rerun()
+        
+        # Mobile QR
+        render_mobile_qr()
+
+# ============ NEW FEATURE RENDERER ============
+def render_selected_feature():
+    """Render the selected feature in the main area"""
+    if 'current_feature' in st.session_state and st.session_state.current_feature:
+        if st.session_state.current_feature == 'wellness':
+            render_wellness_center()
+        elif st.session_state.current_feature == 'study_groups':
+            render_study_groups()
+        elif st.session_state.current_feature == 'career':
+            render_career_guidance()
+        elif st.session_state.current_feature == 'portfolio':
+            render_portfolio()
+        elif st.session_state.current_feature == 'video':
+            render_video_meeting()
+        elif st.session_state.current_feature == 'emergency':
+            render_emergency_alerts()
+        
+        if st.button("← Back to Dashboard", key="back_to_dash", use_container_width=True):
+            st.session_state.current_feature = None
+            st.rerun()
+        return True
+    return False
+
+# ============ ACCESSIBILITY CSS INTEGRATION ============
+def get_accessibility_css():
+    """Generate accessibility CSS based on settings"""
+    if 'accessibility' not in st.session_state:
+        return ""
+    
+    settings = st.session_state.accessibility
+    css = ""
+    
+    # Text size
+    text_sizes = {
+        "Small": "0.85rem",
+        "Medium": "1rem",
+        "Large": "1.2rem",
+        "Extra Large": "1.4rem"
+    }
+    base_size = text_sizes.get(settings.get('text_size', 'Medium'), '1rem')
+    css += f"""
+        body, .stApp, .main, .stMarkdown, p, h1, h2, h3, h4, h5, h6, .stTextInput, .stTextArea, .stSelectbox, .stButton {{
+            font-size: {base_size} !important;
+            line-height: 1.5 !important;
+        }}
+    """
+    
+    # High contrast mode
+    if settings.get('contrast_mode', False):
+        css += """
+            body, .stApp, .main, .stMarkdown, p, h1, h2, h3, h4, h5, h6 {
+                background: black !important;
+                color: yellow !important;
+            }
+            a { color: cyan !important; }
+            button, .stButton button {
+                background: yellow !important;
+                color: black !important;
+                border: 2px solid yellow !important;
+            }
+            input, textarea, select {
+                background: black !important;
+                color: yellow !important;
+                border: 2px solid yellow !important;
+            }
+            .golden-card, .class-card, .member-card {
+                background: black !important;
+                border: 2px solid yellow !important;
+            }
+        """
+    
+    # Dyslexia-friendly font
+    if settings.get('dyslexia_font', False):
+        css += """
+            @import url('https://fonts.googleapis.com/css2?family=OpenDyslexic&display=swap');
+            body, .stApp, .main, .stMarkdown, p, h1, h2, h3, h4, h5, h6, .stTextInput, .stTextArea, .stSelectbox {
+                font-family: 'OpenDyslexic', Arial, sans-serif !important;
+                line-height: 1.5 !important;
+                letter-spacing: 0.05em !important;
+            }
+        """
+    
+    # Color blind filters
+    color_blind_mode = settings.get('color_blind_mode', 'None')
+    if color_blind_mode != 'None':
+        filters = {
+            "Protanopia": "url('#protanopia')",
+            "Deuteranopia": "url('#deuteranopia')",
+            "Tritanopia": "url('#tritanopia')"
+        }
+        css += f"""
+            <svg style="position: absolute; width: 0; height: 0;">
+                <filter id="protanopia">
+                    <feColorMatrix type="matrix" values="0.567,0.433,0,0,0 0.558,0.442,0,0,0 0,0.242,0.758,0,0 0,0,0,1,0"/>
+                </filter>
+                <filter id="deuteranopia">
+                    <feColorMatrix type="matrix" values="0.625,0.375,0,0,0 0.7,0.3,0,0,0 0,0.3,0.7,0,0 0,0,0,1,0"/>
+                </filter>
+                <filter id="tritanopia">
+                    <feColorMatrix type="matrix" values="0.95,0.05,0,0,0 0,0.433,0.567,0,0 0,0.475,0.525,0,0 0,0,0,1,0"/>
+                </filter>
+            </svg>
+            body, .stApp {{
+                filter: {filters[color_blind_mode]};
+            }}
+        """
+    
+    # Reduced motion
+    if settings.get('reduced_motion', False):
+        css += """
+            * {
+                animation: none !important;
+                transition: none !important;
+            }
+            @keyframes golden-shimmer {
+                0% { background-position: 0% 50%; }
+                100% { background-position: 0% 50%; }
+            }
+        """
+    
+    return css
+
 # ============ SESSION STATE ============
 if 'user' not in st.session_state:
     st.session_state.user = None
@@ -1361,6 +2584,10 @@ if st.session_state.user and st.session_state.current_school:
 
 # Apply theme CSS
 st.markdown(get_theme_css(st.session_state.theme, st.session_state.wallpaper), unsafe_allow_html=True)
+
+# Apply accessibility CSS
+if st.session_state.page == 'dashboard' and st.session_state.user:
+    st.markdown(f"<style>{get_accessibility_css()}</style>", unsafe_allow_html=True)
 
 # ----- WELCOME PAGE -----
 if st.session_state.page == 'welcome':
@@ -1935,7 +3162,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         
         st.divider()
         
-        # Add the new features to sidebar (this is the only addition to existing code)
+        # Add the new features to sidebar
         render_enhanced_sidebar_additions()
         
         if st.button("🚪 Logout", use_container_width=True):
@@ -4292,1249 +5519,3 @@ else:
     if st.button("Restart"):
         st.session_state.page = 'welcome'
         st.rerun()
-
-# ============ NEW FEATURES ADDITIONS - DO NOT MODIFY EXISTING CODE ABOVE ============
-# These additions extend the functionality without changing any original code
-
-# ============ MULTI-LANGUAGE SUPPORT ============
-TRANSLATIONS = {
-    "en": {  # English
-        "welcome": "✨ School Community Hub ✨",
-        "connect": "Connect • Collaborate • Manage • Shine",
-        "school_community": "🏫 School Community",
-        "school_management": "📊 School Management",
-        "personal_dashboard": "👤 Personal Dashboard",
-        "admin_login": "👑 Admin Login",
-        "teacher_login": "👨‍🏫 Teacher Login",
-        "student_login": "👨‍🎓 Student Login",
-        "guardian_login": "👪 Guardian Login",
-        "create_school": "🏫 Create New School",
-        "login": "Login",
-        "register": "Register",
-        "email": "Email",
-        "password": "Password",
-        "school_code": "School Code",
-        "full_name": "Full Name",
-        "phone": "Phone",
-        "admission_number": "Admission Number",
-        "dashboard": "Dashboard",
-        "announcements": "Announcements",
-        "community": "Community",
-        "chat": "Chat",
-        "friends": "Friends",
-        "classes": "Classes",
-        "groups": "Groups",
-        "assignments": "Assignments",
-        "library": "Library",
-        "settings": "Settings",
-        "profile": "Profile",
-        "logout": "Logout",
-        "submit": "Submit",
-        "cancel": "Cancel",
-        "save": "Save",
-        "delete": "Delete",
-        "edit": "Edit",
-        "search": "Search",
-        "filter": "Filter",
-        "loading": "Loading...",
-        "error": "Error",
-        "success": "Success",
-        "warning": "Warning",
-        "info": "Info",
-        "confirm": "Confirm",
-        "yes": "Yes",
-        "no": "No",
-        "welcome_back": "Welcome back, {name}!",
-        "no_data": "No data available",
-        "please_wait": "Please wait...",
-        "processing": "Processing...",
-        "completed": "Completed",
-        "pending": "Pending",
-        "failed": "Failed",
-    },
-    "sw": {  # Kiswahili
-        "welcome": "✨ Kituo cha Jumuiya ya Shule ✨",
-        "connect": "Unganisha • Shirikiana • Simamia • Angaza",
-        "school_community": "🏫 Jumuiya ya Shule",
-        "school_management": "📊 Usimamizi wa Shule",
-        "personal_dashboard": "👤 Dashbodi ya Kibinafsi",
-        "admin_login": "👑 Kuingia kwa Msimamizi",
-        "teacher_login": "👨‍🏫 Kuingia kwa Mwalimu",
-        "student_login": "👨‍🎓 Kuingia kwa Mwanafunzi",
-        "guardian_login": "👪 Kuingia kwa Mlezi",
-        "create_school": "🏫 Unda Shule Mpya",
-        "login": "Ingia",
-        "register": "Jisajili",
-        "email": "Barua pepe",
-        "password": "Nywila",
-        "school_code": "Msimbo wa Shule",
-        "full_name": "Jina Kamili",
-        "phone": "Simu",
-        "admission_number": "Nambari ya Udahili",
-        "dashboard": "Dashbodi",
-        "announcements": "Matangazo",
-        "community": "Jumuiya",
-        "chat": "Mazungumzo",
-        "friends": "Marafiki",
-        "classes": "Madarasa",
-        "groups": "Vikundi",
-        "assignments": "Kazi",
-        "library": "Maktaba",
-        "settings": "Mipangilio",
-        "profile": "Wasifu",
-        "logout": "Toka",
-        "submit": "Wasilisha",
-        "cancel": "Ghairi",
-        "save": "Hifadhi",
-        "delete": "Futa",
-        "edit": "Hariri",
-        "search": "Tafuta",
-        "filter": "Chuja",
-        "loading": "Inapakia...",
-        "error": "Hitilafu",
-        "success": "Imefaulu",
-        "warning": "Onyo",
-        "info": "Taarifa",
-        "confirm": "Thibitisha",
-        "yes": "Ndiyo",
-        "no": "Hapana",
-        "welcome_back": "Karibu tena, {name}!",
-        "no_data": "Hakuna data",
-        "please_wait": "Tafadhali subiri...",
-        "processing": "Inachakatwa...",
-        "completed": "Imekamilika",
-        "pending": "Inasubiri",
-        "failed": "Imeshindwa",
-    },
-    "fr": {  # French
-        "welcome": "✨ Centre Communautaire Scolaire ✨",
-        "connect": "Connecter • Collaborer • Gérer • Briller",
-        "school_community": "🏫 Communauté Scolaire",
-        "school_management": "📊 Gestion Scolaire",
-        "personal_dashboard": "👤 Tableau de Bord Personnel",
-        "admin_login": "👑 Connexion Admin",
-        "teacher_login": "👨‍🏫 Connexion Enseignant",
-        "student_login": "👨‍🎓 Connexion Élève",
-        "guardian_login": "👪 Connexion Parent",
-        "create_school": "🏫 Créer une École",
-        "login": "Connexion",
-        "register": "S'inscrire",
-        "email": "Email",
-        "password": "Mot de passe",
-        "school_code": "Code de l'école",
-        "full_name": "Nom Complet",
-        "phone": "Téléphone",
-        "admission_number": "Numéro d'admission",
-        "dashboard": "Tableau de Bord",
-        "announcements": "Annonces",
-        "community": "Communauté",
-        "chat": "Discussion",
-        "friends": "Amis",
-        "classes": "Classes",
-        "groups": "Groupes",
-        "assignments": "Devoirs",
-        "library": "Bibliothèque",
-        "settings": "Paramètres",
-        "profile": "Profil",
-        "logout": "Déconnexion",
-        "submit": "Soumettre",
-        "cancel": "Annuler",
-        "save": "Enregistrer",
-        "delete": "Supprimer",
-        "edit": "Modifier",
-        "search": "Rechercher",
-        "filter": "Filtrer",
-        "loading": "Chargement...",
-        "error": "Erreur",
-        "success": "Succès",
-        "warning": "Avertissement",
-        "info": "Info",
-        "confirm": "Confirmer",
-        "yes": "Oui",
-        "no": "Non",
-        "welcome_back": "Bon retour, {name}!",
-        "no_data": "Aucune donnée",
-        "please_wait": "Veuillez patienter...",
-        "processing": "Traitement...",
-        "completed": "Terminé",
-        "pending": "En attente",
-        "failed": "Échoué",
-    },
-    "ar": {  # Arabic
-        "welcome": "✨ مركز المجتمع المدرسي ✨",
-        "connect": "تواصل • تعاون • إدارة • تألق",
-        "school_community": "🏫 المجتمع المدرسي",
-        "school_management": "📊 إدارة المدرسة",
-        "personal_dashboard": "👤 لوحة التحكم الشخصية",
-        "admin_login": "👑 تسجيل دخول المدير",
-        "teacher_login": "👨‍🏫 تسجيل دخول المعلم",
-        "student_login": "👨‍🎓 تسجيل دخول الطالب",
-        "guardian_login": "👪 تسجيل دخول ولي الأمر",
-        "create_school": "🏫 إنشاء مدرسة جديدة",
-        "login": "تسجيل الدخول",
-        "register": "التسجيل",
-        "email": "البريد الإلكتروني",
-        "password": "كلمة المرور",
-        "school_code": "رمز المدرسة",
-        "full_name": "الاسم الكامل",
-        "phone": "الهاتف",
-        "admission_number": "رقم القبول",
-        "dashboard": "لوحة التحكم",
-        "announcements": "الإعلانات",
-        "community": "المجتمع",
-        "chat": "الدردشة",
-        "friends": "الأصدقاء",
-        "classes": "الفصول",
-        "groups": "المجموعات",
-        "assignments": "الواجبات",
-        "library": "المكتبة",
-        "settings": "الإعدادات",
-        "profile": "الملف الشخصي",
-        "logout": "تسجيل الخروج",
-        "submit": "إرسال",
-        "cancel": "إلغاء",
-        "save": "حفظ",
-        "delete": "حذف",
-        "edit": "تعديل",
-        "search": "بحث",
-        "filter": "تصفية",
-        "loading": "جاري التحميل...",
-        "error": "خطأ",
-        "success": "نجاح",
-        "warning": "تحذير",
-        "info": "معلومات",
-        "confirm": "تأكيد",
-        "yes": "نعم",
-        "no": "لا",
-        "welcome_back": "مرحباً بعودتك، {name}!",
-        "no_data": "لا توجد بيانات",
-        "please_wait": "الرجاء الانتظار...",
-        "processing": "جاري المعالجة...",
-        "completed": "مكتمل",
-        "pending": "قيد الانتظار",
-        "failed": "فشل",
-    }
-}
-
-def get_text(key: str, **kwargs) -> str:
-    """Get translated text"""
-    if 'language' not in st.session_state:
-        st.session_state.language = 'en'
-    lang = st.session_state.language
-    text = TRANSLATIONS.get(lang, TRANSLATIONS['en']).get(key, key)
-    if kwargs:
-        text = text.format(**kwargs)
-    return text
-
-# ============ ACCESSIBILITY FEATURES ============
-ACCESSIBILITY_PRESETS = {
-    "Default": {
-        "text_size": "Medium",
-        "contrast_mode": False,
-        "dyslexia_font": False,
-        "color_blind_mode": "None",
-        "reduced_motion": False
-    },
-    "Large Text": {
-        "text_size": "Large",
-        "contrast_mode": False,
-        "dyslexia_font": False,
-        "color_blind_mode": "None",
-        "reduced_motion": False
-    },
-    "High Contrast": {
-        "text_size": "Medium",
-        "contrast_mode": True,
-        "dyslexia_font": False,
-        "color_blind_mode": "None",
-        "reduced_motion": False
-    },
-    "Dyslexia Friendly": {
-        "text_size": "Medium",
-        "contrast_mode": False,
-        "dyslexia_font": True,
-        "color_blind_mode": "None",
-        "reduced_motion": False
-    }
-}
-
-COLOR_BLIND_FILTERS = {
-    "None": "",
-    "Protanopia": "protanopia",
-    "Deuteranopia": "deuteranopia",
-    "Tritanopia": "tritanopia"
-}
-
-# ============ BADGES & ACHIEVEMENTS ============
-BADGES = {
-    "perfect_attendance": {
-        "name": "Perfect Attendance",
-        "description": "Achieved 100% attendance for a term",
-        "icon": "📅",
-        "color": "gold"
-    },
-    "homework_streak": {
-        "name": "Homework Streak",
-        "description": "Completed all assignments for 30 days",
-        "icon": "📚",
-        "color": "silver"
-    },
-    "helpful_peer": {
-        "name": "Helpful Peer",
-        "description": "Helped 10 classmates with their studies",
-        "icon": "🤝",
-        "color": "blue"
-    },
-    "math_wizard": {
-        "name": "Math Wizard",
-        "description": "Scored 90%+ in all math tests",
-        "icon": "🧮",
-        "color": "purple"
-    },
-    "science_whiz": {
-        "name": "Science Whiz",
-        "description": "Excellent performance in science subjects",
-        "icon": "🔬",
-        "color": "green"
-    },
-    "library_enthusiast": {
-        "name": "Library Enthusiast",
-        "description": "Borrowed 20+ books from the library",
-        "icon": "📖",
-        "color": "brown"
-    },
-    "sports_champion": {
-        "name": "Sports Champion",
-        "description": "Participated in 5+ sports events",
-        "icon": "⚽",
-        "color": "orange"
-    },
-    "artistic_talent": {
-        "name": "Artistic Talent",
-        "description": "Showcased artwork in school exhibitions",
-        "icon": "🎨",
-        "color": "pink"
-    },
-    "leadership_excellence": {
-        "name": "Leadership Excellence",
-        "description": "Led a group or club successfully",
-        "icon": "👑",
-        "color": "gold"
-    },
-    "community_service": {
-        "name": "Community Service",
-        "description": "Volunteered for 20+ hours",
-        "icon": "❤️",
-        "color": "red"
-    }
-}
-
-# ============ WELLNESS CENTER FUNCTIONS ============
-def add_wellness_checkin(user_email: str, school_code: str, mood: int, stress: int, 
-                         sleep: float, anxiety: int, energy: int, social: int, notes: str = ""):
-    """Add a wellness check-in"""
-    checkins = load_school_data(school_code, "wellness_checkins.json", [])
-    checkin = {
-        "id": generate_id("WEL"),
-        "user_email": user_email,
-        "date": datetime.now().strftime("%Y-%m-%d"),
-        "mood": mood,  # 1-10
-        "stress": stress,  # 1-10
-        "sleep": sleep,  # hours
-        "anxiety": anxiety,  # 1-10
-        "energy": energy,  # 1-10
-        "social": social,  # 1-10
-        "notes": notes
-    }
-    checkins.append(checkin)
-    save_school_data(school_code, "wellness_checkins.json", checkins)
-    
-    # Check for concerning patterns
-    recent_checkins = [c for c in checkins if c['user_email'] == user_email][-5:]
-    if len(recent_checkins) >= 3:
-        avg_stress = sum(c['stress'] for c in recent_checkins) / len(recent_checkins)
-        avg_anxiety = sum(c['anxiety'] for c in recent_checkins) / len(recent_checkins)
-        
-        if avg_stress > 7 or avg_anxiety > 7:
-            # Alert counselor
-            counselors = [u for u in load_school_data(school_code, "users.json", []) if u['role'] == 'counselor']
-            for counselor in counselors:
-                # Use your existing notification system
-                if 'send_notification' in globals():
-                    send_notification(
-                        school_code,
-                        counselor['email'],
-                        "wellness_alert",
-                        "⚠️ Student Wellness Alert",
-                        f"Student {user_email} showing high stress/anxiety levels",
-                        {"student": user_email, "avg_stress": avg_stress, "avg_anxiety": avg_anxiety}
-                    )
-    
-    return checkin
-
-# ============ STUDY GROUPS FUNCTIONS ============
-def create_study_group(school_code: str, name: str, subject: str, created_by: str,
-                       schedule: str, max_participants: int = 10) -> str:
-    """Create a study group"""
-    groups = load_school_data(school_code, "study_groups.json", [])
-    group = {
-        "id": generate_id("STG"),
-        "name": name,
-        "subject": subject,
-        "created_by": created_by,
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "members": [created_by],
-        "schedule": schedule,
-        "max_participants": max_participants,
-        "status": "active"
-    }
-    groups.append(group)
-    save_school_data(school_code, "study_groups.json", groups)
-    return group['id']
-
-def join_study_group(school_code: str, group_id: str, user_email: str) -> bool:
-    """Join a study group"""
-    groups = load_school_data(school_code, "study_groups.json", [])
-    for group in groups:
-        if group['id'] == group_id:
-            if len(group['members']) >= group['max_participants']:
-                return False
-            if user_email not in group['members']:
-                group['members'].append(user_email)
-                save_school_data(school_code, "study_groups.json", groups)
-                return True
-    return False
-
-# ============ CAREER GUIDANCE FUNCTIONS ============
-CAREER_INTERESTS = {
-    "science": ["Medicine", "Engineering", "Research", "Pharmacy", "Environmental Science"],
-    "arts": ["Graphic Design", "Photography", "Fine Arts", "Animation", "Fashion Design"],
-    "business": ["Accounting", "Marketing", "Entrepreneurship", "Finance", "Human Resources"],
-    "technology": ["Software Development", "Data Science", "Cybersecurity", "AI/ML", "IT Management"],
-    "humanities": ["Law", "Journalism", "Psychology", "Education", "Social Work"],
-    "trades": ["Electrician", "Plumbing", "Carpentry", "Welding", "Automotive"]
-}
-
-def career_quiz(answers: dict) -> list:
-    """Process career quiz and return recommendations"""
-    interests = []
-    
-    # Q1: What subjects do you enjoy?
-    if answers.get('q1') in ['math', 'science']:
-        interests.extend(['science', 'technology'])
-    elif answers.get('q1') in ['english', 'history']:
-        interests.extend(['humanities', 'arts'])
-    elif answers.get('q1') == 'business':
-        interests.extend(['business', 'trades'])
-    
-    # Q2: How do you like to work?
-    if answers.get('q2') == 'alone':
-        interests.extend(['technology', 'research'])
-    elif answers.get('q2') == 'team':
-        interests.extend(['business', 'healthcare'])
-    elif answers.get('q2') == 'creative':
-        interests.extend(['arts', 'design'])
-    
-    # Q3: What's your problem-solving style?
-    if answers.get('q3') == 'analytical':
-        interests.extend(['science', 'engineering'])
-    elif answers.get('q3') == 'creative':
-        interests.extend(['arts', 'marketing'])
-    elif answers.get('q3') == 'practical':
-        interests.extend(['trades', 'business'])
-    
-    # Q4: What's important in your career?
-    if answers.get('q4') == 'money':
-        interests.extend(['business', 'technology'])
-    elif answers.get('q4') == 'helping':
-        interests.extend(['healthcare', 'education'])
-    elif answers.get('q4') == 'creativity':
-        interests.extend(['arts', 'design'])
-    elif answers.get('q4') == 'stability':
-        interests.extend(['government', 'trades'])
-    
-    # Get unique interests and map to careers
-    unique_interests = list(set(interests))
-    recommendations = []
-    for interest in unique_interests[:3]:
-        recommendations.extend(CAREER_INTERESTS.get(interest, []))
-    
-    return recommendations[:5]  # Return top 5
-
-# ============ EMERGENCY ALERT SYSTEM ============
-EMERGENCY_TYPES = {
-    "medical": {"icon": "🚑", "priority": 1, "message": "Medical Emergency"},
-    "security": {"icon": "🚨", "priority": 2, "message": "Security Threat"},
-    "fire": {"icon": "🔥", "priority": 1, "message": "Fire Emergency"},
-    "accident": {"icon": "⚠️", "priority": 2, "message": "Accident Reported"},
-    "other": {"icon": "🆘", "priority": 3, "message": "Other Emergency"}
-}
-
-def send_emergency_alert(user_email: str, school_code: str, alert_type: str, 
-                         location: str = "", description: str = ""):
-    """Send an emergency alert"""
-    alerts = load_school_data(school_code, "emergency_alerts.json", [])
-    
-    # Check for recent similar alerts to prevent spam
-    recent = [a for a in alerts if a['user_email'] == user_email and 
-              a['timestamp'].startswith(datetime.now().strftime("%Y-%m-%d"))]
-    if len(recent) > 3:
-        return False, "Too many alerts from this user today"
-    
-    alert = {
-        "id": generate_id("EMA"),
-        "user_email": user_email,
-        "alert_type": alert_type,
-        "location": location,
-        "description": description,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "status": "active",
-        "responded_by": None,
-        "response_time": None
-    }
-    alerts.append(alert)
-    save_school_data(school_code, "emergency_alerts.json", alerts)
-    
-    # Get emergency contacts (admins, security)
-    users = load_school_data(school_code, "users.json", [])
-    emergency_contacts = [u for u in users if u['role'] in ['admin', 'security']]
-    
-    alert_info = EMERGENCY_TYPES.get(alert_type, EMERGENCY_TYPES['other'])
-    
-    for contact in emergency_contacts:
-        # Use your existing notification system
-        if 'send_notification' in globals():
-            send_notification(
-                school_code,
-                contact['email'],
-                "emergency_alert",
-                f"{alert_info['icon']} EMERGENCY ALERT",
-                f"{alert_info['message']} at {location}\nReported by: {user_email}\nDetails: {description}",
-                {"alert_id": alert['id'], "priority": alert_info['priority']}
-            )
-    
-    return True, "Emergency alert sent successfully"
-
-# ============ VIDEO CONFERENCING ============
-def create_video_meeting(school_code: str, room_name: str, created_by: str,
-                         meeting_type: str, scheduled_for: datetime = None) -> dict:
-    """Create a Jitsi Meet video conference"""
-    meetings = load_school_data(school_code, "video_meetings.json", [])
-    
-    # Generate unique room name
-    room_id = generate_id("VID")
-    jitsi_url = f"https://meet.jit.si/{school_code}_{room_id}"
-    
-    meeting = {
-        "id": room_id,
-        "room_name": room_name,
-        "created_by": created_by,
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "scheduled_for": scheduled_for.strftime("%Y-%m-%d %H:%M:%S") if scheduled_for else None,
-        "participants": [created_by],
-        "meeting_type": meeting_type,  # class, parent_teacher, study_group
-        "link": jitsi_url,
-        "status": "scheduled" if scheduled_for else "active"
-    }
-    meetings.append(meeting)
-    save_school_data(school_code, "video_meetings.json", meetings)
-    
-    return meeting
-
-# ============ QR CODE GENERATOR ============
-def generate_qr_code(data: str, size: int = 200) -> str:
-    """Generate QR code and return as base64 image (if qrcode is available)"""
-    if not QRCODE_AVAILABLE:
-        return ""
-    
-    try:
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(data)
-        qr.make(fit=True)
-        
-        img = qr.make_image(fill_color="black", back_color="white")
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_str = base64.b64encode(buffered.getvalue()).decode()
-        
-        return f"data:image/png;base64,{img_str}"
-    except Exception as e:
-        return ""
-
-# ============ E-PORTFOLIO FUNCTIONS ============
-def add_portfolio_project(user_email: str, school_code: str, title: str, 
-                          description: str, skills: list, files: list = None):
-    """Add a project to user's portfolio"""
-    projects = load_school_data(school_code, "portfolio_projects.json", [])
-    
-    # Process uploaded files using your existing save_attachment function
-    file_data = []
-    if files and 'save_attachment' in globals():
-        for file in files:
-            attachment = save_attachment(file)
-            if attachment:
-                file_data.append(attachment)
-    
-    project = {
-        "id": generate_id("PFP"),
-        "user_email": user_email,
-        "title": title,
-        "description": description,
-        "skills": skills,
-        "files": file_data,
-        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-        "updated_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    }
-    projects.append(project)
-    save_school_data(school_code, "portfolio_projects.json", projects)
-    
-    return project
-
-# ============ RENDER FUNCTIONS FOR NEW UI ELEMENTS ============
-def render_language_selector():
-    """Render language selection dropdown"""
-    st.sidebar.markdown("### 🌐 Language")
-    col1, col2, col3, col4 = st.sidebar.columns(4)
-    with col1:
-        if st.sidebar.button("🇬🇧 EN", key="lang_en", use_container_width=True):
-            st.session_state.language = 'en'
-            st.rerun()
-    with col2:
-        if st.sidebar.button("🇰🇪 SW", key="lang_sw", use_container_width=True):
-            st.session_state.language = 'sw'
-            st.rerun()
-    with col3:
-        if st.sidebar.button("🇫🇷 FR", key="lang_fr", use_container_width=True):
-            st.session_state.language = 'fr'
-            st.rerun()
-    with col4:
-        if st.sidebar.button("🇸🇦 AR", key="lang_ar", use_container_width=True):
-            st.session_state.language = 'ar'
-            st.rerun()
-
-def render_accessibility_panel():
-    """Render accessibility settings panel"""
-    with st.sidebar.expander("♿ Accessibility", expanded=False):
-        if 'accessibility' not in st.session_state:
-            st.session_state.accessibility = ACCESSIBILITY_PRESETS["Default"]
-        
-        col1, col2 = st.columns(2)
-        
-        with col1:
-            # Text size
-            text_size = st.select_slider(
-                "Text Size",
-                options=["Small", "Medium", "Large", "Extra Large"],
-                value=st.session_state.accessibility.get('text_size', 'Medium'),
-                key="acc_text_size"
-            )
-            
-            # High contrast
-            high_contrast = st.checkbox(
-                "High Contrast Mode",
-                value=st.session_state.accessibility.get('contrast_mode', False),
-                key="acc_contrast"
-            )
-            
-            # Dyslexia font
-            dyslexia_font = st.checkbox(
-                "Dyslexia-Friendly Font",
-                value=st.session_state.accessibility.get('dyslexia_font', False),
-                key="acc_dyslexia"
-            )
-        
-        with col2:
-            # Color blind mode
-            color_blind = st.selectbox(
-                "Color Blindness Mode",
-                options=list(COLOR_BLIND_FILTERS.keys()),
-                index=list(COLOR_BLIND_FILTERS.keys()).index(
-                    st.session_state.accessibility.get('color_blind_mode', 'None')
-                ),
-                key="acc_color_blind"
-            )
-            
-            # Reduced motion
-            reduced_motion = st.checkbox(
-                "Reduced Motion",
-                value=st.session_state.accessibility.get('reduced_motion', False),
-                key="acc_motion"
-            )
-            
-            # Accessibility presets
-            preset = st.selectbox(
-                "Presets",
-                options=list(ACCESSIBILITY_PRESETS.keys()),
-                key="acc_preset"
-            )
-            if st.button("Apply Preset", key="acc_apply", use_container_width=True):
-                st.session_state.accessibility = ACCESSIBILITY_PRESETS[preset]
-                st.rerun()
-        
-        if st.button("💾 Save Settings", key="acc_save", use_container_width=True):
-            st.session_state.accessibility.update({
-                'text_size': text_size,
-                'contrast_mode': high_contrast,
-                'dyslexia_font': dyslexia_font,
-                'color_blind_mode': color_blind,
-                'reduced_motion': reduced_motion
-            })
-            st.success("Accessibility settings saved!")
-            st.rerun()
-
-def render_wellness_center():
-    """Render wellness center interface"""
-    st.markdown("### 🧠 Wellness Center")
-    
-    tab1, tab2, tab3 = st.tabs([
-        "📝 Daily Check-in",
-        "📊 My Wellness",
-        "🆘 Resources"
-    ])
-    
-    with tab1:
-        st.markdown("#### How are you feeling today?")
-        
-        with st.form("wellness_checkin"):
-            col1, col2 = st.columns(2)
-            
-            with col1:
-                mood = st.slider("Mood (1-10)", 1, 10, 7, help="1=Very Sad, 10=Very Happy")
-                stress = st.slider("Stress Level (1-10)", 1, 10, 5, help="1=No stress, 10=Extremely stressed")
-                sleep = st.number_input("Hours of Sleep", min_value=0.0, max_value=24.0, value=7.0, step=0.5)
-            
-            with col2:
-                anxiety = st.slider("Anxiety Level (1-10)", 1, 10, 5, help="1=No anxiety, 10=Extremely anxious")
-                energy = st.slider("Energy Level (1-10)", 1, 10, 6, help="1=Very low, 10=Very high")
-                social = st.slider("Social Connection (1-10)", 1, 10, 6, help="1=Isolated, 10=Very connected")
-            
-            notes = st.text_area("Notes (optional)", placeholder="Anything you'd like to share...")
-            
-            if st.form_submit_button("Submit Check-in", use_container_width=True):
-                if st.session_state.user and st.session_state.current_school:
-                    add_wellness_checkin(
-                        st.session_state.user['email'],
-                        st.session_state.current_school['code'],
-                        mood, stress, sleep, anxiety, energy, social, notes
-                    )
-                    st.success("Check-in recorded! Thank you for sharing.")
-                    
-                    if stress > 7 or anxiety > 7:
-                        st.warning("""
-                        ⚠️ Your stress/anxiety levels seem high. 
-                        Remember you can talk to our school counselor.
-                        """)
-    
-    with tab2:
-        if st.session_state.user and st.session_state.current_school:
-            checkins = load_school_data(
-                st.session_state.current_school['code'], 
-                "wellness_checkins.json", 
-                []
-            )
-            user_checkins = [c for c in checkins if c['user_email'] == st.session_state.user['email']]
-            
-            if user_checkins:
-                df = pd.DataFrame(user_checkins)
-                df['date'] = pd.to_datetime(df['date'])
-                df = df.sort_values('date')
-                
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    avg_mood = df['mood'].mean()
-                    st.metric("Average Mood", f"{avg_mood:.1f}/10")
-                with col2:
-                    avg_stress = df['stress'].mean()
-                    st.metric("Average Stress", f"{avg_stress:.1f}/10")
-                with col3:
-                    avg_sleep = df['sleep'].mean()
-                    st.metric("Average Sleep", f"{avg_sleep:.1f} hrs")
-                
-                # Trend graphs
-                fig = px.line(df, x='date', y=['mood', 'stress', 'anxiety', 'energy'],
-                              title="Wellness Trends Over Time",
-                              color_discrete_sequence=['#28a745', '#dc3545', '#ffc107', '#17a2b8'])
-                st.plotly_chart(fig, use_container_width=True)
-            else:
-                st.info("No check-in data yet. Start tracking your wellness today!")
-    
-    with tab3:
-        st.markdown("""
-        #### 📞 Emergency Contacts
-        - **School Counselor**: Room 101, Ext 123
-        - **Health Center**: Ext 456
-        - **Emergency**: 999 / 112
-        
-        #### 📚 Self-Help Resources
-        - Stress Management Guide
-        - Mindfulness Exercises
-        - Study-Life Balance Tips
-        - Peer Support Group Schedule
-        
-        #### 🗓️ Support Groups
-        - **Anxiety Support**: Mondays 4pm, Room 203
-        - **Study Stress**: Wednesdays 3pm, Library
-        - **Peer Connection**: Fridays 2pm, Student Lounge
-        """)
-
-def render_study_groups():
-    """Render study groups interface"""
-    st.markdown("### 📚 Study Groups")
-    
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        st.markdown("#### Create Study Group")
-        with st.form("create_study_group"):
-            group_name = st.text_input("Group Name", placeholder="e.g., Math Masters")
-            subject = st.selectbox("Subject", PRIMARY_SUBJECTS)
-            schedule = st.text_input("Schedule", placeholder="e.g., Mon/Wed 3-4pm")
-            max_participants = st.number_input("Max Participants", min_value=2, max_value=20, value=10)
-            
-            if st.form_submit_button("Create Group", use_container_width=True):
-                if st.session_state.user and st.session_state.current_school:
-                    group_id = create_study_group(
-                        st.session_state.current_school['code'],
-                        group_name,
-                        subject,
-                        st.session_state.user['email'],
-                        schedule,
-                        max_participants
-                    )
-                    st.success(f"Study group '{group_name}' created!")
-                    st.rerun()
-    
-    with col2:
-        st.markdown("#### Available Study Groups")
-        if st.session_state.user and st.session_state.current_school:
-            groups = load_school_data(st.session_state.current_school['code'], "study_groups.json", [])
-            active_groups = [g for g in groups if g['status'] == 'active']
-            
-            if active_groups:
-                for group in active_groups:
-                    with st.container():
-                        col_a, col_b = st.columns([3, 1])
-                        with col_a:
-                            st.markdown(f"**{group['name']}** ({group['subject']})")
-                            st.markdown(f"Schedule: {group['schedule']}")
-                            st.markdown(f"Members: {len(group['members'])}/{group['max_participants']}")
-                        with col_b:
-                            if st.session_state.user['email'] not in group['members']:
-                                if len(group['members']) < group['max_participants']:
-                                    if st.button("Join", key=f"join_{group['id']}", use_container_width=True):
-                                        if join_study_group(
-                                            st.session_state.current_school['code'],
-                                            group['id'],
-                                            st.session_state.user['email']
-                                        ):
-                                            st.success(f"Joined {group['name']}!")
-                                            st.rerun()
-                        st.divider()
-            else:
-                st.info("No active study groups available")
-
-def render_career_guidance():
-    """Render career guidance interface"""
-    st.markdown("### 🎯 Career Guidance")
-    
-    tab1, tab2 = st.tabs(["🎯 Career Quiz", "💼 Recommendations"])
-    
-    with tab1:
-        st.markdown("#### Discover Your Career Path")
-        st.markdown("Answer a few questions to get personalized career recommendations.")
-        
-        with st.form("career_quiz"):
-            q1 = st.radio(
-                "1. What subjects do you enjoy most?",
-                ["Mathematics/Science", "Languages/Arts", "Business/Commerce", "Practical/Trades"]
-            )
-            
-            q2 = st.radio(
-                "2. How do you prefer to work?",
-                ["Independently", "In a team", "Creatively", "With my hands"]
-            )
-            
-            q3 = st.radio(
-                "3. How do you solve problems?",
-                ["Analytically - break them down", "Creatively - think outside box", 
-                 "Practically - try solutions", "Collaboratively - ask others"]
-            )
-            
-            q4 = st.radio(
-                "4. What's most important in your career?",
-                ["High income", "Helping others", "Creative expression", "Job stability"]
-            )
-            
-            if st.form_submit_button("Get Recommendations", use_container_width=True):
-                answers = {
-                    'q1': q1.lower().split('/')[0],
-                    'q2': q2.lower(),
-                    'q3': q3.lower().split()[0],
-                    'q4': q4.lower().split()[0]
-                }
-                
-                recommendations = career_quiz(answers)
-                st.session_state.career_recommendations = recommendations
-                st.rerun()
-    
-    with tab2:
-        if 'career_recommendations' in st.session_state and st.session_state.career_recommendations:
-            st.markdown("#### Your Career Recommendations")
-            
-            for i, career in enumerate(st.session_state.career_recommendations, 1):
-                with st.container():
-                    st.markdown(f"""
-                    <div class="golden-card">
-                        <h4>{i}. {career}</h4>
-                        <p>📚 Recommended subjects: Mathematics, Sciences, Languages</p>
-                        <p>🎓 Education path: Bachelor's degree in relevant field</p>
-                    </div>
-                    """, unsafe_allow_html=True)
-        else:
-            st.info("Take the career quiz to get personalized recommendations!")
-
-def render_emergency_alerts():
-    """Render emergency alert system"""
-    st.markdown("### 🚨 Emergency Alert System")
-    st.warning("Only use this for genuine emergencies!")
-    
-    with st.form("emergency_alert"):
-        alert_type = st.selectbox(
-            "Alert Type",
-            options=list(EMERGENCY_TYPES.keys()),
-            format_func=lambda x: EMERGENCY_TYPES[x]['message']
-        )
-        
-        location = st.text_input("Your Location", placeholder="e.g., Room 101, Library, Field")
-        description = st.text_area("Description", placeholder="Briefly describe the situation...")
-        
-        # Confirmation checkbox to prevent false alarms
-        confirm = st.checkbox("I confirm this is a genuine emergency")
-        
-        if st.form_submit_button("🚨 SEND EMERGENCY ALERT", use_container_width=True, type="primary"):
-            if not confirm:
-                st.error("Please confirm this is a genuine emergency")
-            elif st.session_state.user and st.session_state.current_school:
-                success, message = send_emergency_alert(
-                    st.session_state.user['email'],
-                    st.session_state.current_school['code'],
-                    alert_type,
-                    location,
-                    description
-                )
-                if success:
-                    st.error("🚨 EMERGENCY ALERT SENT - Help is on the way!")
-                    st.balloons()
-                else:
-                    st.error(message)
-
-def render_portfolio():
-    """Render e-portfolio interface"""
-    st.markdown("### 📁 My Portfolio")
-    
-    tab1, tab2 = st.tabs(["📁 Projects", "🎯 Skills"])
-    
-    with tab1:
-        st.markdown("#### My Projects")
-        
-        with st.expander("➕ Add New Project"):
-            with st.form("add_project"):
-                title = st.text_input("Project Title")
-                description = st.text_area("Description", height=100)
-                skills = st.multiselect("Skills Used", 
-                                       ["Python", "Java", "HTML/CSS", "JavaScript", "Design", 
-                                        "Research", "Writing", "Leadership", "Teamwork"])
-                files = st.file_uploader("Upload Files", accept_multiple_files=True)
-                
-                if st.form_submit_button("Save Project", use_container_width=True):
-                    if st.session_state.user and st.session_state.current_school:
-                        project = add_portfolio_project(
-                            st.session_state.user['email'],
-                            st.session_state.current_school['code'],
-                            title,
-                            description,
-                            skills,
-                            files
-                        )
-                        st.success("Project added to portfolio!")
-                        st.rerun()
-        
-        # Display projects
-        if st.session_state.user and st.session_state.current_school:
-            projects = load_school_data(st.session_state.current_school['code'], "portfolio_projects.json", [])
-            user_projects = [p for p in projects if p['user_email'] == st.session_state.user['email']]
-            
-            if user_projects:
-                for project in user_projects:
-                    with st.container():
-                        st.markdown(f"""
-                        <div class="golden-card">
-                            <h4>{project['title']}</h4>
-                            <p>{project['description']}</p>
-                            <p><strong>Skills:</strong> {', '.join(project['skills'])}</p>
-                            <p><small>Added: {project['created_at'][:10]}</small></p>
-                        </div>
-                        """, unsafe_allow_html=True)
-                        
-                        if project.get('files'):
-                            with st.expander("📎 Project Files"):
-                                for file in project['files']:
-                                    if 'display_attachment' in globals():
-                                        display_attachment(file)
-                        st.divider()
-            else:
-                st.info("No projects yet. Add your first project!")
-    
-    with tab2:
-        st.markdown("#### Skills")
-        st.info("Skills tracking feature coming soon!")
-
-def render_video_meeting():
-    """Render video conferencing interface"""
-    st.markdown("### 🎥 Video Meeting")
-    
-    col1, col2 = st.columns([1, 2])
-    
-    with col1:
-        st.markdown("#### Create Meeting")
-        with st.form("create_meeting"):
-            room_name = st.text_input("Meeting Name", placeholder="e.g., Math Class")
-            meeting_type = st.selectbox("Meeting Type", 
-                                      ["Class Session", "Study Group", "Parent-Teacher"])
-            
-            schedule = st.checkbox("Schedule for later")
-            if schedule:
-                scheduled_time = st.datetime_input("Scheduled Time", 
-                                                 min_value=datetime.now())
-            else:
-                scheduled_time = datetime.now()
-            
-            if st.form_submit_button("Create Meeting", use_container_width=True):
-                if st.session_state.user and st.session_state.current_school:
-                    meeting = create_video_meeting(
-                        st.session_state.current_school['code'],
-                        room_name,
-                        st.session_state.user['email'],
-                        meeting_type.lower().replace(' ', '_'),
-                        scheduled_time if schedule else None
-                    )
-                    
-                    st.session_state.current_meeting = meeting
-                    st.success(f"Meeting created!")
-                    st.rerun()
-    
-    with col2:
-        if 'current_meeting' in st.session_state:
-            meeting = st.session_state.current_meeting
-            st.markdown(f"#### {meeting['room_name']}")
-            st.markdown(f"**Meeting Link:** {meeting['link']}")
-            st.markdown("Open this link in a new tab to join the meeting.")
-            
-            if st.button("Leave Meeting", use_container_width=True):
-                del st.session_state.current_meeting
-                st.rerun()
-        else:
-            st.info("Create a meeting to start")
-
-def render_mobile_qr():
-    """Render mobile app QR code"""
-    st.sidebar.markdown("### 📱 Mobile App")
-    
-    if QRCODE_AVAILABLE and st.session_state.current_school:
-        qr = generate_qr_code(f"https://schoolhub.app/download?school={st.session_state.current_school['code']}")
-        if qr:
-            st.sidebar.image(qr, width=150)
-        else:
-            st.sidebar.info("QR code unavailable")
-    else:
-        st.sidebar.info("Install qrcode package to enable QR features")
-
-# ============ UPDATE SESSION STATE WITH NEW VARIABLES ============
-if 'language' not in st.session_state:
-    st.session_state.language = 'en'
-if 'accessibility' not in st.session_state:
-    st.session_state.accessibility = ACCESSIBILITY_PRESETS["Default"]
-if 'current_feature' not in st.session_state:
-    st.session_state.current_feature = None
-if 'career_recommendations' not in st.session_state:
-    st.session_state.career_recommendations = None
-if 'current_meeting' not in st.session_state:
-    st.session_state.current_meeting = None
-
-# ============ NEW SIDEBAR ENHANCEMENTS ============
-def render_enhanced_sidebar_additions():
-    """Add these elements to your existing sidebar - call this after your sidebar content"""
-    if st.session_state.user:
-        st.sidebar.divider()
-        
-        # Language selector
-        render_language_selector()
-        
-        # Accessibility panel
-        render_accessibility_panel()
-        
-        st.sidebar.divider()
-        
-        # New features section
-        st.sidebar.markdown("### 🆕 New Features")
-        
-        # Wellness Center
-        if st.sidebar.button("🧠 Wellness Center", key="nav_wellness", use_container_width=True):
-            st.session_state.current_feature = 'wellness'
-            st.rerun()
-        
-        # Study Groups
-        if st.sidebar.button("📚 Study Groups", key="nav_study", use_container_width=True):
-            st.session_state.current_feature = 'study_groups'
-            st.rerun()
-        
-        # Career Guidance
-        if st.sidebar.button("🎯 Career Guidance", key="nav_career", use_container_width=True):
-            st.session_state.current_feature = 'career'
-            st.rerun()
-        
-        # Portfolio
-        if st.sidebar.button("📁 Portfolio", key="nav_portfolio", use_container_width=True):
-            st.session_state.current_feature = 'portfolio'
-            st.rerun()
-        
-        # Video Meeting
-        if st.sidebar.button("🎥 Video Meeting", key="nav_video", use_container_width=True):
-            st.session_state.current_feature = 'video'
-            st.rerun()
-        
-        st.sidebar.divider()
-        
-        # Emergency Alert Button
-        if st.sidebar.button("🚨 EMERGENCY ALERT", key="nav_emergency", use_container_width=True, type="primary"):
-            st.session_state.current_feature = 'emergency'
-            st.rerun()
-        
-        # Mobile QR
-        render_mobile_qr()
-
-# ============ NEW FEATURE RENDERER ============
-def render_selected_feature():
-    """Render the selected feature in the main area"""
-    if 'current_feature' in st.session_state and st.session_state.current_feature:
-        if st.session_state.current_feature == 'wellness':
-            render_wellness_center()
-        elif st.session_state.current_feature == 'study_groups':
-            render_study_groups()
-        elif st.session_state.current_feature == 'career':
-            render_career_guidance()
-        elif st.session_state.current_feature == 'portfolio':
-            render_portfolio()
-        elif st.session_state.current_feature == 'video':
-            render_video_meeting()
-        elif st.session_state.current_feature == 'emergency':
-            render_emergency_alerts()
-        
-        if st.button("← Back to Dashboard", key="back_to_dash", use_container_width=True):
-            st.session_state.current_feature = None
-            st.rerun()
-        return True
-    return False
-
-# ============ ACCESSIBILITY CSS INTEGRATION ============
-def get_accessibility_css():
-    """Generate accessibility CSS based on settings"""
-    if 'accessibility' not in st.session_state:
-        return ""
-    
-    settings = st.session_state.accessibility
-    css = ""
-    
-    # Text size
-    text_sizes = {
-        "Small": "0.85rem",
-        "Medium": "1rem",
-        "Large": "1.2rem",
-        "Extra Large": "1.4rem"
-    }
-    base_size = text_sizes.get(settings.get('text_size', 'Medium'), '1rem')
-    css += f"""
-        body, .stApp, .main, .stMarkdown, p, h1, h2, h3, h4, h5, h6, .stTextInput, .stTextArea, .stSelectbox, .stButton {{
-            font-size: {base_size} !important;
-            line-height: 1.5 !important;
-        }}
-    """
-    
-    # High contrast mode
-    if settings.get('contrast_mode', False):
-        css += """
-            body, .stApp, .main, .stMarkdown, p, h1, h2, h3, h4, h5, h6 {
-                background: black !important;
-                color: yellow !important;
-            }
-            a { color: cyan !important; }
-            button, .stButton button {
-                background: yellow !important;
-                color: black !important;
-                border: 2px solid yellow !important;
-            }
-            input, textarea, select {
-                background: black !important;
-                color: yellow !important;
-                border: 2px solid yellow !important;
-            }
-            .golden-card, .class-card, .member-card {
-                background: black !important;
-                border: 2px solid yellow !important;
-            }
-        """
-    
-    # Dyslexia-friendly font
-    if settings.get('dyslexia_font', False):
-        css += """
-            @import url('https://fonts.googleapis.com/css2?family=OpenDyslexic&display=swap');
-            body, .stApp, .main, .stMarkdown, p, h1, h2, h3, h4, h5, h6, .stTextInput, .stTextArea, .stSelectbox {
-                font-family: 'OpenDyslexic', Arial, sans-serif !important;
-                line-height: 1.5 !important;
-                letter-spacing: 0.05em !important;
-            }
-        """
-    
-    # Color blind filters
-    color_blind_mode = settings.get('color_blind_mode', 'None')
-    if color_blind_mode != 'None':
-        filters = {
-            "Protanopia": "url('#protanopia')",
-            "Deuteranopia": "url('#deuteranopia')",
-            "Tritanopia": "url('#tritanopia')"
-        }
-        css += f"""
-            <svg style="position: absolute; width: 0; height: 0;">
-                <filter id="protanopia">
-                    <feColorMatrix type="matrix" values="0.567,0.433,0,0,0 0.558,0.442,0,0,0 0,0.242,0.758,0,0 0,0,0,1,0"/>
-                </filter>
-                <filter id="deuteranopia">
-                    <feColorMatrix type="matrix" values="0.625,0.375,0,0,0 0.7,0.3,0,0,0 0,0.3,0.7,0,0 0,0,0,1,0"/>
-                </filter>
-                <filter id="tritanopia">
-                    <feColorMatrix type="matrix" values="0.95,0.05,0,0,0 0,0.433,0.567,0,0 0,0.475,0.525,0,0 0,0,0,1,0"/>
-                </filter>
-            </svg>
-            body, .stApp {{
-                filter: {filters[color_blind_mode]};
-            }}
-        """
-    
-    # Reduced motion
-    if settings.get('reduced_motion', False):
-        css += """
-            * {
-                animation: none !important;
-                transition: none !important;
-            }
-            @keyframes golden-shimmer {
-                0% { background-position: 0% 50%; }
-                100% { background-position: 0% 50%; }
-            }
-        """
-    
-    return css
-
-# Apply accessibility CSS (this will be appended to your existing theme CSS)
-if st.session_state.page == 'dashboard' and st.session_state.user:
-    st.markdown(f"<style>{get_accessibility_css()}</style>", unsafe_allow_html=True)
