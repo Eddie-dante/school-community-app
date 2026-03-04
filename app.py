@@ -11,12 +11,13 @@ from io import BytesIO
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
+import time
 import os
 import threading
 import queue
 import uuid
 
-# Try importing optional dependencies
+# Try importing optional dependencies (will be handled gracefully if not installed)
 try:
     import qrcode
     QRCODE_AVAILABLE = True
@@ -294,7 +295,7 @@ WALLPAPERS = {
     "Cosmic Purple Dust": "https://images5.alphacoders.com/432/thumb-1920-432766.jpg",
     "Milky Way Cosmic Burst": "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=2400",
 
-    # Additional variety
+    # Additional variety to reach 100+
     "Minimalist Ocean Horizon": "https://images.unsplash.com/photo-1507525425510-56b1e2d6c4f2?w=2400",
     "Enchanted Forest Mist": "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=2400",
     "Cyber Neon Grid": "https://images.unsplash.com/photo-1557682257-2f9c97a8a469",
@@ -345,18 +346,6 @@ def get_theme_css(theme_name, wallpaper=None):
             border: 1px solid rgba(255, 255, 255, 0.3);
             position: relative;
             z-index: 10;
-        }}
-        
-        /* Improve text readability */
-        .main .block-container, .stMarkdown, p, h1, h2, h3, h4, h5, h6,
-        .stTextInput, .stTextArea, .stSelectbox, .stButton,
-        div:not(.stTextInput):not(.stTextArea) {{
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
-        }}
-        .stMarkdown, .stText, div:not(.stTextInput):not(.stTextArea) {{
-            background: rgba(0, 0, 0, 0.3) !important;
-            padding: 2px 6px !important;
-            border-radius: 4px !important;
         }}
         
         section[data-testid="stSidebar"] {{
@@ -625,7 +614,7 @@ def get_theme_css(theme_name, wallpaper=None):
         }}
         
         .chat-container {{
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
             border-radius: 16px;
             padding: 20px;
@@ -898,23 +887,6 @@ def generate_notification_id():
 def generate_request_id():
     return 'REQ' + ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
 
-# ============ GLOBAL EMAIL UNIQUENESS ============
-def is_email_global_unique(email: str, school_code: str = None) -> bool:
-    """Check if email is not used in any school (except optionally the current school)."""
-    all_schools = load_all_schools()
-    for s_code, school in all_schools.items():
-        if school_code and s_code == school_code:
-            continue
-        # Check admin email
-        if school.get('admin_email') == email:
-            return False
-        # Check users in that school
-        users = load_school_data(s_code, "users.json", [])
-        for u in users:
-            if u['email'] == email:
-                return False
-    return True
-
 # ============ DATA STORAGE ============
 DATA_DIR = Path("school_data")
 DATA_DIR.mkdir(exist_ok=True)
@@ -1009,6 +981,7 @@ def initiate_call(school_code, caller_email, recipients, call_type, room_name=No
     calls = load_school_data(school_code, "calls.json", [])
     call_id = generate_call_id()
     
+    # Create unique room name if not provided
     if not room_name:
         room_name = f"call_{call_id}"
     
@@ -1018,7 +991,7 @@ def initiate_call(school_code, caller_email, recipients, call_type, room_name=No
         "recipients": recipients,
         "call_type": call_type,
         "room_name": room_name,
-        "status": "ringing",
+        "status": "ringing",  # ringing, active, ended, missed
         "started_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
         "ended_at": None,
         "answered_by": [],
@@ -1027,6 +1000,7 @@ def initiate_call(school_code, caller_email, recipients, call_type, room_name=No
     calls.append(call)
     save_school_data(school_code, "calls.json", calls)
     
+    # Create notifications for all recipients
     users = load_school_data(school_code, "users.json", [])
     caller = next((u for u in users if u['email'] == caller_email), None)
     caller_name = caller['fullname'] if caller else caller_email
@@ -1044,6 +1018,7 @@ def initiate_call(school_code, caller_email, recipients, call_type, room_name=No
     return call
 
 def answer_call(school_code, call_id, user_email):
+    """Answer a call"""
     calls = load_school_data(school_code, "calls.json", [])
     for call in calls:
         if call['id'] == call_id:
@@ -1057,6 +1032,7 @@ def answer_call(school_code, call_id, user_email):
                 })
                 save_school_data(school_code, "calls.json", calls)
                 
+                # Notify caller that call was answered
                 create_notification(
                     school_code,
                     call['caller'],
@@ -1069,6 +1045,7 @@ def answer_call(school_code, call_id, user_email):
     return False
 
 def end_call(school_code, call_id, user_email):
+    """End a call"""
     calls = load_school_data(school_code, "calls.json", [])
     for call in calls:
         if call['id'] == call_id:
@@ -1081,6 +1058,7 @@ def end_call(school_code, call_id, user_email):
             })
             save_school_data(school_code, "calls.json", calls)
             
+            # Notify all participants
             all_participants = [call['caller']] + call['recipients']
             for participant in all_participants:
                 if participant != user_email:
@@ -1096,6 +1074,7 @@ def end_call(school_code, call_id, user_email):
     return False
 
 def get_active_calls(school_code, user_email):
+    """Get active calls for a user"""
     calls = load_school_data(school_code, "calls.json", [])
     active_calls = []
     for call in calls:
@@ -1118,6 +1097,7 @@ def send_friend_request(school_code, from_email, to_email):
         })
         save_school_data(school_code, "friend_requests.json", requests)
         
+        # Create notification for recipient
         users = load_school_data(school_code, "users.json", [])
         from_user = next((u for u in users if u['email'] == from_email), None)
         from_name = from_user['fullname'] if from_user else from_email
@@ -1146,6 +1126,7 @@ def accept_friend_request(school_code, request_id):
                 "since": datetime.now().strftime("%Y-%m-%d %H:%M")
             })
             
+            # Create notification for requester
             create_notification(
                 school_code,
                 req['from'],
@@ -1202,6 +1183,7 @@ def send_message(school_code, sender_email, recipient_email, message, attachment
     })
     save_school_data(school_code, "messages.json", messages)
     
+    # Create notification for recipient
     users = load_school_data(school_code, "users.json", [])
     sender = next((u for u in users if u['email'] == sender_email), None)
     sender_name = sender['fullname'] if sender else sender_email
@@ -1218,6 +1200,7 @@ def send_message(school_code, sender_email, recipient_email, message, attachment
     return message_id
 
 def delete_message(school_code, message_id, user_email):
+    """Delete a message (soft delete)"""
     messages = load_school_data(school_code, "messages.json", [])
     for msg in messages:
         if msg['id'] == message_id:
@@ -1225,6 +1208,7 @@ def delete_message(school_code, message_id, user_email):
                 msg['deleted_by'] = []
             if user_email not in msg['deleted_by']:
                 msg['deleted_by'].append(user_email)
+            # If both parties have deleted, mark as deleted
             if len(msg['deleted_by']) >= 2:
                 msg['deleted'] = True
             break
@@ -1243,10 +1227,12 @@ def get_unread_count(user_email, school_code):
     return len([m for m in messages if m['recipient'] == user_email and not m.get('read', False) and not m.get('deleted', False)])
 
 def get_conversation_messages(school_code, user_email, other_email):
+    """Get messages between two users"""
     messages = load_school_data(school_code, "messages.json", [])
     conv_id = f"{min(user_email, other_email)}_{max(user_email, other_email)}"
     conv_msgs = [m for m in messages if m['conversation_id'] == conv_id and not m.get('deleted', False)]
     
+    # Filter out messages deleted by this user
     filtered_msgs = []
     for msg in conv_msgs:
         if user_email not in msg.get('deleted_by', []):
@@ -1270,6 +1256,7 @@ def create_group_chat(school_code, group_name, created_by, members):
     group_chats.append(group_chat)
     save_school_data(school_code, "group_chats.json", group_chats)
     
+    # Notify all members
     users = load_school_data(school_code, "users.json", [])
     creator = next((u for u in users if u['email'] == created_by), None)
     creator_name = creator['fullname'] if creator else created_by
@@ -1304,6 +1291,7 @@ def send_group_message(school_code, group_id, sender_email, message, attachment=
                 "deleted_by": []
             })
             
+            # Notify all members
             users = load_school_data(school_code, "users.json", [])
             sender = next((u for u in users if u['email'] == sender_email), None)
             sender_name = sender['fullname'] if sender else sender_email
@@ -1323,6 +1311,7 @@ def send_group_message(school_code, group_id, sender_email, message, attachment=
     save_school_data(school_code, "group_chats.json", group_chats)
 
 def delete_group_message(school_code, group_id, message_id, user_email):
+    """Delete a message in group chat"""
     group_chats = load_school_data(school_code, "group_chats.json", [])
     for group in group_chats:
         if group['id'] == group_id:
@@ -1332,6 +1321,7 @@ def delete_group_message(school_code, group_id, message_id, user_email):
                         msg['deleted_by'] = []
                     if user_email not in msg['deleted_by']:
                         msg['deleted_by'].append(user_email)
+                    # If admin or sender, mark as deleted for all
                     if user_email == msg['sender'] or user_email in group.get('admins', []):
                         msg['deleted'] = True
                     break
@@ -1501,6 +1491,7 @@ def add_parent_feedback(school_code, guardian_email, student_email, feedback_tex
     save_school_data(school_code, "parent_feedback.json", feedback)
 
 def delete_user(school_code, user_email, admin_email):
+    """Admin function to delete a user from the community"""
     if st.session_state.user['role'] != 'admin':
         return False, "Only admins can delete users"
     
@@ -1508,6 +1499,7 @@ def delete_user(school_code, user_email, admin_email):
     users = [u for u in users if u['email'] != user_email]
     save_school_data(school_code, "users.json", users)
     
+    # Remove from all relationships
     friendships = load_school_data(school_code, "friendships.json", [])
     friendships = [f for f in friendships if f['user1'] != user_email and f['user2'] != user_email]
     save_school_data(school_code, "friendships.json", friendships)
@@ -1516,12 +1508,14 @@ def delete_user(school_code, user_email, admin_email):
     friend_requests = [r for r in friend_requests if r['from'] != user_email and r['to'] != user_email]
     save_school_data(school_code, "friend_requests.json", friend_requests)
     
+    # Remove from groups
     groups = load_school_data(school_code, "groups.json", [])
     for group in groups:
         if user_email in group.get('members', []):
             group['members'].remove(user_email)
     save_school_data(school_code, "groups.json", groups)
     
+    # Remove from classes
     classes = load_school_data(school_code, "classes.json", [])
     for cls in classes:
         if user_email in cls.get('students', []):
@@ -1567,19 +1561,23 @@ def borrow_book(school_code, user_email, book_id, due_days=14):
     transactions = load_school_data(school_code, "library_transactions.json", [])
     members = load_school_data(school_code, "library_members.json", [])
     
+    # Find book
     book = next((b for b in books if b['id'] == book_id), None)
     if not book or book['available'] <= 0:
         return False, "Book not available"
     
+    # Find or create member
     member = next((m for m in members if m['email'] == user_email), None)
     if not member:
         add_library_member(school_code, user_email)
         members = load_school_data(school_code, "library_members.json", [])
         member = next((m for m in members if m['email'] == user_email), None)
     
+    # Check if member already has this book
     if any(b['book_id'] == book_id and b['status'] == 'borrowed' for b in member.get('borrowed_books', [])):
         return False, "Already borrowed this book"
     
+    # Create transaction
     borrow_date = datetime.now()
     due_date = borrow_date + timedelta(days=due_days)
     
@@ -1596,8 +1594,10 @@ def borrow_book(school_code, user_email, book_id, due_days=14):
     }
     transactions.append(transaction)
     
+    # Update book availability
     book['available'] -= 1
     
+    # Update member's borrowed books
     member.setdefault('borrowed_books', []).append({
         "book_id": book_id,
         "transaction_id": transaction['id'],
@@ -1621,13 +1621,16 @@ def return_book(school_code, transaction_id):
     if not transaction or transaction['status'] != 'borrowed':
         return False, "Invalid transaction"
     
+    # Update transaction
     transaction['return_date'] = datetime.now().strftime("%Y-%m-%d")
     transaction['status'] = 'returned'
     
+    # Update book availability
     book = next((b for b in books if b['id'] == transaction['book_id']), None)
     if book:
         book['available'] += 1
     
+    # Update member's record
     member = next((m for m in members if m['email'] == transaction['user_email']), None)
     if member:
         for b in member.get('borrowed_books', []):
@@ -1688,9 +1691,11 @@ def import_members_from_excel(school_code, uploaded_file):
         imported_count = 0
         
         for _, row in df.iterrows():
+            # Check if email already exists
             if any(u['email'] == row['Email'] for u in users):
                 continue
             
+            # Create user
             new_user = {
                 "user_id": generate_id("USR"),
                 "email": row['Email'],
@@ -1705,6 +1710,7 @@ def import_members_from_excel(school_code, uploaded_file):
             }
             users.append(new_user)
             
+            # Add to library members
             if not any(m['email'] == row['Email'] for m in members):
                 member = {
                     "email": row['Email'],
@@ -2077,12 +2083,14 @@ def add_wellness_checkin(user_email: str, school_code: str, mood: int, stress: i
     checkins.append(checkin)
     save_school_data(school_code, "wellness_checkins.json", checkins)
     
+    # Check for concerning patterns
     recent_checkins = [c for c in checkins if c['user_email'] == user_email][-5:]
     if len(recent_checkins) >= 3:
         avg_stress = sum(c['stress'] for c in recent_checkins) / len(recent_checkins)
         avg_anxiety = sum(c['anxiety'] for c in recent_checkins) / len(recent_checkins)
         
         if avg_stress > 7 or avg_anxiety > 7:
+            # Alert counselor
             counselors = [u for u in load_school_data(school_code, "users.json", []) if u['role'] == 'counselor']
             for counselor in counselors:
                 create_notification(
@@ -2115,6 +2123,7 @@ def create_study_group(school_code: str, name: str, subject: str, created_by: st
     groups.append(group)
     save_school_data(school_code, "study_groups.json", groups)
     
+    # Notify potential members (students in same class)
     users = load_school_data(school_code, "users.json", [])
     students = [u for u in users if u['role'] == 'student']
     
@@ -2141,6 +2150,7 @@ def join_study_group(school_code: str, group_id: str, user_email: str) -> bool:
                 group['members'].append(user_email)
                 save_school_data(school_code, "study_groups.json", groups)
                 
+                # Notify group creator
                 create_notification(
                     school_code,
                     group['created_by'],
@@ -2200,12 +2210,13 @@ def career_quiz(answers: dict) -> list:
     elif answers.get('q4') == 'stability':
         interests.extend(['government', 'trades'])
     
+    # Get unique interests and map to careers
     unique_interests = list(set(interests))
     recommendations = []
     for interest in unique_interests[:3]:
         recommendations.extend(CAREER_INTERESTS.get(interest, []))
     
-    return recommendations[:5]
+    return recommendations[:5]  # Return top 5
 
 # ============ EMERGENCY ALERT SYSTEM ============
 EMERGENCY_TYPES = {
@@ -2221,6 +2232,7 @@ def send_emergency_alert(user_email: str, school_code: str, alert_type: str,
     """Send an emergency alert"""
     alerts = load_school_data(school_code, "emergency_alerts.json", [])
     
+    # Check for recent similar alerts to prevent spam
     recent = [a for a in alerts if a['user_email'] == user_email and 
               a['timestamp'].startswith(datetime.now().strftime("%Y-%m-%d"))]
     if len(recent) > 3:
@@ -2240,6 +2252,7 @@ def send_emergency_alert(user_email: str, school_code: str, alert_type: str,
     alerts.append(alert)
     save_school_data(school_code, "emergency_alerts.json", alerts)
     
+    # Get emergency contacts (admins, security)
     users = load_school_data(school_code, "users.json", [])
     emergency_contacts = [u for u in users if u['role'] in ['admin', 'security']]
     
@@ -2268,6 +2281,7 @@ def respond_to_emergency(alert_id: str, responder_email: str, school_code: str):
             break
     save_school_data(school_code, "emergency_alerts.json", alerts)
     
+    # Notify the reporter
     create_notification(
         school_code,
         alert['user_email'],
@@ -2283,6 +2297,7 @@ def create_video_meeting(school_code: str, room_name: str, created_by: str,
     """Create a video meeting"""
     meetings = load_school_data(school_code, "video_meetings.json", [])
     
+    # Generate unique room name
     room_id = generate_id("VID")
     
     meeting = {
@@ -2338,6 +2353,7 @@ def answer_call_room(school_code: str, call_id: str, user_email: str) -> bool:
                     call['answered_by'].append(user_email)
                 save_school_data(school_code, "calls.json", calls)
                 
+                # Notify caller
                 create_notification(
                     school_code,
                     call['created_by'],
@@ -2359,6 +2375,7 @@ def end_call_room(school_code: str, call_id: str, user_email: str) -> bool:
             call['ended_at'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             save_school_data(school_code, "calls.json", calls)
             
+            # Notify all participants
             all_participants = [call['created_by']] + call['recipients']
             for participant in all_participants:
                 if participant != user_email:
@@ -2399,6 +2416,7 @@ def add_portfolio_project(user_email: str, school_code: str, title: str,
     """Add a project to user's portfolio"""
     projects = load_school_data(school_code, "portfolio_projects.json", [])
     
+    # Process uploaded files using your existing save_attachment function
     file_data = []
     if files:
         for file in files:
@@ -2484,6 +2502,7 @@ def render_accessibility_panel():
         col1, col2 = st.columns(2)
         
         with col1:
+            # Text size
             text_size = st.select_slider(
                 "Text Size",
                 options=["Small", "Medium", "Large", "Extra Large"],
@@ -2491,12 +2510,14 @@ def render_accessibility_panel():
                 key="acc_text_size"
             )
             
+            # High contrast
             high_contrast = st.checkbox(
                 "High Contrast Mode",
                 value=st.session_state.accessibility.get('contrast_mode', False),
                 key="acc_contrast"
             )
             
+            # Dyslexia font
             dyslexia_font = st.checkbox(
                 "Dyslexia-Friendly Font",
                 value=st.session_state.accessibility.get('dyslexia_font', False),
@@ -2504,6 +2525,7 @@ def render_accessibility_panel():
             )
         
         with col2:
+            # Color blind mode
             color_blind = st.selectbox(
                 "Color Blindness Mode",
                 options=list(COLOR_BLIND_FILTERS.keys()),
@@ -2513,12 +2535,14 @@ def render_accessibility_panel():
                 key="acc_color_blind"
             )
             
+            # Reduced motion
             reduced_motion = st.checkbox(
                 "Reduced Motion",
                 value=st.session_state.accessibility.get('reduced_motion', False),
                 key="acc_motion"
             )
             
+            # Accessibility presets
             preset = st.selectbox(
                 "Presets",
                 options=list(ACCESSIBILITY_PRESETS.keys()),
@@ -2607,6 +2631,7 @@ def render_wellness_center():
                     avg_sleep = df['sleep'].mean()
                     st.metric("Average Sleep", f"{avg_sleep:.1f} hrs")
                 
+                # Trend graphs
                 fig = px.line(df, x='date', y=['mood', 'stress', 'anxiety', 'energy'],
                               title="Wellness Trends Over Time",
                               color_discrete_sequence=['#28a745', '#dc3545', '#ffc107', '#17a2b8'])
@@ -2764,6 +2789,7 @@ def render_emergency_alerts():
         location = st.text_input("Your Location", placeholder="e.g., Room 101, Library, Field")
         description = st.text_area("Description", placeholder="Briefly describe the situation...")
         
+        # Confirmation checkbox to prevent false alarms
         confirm = st.checkbox("I confirm this is a genuine emergency")
         
         if st.form_submit_button("🚨 SEND EMERGENCY ALERT", use_container_width=True, type="primary"):
@@ -2814,6 +2840,7 @@ def render_portfolio():
                         st.success("Project added to portfolio!")
                         st.rerun()
         
+        # Display projects
         if st.session_state.user and st.session_state.current_school:
             projects = load_school_data(st.session_state.current_school['code'], "portfolio_projects.json", [])
             user_projects = [p for p in projects if p['user_email'] == st.session_state.user['email']]
@@ -2833,7 +2860,8 @@ def render_portfolio():
                         if project.get('files'):
                             with st.expander("📎 Project Files"):
                                 for file in project['files']:
-                                    display_attachment(file)
+                                    if 'display_attachment' in globals():
+                                        display_attachment(file)
                         st.divider()
             else:
                 st.info("No projects yet. Add your first project!")
@@ -2894,6 +2922,7 @@ def render_video_meeting():
         if st.session_state.user and st.session_state.current_school:
             users = load_school_data(st.session_state.current_school['code'], "users.json", [])
             
+            # Filter users based on role for different call types
             all_users = [u for u in users if u['email'] != st.session_state.user['email']]
             
             col1, col2 = st.columns(2)
@@ -2963,6 +2992,7 @@ def render_video_meeting():
         if st.session_state.user and st.session_state.current_school:
             calls = load_school_data(st.session_state.current_school['code'], "calls.json", [])
             
+            # Find calls where user is involved and call is active
             active_calls = []
             for call in calls:
                 if call['status'] in ['ringing', 'active']:
@@ -3047,9 +3077,11 @@ def render_call_room():
     col1, col2 = st.columns([3, 1])
     
     with col1:
+        # Simulated call interface
         call_icon = "🎧" if call['call_type'] == 'audio' else "📹"
         st.markdown(f"## {call_icon} {call['call_type'].title()} Call")
         
+        # Participants
         st.markdown("#### Participants")
         
         users = load_school_data(st.session_state.current_school['code'], "users.json", [])
@@ -3063,6 +3095,7 @@ def render_call_room():
             else:
                 st.markdown(f"🔴 {name} (Ringing...)")
         
+        # Call controls
         st.markdown("---")
         col_a, col_b, col_c = st.columns(3)
         
@@ -3095,6 +3128,7 @@ def render_call_room():
         st.markdown(f"**Room:** {call['room_name']}")
         
         if call['call_type'] == 'video':
+            # Simulated video feed
             st.markdown("### 📹 Your Video")
             st.markdown("""
             <div style="background: rgba(0,0,0,0.5); height: 200px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
@@ -3149,75 +3183,70 @@ def render_mobile_qr():
     else:
         st.sidebar.info("Install qrcode package to enable QR features")
 
-def render_requests_section(sidebar=True):
+def render_requests_section():
     """Render requests section for admins"""
     if st.session_state.user['role'] != 'admin':
         return
     
-    school_code = st.session_state.current_school['code']
-    
-    if sidebar:
-        with st.sidebar.expander("📋 Pending Requests", expanded=False):
-            _display_requests(school_code)
-    else:
-        st.markdown("### 📋 Pending Requests")
-        _display_requests(school_code)
-
-def _display_requests(school_code):
-    """Helper to display requests"""
-    class_requests = load_school_data(school_code, "class_requests.json", [])
-    pending_class = [r for r in class_requests if r['status'] == 'pending']
-    
-    if pending_class:
-        st.markdown("#### Class Enrollment Requests")
-        for req in pending_class[:5]:
-            with st.container():
-                st.markdown(f"**{req['student_name']}** wants to join")
-                st.markdown(f"Class: {req['class_code']}")
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("✅", key=f"accept_class_{req['id']}"):
-                        req['status'] = 'accepted'
-                        classes = load_school_data(school_code, "classes.json", [])
-                        for cls in classes:
-                            if cls['code'] == req['class_code']:
-                                cls.setdefault('students', []).append(req['student_email'])
-                        save_school_data(school_code, "classes.json", classes)
-                        save_school_data(school_code, "class_requests.json", class_requests)
-                        st.rerun()
-                with col2:
-                    if st.button("❌", key=f"decline_class_{req['id']}"):
-                        req['status'] = 'declined'
-                        save_school_data(school_code, "class_requests.json", class_requests)
-                        st.rerun()
-                st.divider()
-    
-    group_requests = load_school_data(school_code, "group_requests.json", [])
-    pending_group = [r for r in group_requests if r['status'] == 'pending']
-    
-    if pending_group:
-        st.markdown("#### Group Join Requests")
-        for req in pending_group[:5]:
-            with st.container():
-                st.markdown(f"**{req.get('user_name', 'Someone')}** wants to join")
-                st.markdown(f"Group: {req.get('group_name', req['group_code'])}")
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("✅", key=f"accept_group_{req['id']}"):
-                        req['status'] = 'accepted'
-                        groups = load_school_data(school_code, "groups.json", [])
-                        for group in groups:
-                            if group['code'] == req['group_code']:
-                                group.setdefault('members', []).append(req['user_email'])
-                        save_school_data(school_code, "groups.json", groups)
-                        save_school_data(school_code, "group_requests.json", group_requests)
-                        st.rerun()
-                with col2:
-                    if st.button("❌", key=f"decline_group_{req['id']}"):
-                        req['status'] = 'declined'
-                        save_school_data(school_code, "group_requests.json", group_requests)
-                        st.rerun()
-                st.divider()
+    with st.sidebar.expander("📋 Pending Requests", expanded=False):
+        school_code = st.session_state.current_school['code']
+        
+        # Class requests
+        class_requests = load_school_data(school_code, "class_requests.json", [])
+        pending_class = [r for r in class_requests if r['status'] == 'pending']
+        
+        if pending_class:
+            st.markdown("#### Class Enrollment Requests")
+            for req in pending_class[:5]:
+                with st.container():
+                    st.markdown(f"**{req['student_name']}** wants to join")
+                    st.markdown(f"Class: {req['class_code']}")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅", key=f"accept_class_{req['id']}"):
+                            # Accept logic
+                            req['status'] = 'accepted'
+                            classes = load_school_data(school_code, "classes.json", [])
+                            for cls in classes:
+                                if cls['code'] == req['class_code']:
+                                    cls.setdefault('students', []).append(req['student_email'])
+                            save_school_data(school_code, "classes.json", classes)
+                            save_school_data(school_code, "class_requests.json", class_requests)
+                            st.rerun()
+                    with col2:
+                        if st.button("❌", key=f"decline_class_{req['id']}"):
+                            req['status'] = 'declined'
+                            save_school_data(school_code, "class_requests.json", class_requests)
+                            st.rerun()
+                    st.divider()
+        
+        # Group requests
+        group_requests = load_school_data(school_code, "group_requests.json", [])
+        pending_group = [r for r in group_requests if r['status'] == 'pending']
+        
+        if pending_group:
+            st.markdown("#### Group Join Requests")
+            for req in pending_group[:5]:
+                with st.container():
+                    st.markdown(f"**{req.get('user_name', 'Someone')}** wants to join")
+                    st.markdown(f"Group: {req.get('group_name', req['group_code'])}")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅", key=f"accept_group_{req['id']}"):
+                            req['status'] = 'accepted'
+                            groups = load_school_data(school_code, "groups.json", [])
+                            for group in groups:
+                                if group['code'] == req['group_code']:
+                                    group.setdefault('members', []).append(req['user_email'])
+                            save_school_data(school_code, "groups.json", groups)
+                            save_school_data(school_code, "group_requests.json", group_requests)
+                            st.rerun()
+                    with col2:
+                        if st.button("❌", key=f"decline_group_{req['id']}"):
+                            req['status'] = 'declined'
+                            save_school_data(school_code, "group_requests.json", group_requests)
+                            st.rerun()
+                    st.divider()
 
 # ============ UPDATE SESSION STATE WITH NEW VARIABLES ============
 if 'language' not in st.session_state:
@@ -3232,14 +3261,8 @@ if 'current_meeting' not in st.session_state:
     st.session_state.current_meeting = None
 if 'current_call' not in st.session_state:
     st.session_state.current_call = None
-
-# Flags for double-click prevention
-if 'sending_message' not in st.session_state:
-    st.session_state.sending_message = False
-if 'borrowing_book' not in st.session_state:
-    st.session_state.borrowing_book = False
-if 'creating_group' not in st.session_state:
-    st.session_state.creating_group = False
+if 'last_refresh' not in st.session_state:
+    st.session_state.last_refresh = time.time()
 
 # ============ NEW SIDEBAR ENHANCEMENTS ============
 def render_enhanced_sidebar_additions():
@@ -3247,41 +3270,56 @@ def render_enhanced_sidebar_additions():
     if st.session_state.user:
         st.sidebar.divider()
         
+        # Notifications
         render_notifications()
         
+        # Language selector
         render_language_selector()
         
+        # Accessibility panel
         render_accessibility_panel()
         
-        # Only show Requests for admin (already handled inside render_requests_section)
-        render_requests_section(sidebar=True)
+        # Requests section for admins
+        render_requests_section()
         
         st.sidebar.divider()
         
+        # New features section
         st.sidebar.markdown("### 🆕 New Features")
         
+        # Wellness Center
         if st.sidebar.button("🧠 Wellness Center", key="nav_wellness", use_container_width=True):
             st.session_state.current_feature = 'wellness'
             st.rerun()
         
+        # Study Groups
         if st.sidebar.button("📚 Study Groups", key="nav_study", use_container_width=True):
             st.session_state.current_feature = 'study_groups'
             st.rerun()
         
+        # Career Guidance
         if st.sidebar.button("🎯 Career Guidance", key="nav_career", use_container_width=True):
             st.session_state.current_feature = 'career'
             st.rerun()
         
+        # Portfolio
+        if st.sidebar.button("📁 Portfolio", key="nav_portfolio", use_container_width=True):
+            st.session_state.current_feature = 'portfolio'
+            st.rerun()
+        
+        # Video Meeting
         if st.sidebar.button("🎥 Video/Audio Calls", key="nav_video", use_container_width=True):
             st.session_state.current_feature = 'video'
             st.rerun()
         
         st.sidebar.divider()
         
+        # Emergency Alert Button
         if st.sidebar.button("🚨 EMERGENCY ALERT", key="nav_emergency", use_container_width=True, type="primary"):
             st.session_state.current_feature = 'emergency'
             st.rerun()
         
+        # Mobile QR
         render_mobile_qr()
 
 # ============ NEW FEATURE RENDERER ============
@@ -3294,6 +3332,8 @@ def render_selected_feature():
             render_study_groups()
         elif st.session_state.current_feature == 'career':
             render_career_guidance()
+        elif st.session_state.current_feature == 'portfolio':
+            render_portfolio()
         elif st.session_state.current_feature == 'video':
             if 'current_call' in st.session_state and st.session_state.current_call:
                 render_call_room()
@@ -3301,8 +3341,6 @@ def render_selected_feature():
                 render_video_meeting()
         elif st.session_state.current_feature == 'emergency':
             render_emergency_alerts()
-        else:
-            return False
         
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
@@ -3322,6 +3360,7 @@ def get_accessibility_css():
     settings = st.session_state.accessibility
     css = ""
     
+    # Text size
     text_sizes = {
         "Small": "0.85rem",
         "Medium": "1rem",
@@ -3336,6 +3375,7 @@ def get_accessibility_css():
         }}
     """
     
+    # High contrast mode
     if settings.get('contrast_mode', False):
         css += """
             body, .stApp, .main, .stMarkdown, p, h1, h2, h3, h4, h5, h6 {
@@ -3359,6 +3399,7 @@ def get_accessibility_css():
             }
         """
     
+    # Dyslexia-friendly font
     if settings.get('dyslexia_font', False):
         css += """
             @import url('https://fonts.googleapis.com/css2?family=OpenDyslexic&display=swap');
@@ -3369,6 +3410,7 @@ def get_accessibility_css():
             }
         """
     
+    # Color blind filters
     color_blind_mode = settings.get('color_blind_mode', 'None')
     if color_blind_mode != 'None':
         filters = {
@@ -3393,6 +3435,7 @@ def get_accessibility_css():
             }}
         """
     
+    # Reduced motion
     if settings.get('reduced_motion', False):
         css += """
             * {
@@ -3452,6 +3495,7 @@ if st.session_state.page == 'welcome':
     st.markdown('<p style="text-align: center; color: white; font-size: 1.2rem; text-shadow: 1px 1px 2px black;">Connect • Collaborate • Manage • Shine</p>', unsafe_allow_html=True)
     st.divider()
     
+    # MAIN NAVIGATION BUTTONS
     col1, col2, col3 = st.columns(3)
     
     with col1:
@@ -3527,10 +3571,19 @@ if st.session_state.page == 'welcome':
                             st.error("School name, email and password are required")
                         elif password != confirm:
                             st.error("Passwords do not match")
-                        elif not is_email_global_unique(admin_email):
-                            st.error("This email is already registered with another school")
                         else:
+                            # Check if email already exists in any school
                             all_schools = load_all_schools()
+                            email_exists = False
+                            for s_code, s_data in all_schools.items():
+                                if s_data['admin_email'] == admin_email:
+                                    email_exists = True
+                                    break
+                            
+                            if email_exists:
+                                st.error("This email is already registered with another school")
+                                st.stop()
+                            
                             code = generate_school_code()
                             while code in all_schools:
                                 code = generate_school_code()
@@ -3562,7 +3615,6 @@ if st.session_state.page == 'welcome':
                                 "phone": ""
                             }]
                             save_school_data(code, "users.json", users)
-                            # Initialize other data files...
                             save_school_data(code, "teachers.json", [])
                             save_school_data(code, "guardians.json", [])
                             save_school_data(code, "classes.json", [])
@@ -3650,8 +3702,6 @@ if st.session_state.page == 'welcome':
                             st.error("All fields required")
                         elif password != confirm:
                             st.error("Passwords don't match")
-                        elif not is_email_global_unique(email, school_code):
-                            st.error("❌ This email is already registered in another school!")
                         else:
                             all_schools = load_all_schools()
                             if school_code not in all_schools:
@@ -3659,6 +3709,10 @@ if st.session_state.page == 'welcome':
                             else:
                                 school = all_schools[school_code]
                                 users = load_school_data(school_code, "users.json", [])
+                                
+                                if any(u['email'] == email for u in users):
+                                    st.error("❌ Email already registered!")
+                                    st.stop()
                                 
                                 teachers_data = load_school_data(school_code, "teachers.json", [])
                                 valid = False
@@ -3674,6 +3728,7 @@ if st.session_state.page == 'welcome':
                                         t['last_used_by'] = email
                                         break
                                 if not valid:
+                                    # Auto-generate teacher code if none exists
                                     new_code = generate_teacher_code()
                                     teachers_data.append({
                                         "code": new_code,
@@ -3711,6 +3766,7 @@ if st.session_state.page == 'welcome':
                                 all_schools[school_code] = school
                                 save_all_schools(all_schools)
                                 
+                                # Add to library members
                                 add_library_member(school_code, email, "teacher")
                                 
                                 st.session_state.current_school = school
@@ -3761,8 +3817,6 @@ if st.session_state.page == 'welcome':
                             st.error("School code, name and password are required")
                         elif password != confirm:
                             st.error("Passwords don't match")
-                        elif email and not is_email_global_unique(email, school_code):
-                            st.error("❌ This email is already registered in another school!")
                         else:
                             all_schools = load_all_schools()
                             if school_code not in all_schools:
@@ -3770,6 +3824,10 @@ if st.session_state.page == 'welcome':
                             else:
                                 school = all_schools[school_code]
                                 users = load_school_data(school_code, "users.json", [])
+                                
+                                if email and any(u['email'] == email for u in users):
+                                    st.error("❌ Email already registered!")
+                                    st.stop()
                                 
                                 admission_number = generate_admission_number()
                                 while any(u.get('admission_number') == admission_number for u in users):
@@ -3797,6 +3855,7 @@ if st.session_state.page == 'welcome':
                                 all_schools[school_code] = school
                                 save_all_schools(all_schools)
                                 
+                                # Add to library members
                                 add_library_member(school_code, new_user['email'], "student")
                                 
                                 st.success(f"✅ Registered! Your Admission Number is: **{admission_number}**")
@@ -3852,8 +3911,6 @@ if st.session_state.page == 'welcome':
                             st.error("All fields required")
                         elif password != confirm:
                             st.error("Passwords don't match")
-                        elif not is_email_global_unique(email, school_code):
-                            st.error("❌ This email is already registered in another school!")
                         else:
                             all_schools = load_all_schools()
                             if school_code not in all_schools:
@@ -3861,6 +3918,10 @@ if st.session_state.page == 'welcome':
                             else:
                                 school = all_schools[school_code]
                                 users = load_school_data(school_code, "users.json", [])
+                                
+                                if any(u['email'] == email for u in users):
+                                    st.error("❌ Email already registered!")
+                                    st.stop()
                                 
                                 student = None
                                 for u in users:
@@ -3896,6 +3957,7 @@ if st.session_state.page == 'welcome':
                                 all_schools[school_code] = school
                                 save_all_schools(all_schools)
                                 
+                                # Add to library members
                                 add_library_member(school_code, email, "guardian")
                                 
                                 st.success("✅ Guardian Registration Successful!")
@@ -3922,7 +3984,7 @@ if st.session_state.page == 'welcome':
         st.markdown("""
         <div class="golden-card" style="text-align: center;">
             <h3>👤 Personal Dashboard</h3>
-            <p>Your personal information, performance, reviews, achievements, and portfolio!</p>
+            <p>Your personal information, performance, reviews, achievements, and library account!</p>
             <p style="font-size: 0.9rem;">Please log in with your student or guardian credentials to view your personal dashboard.</p>
         </div>
         """, unsafe_allow_html=True)
@@ -3959,8 +4021,15 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     unread_count = get_unread_count(user['email'], school_code)
     pending_friend_count = len(get_pending_requests(school_code, user['email']))
     
+    # Get user's borrowed books
     user_member = next((m for m in library_members if m['email'] == user['email']), None)
     borrowed_books = user_member.get('borrowed_books', []) if user_member else []
+    
+    # Auto-refresh check
+    current_time = time.time()
+    if current_time - st.session_state.last_refresh > 5:  # Refresh every 5 seconds
+        st.session_state.last_refresh = current_time
+        # No need to rerun, just update the last_refresh time
     
     # ============ GOLDEN SIDEBAR ============
     with st.sidebar:
@@ -3999,10 +4068,11 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         
         st.divider()
         
+        # Define sidebar options based on role
         base_options = ["Dashboard", "Announcements", "Community", f"Chat 💬{f' ({unread_count})' if unread_count>0 else ''}", f"Group Chats 👥", f"Friends 🤝{f' ({pending_friend_count})' if pending_friend_count>0 else ''}"]
         
         if user['role'] == 'admin':
-            options = base_options + ["Requests", "Classes", "Groups", "Teachers", "Students", "Guardians", "Assignments", "School Management", "Personal Dashboard", "Library Management", "Settings ⚙️", "Profile"]
+            options = base_options + ["Classes", "Groups", "Teachers", "Students", "Guardians", "Assignments", "School Management", "Personal Dashboard", "Library Management", "Settings ⚙️", "Profile"]
         elif user['role'] == 'teacher':
             options = base_options + ["My Classes", "Groups", "Assignments", "School Management", "Personal Dashboard", "Library Management", "Settings ⚙️", "Profile"]
         elif user['role'] == 'student':
@@ -4018,6 +4088,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         
         st.divider()
         
+        # Add the new features to sidebar
         render_enhanced_sidebar_additions()
         
         if st.button("🚪 Logout", use_container_width=True):
@@ -4028,8 +4099,9 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     
     # ============ MAIN CONTENT ============
     
+    # Check if a new feature is selected
     if render_selected_feature():
-        pass
+        pass  # Feature is being displayed, nothing else to do
     elif menu == "Dashboard":
         st.markdown(f"<h2 style='text-align: center; color: white;'>Welcome, {user['fullname']}!</h2>", unsafe_allow_html=True)
         
@@ -4080,6 +4152,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             with col3:
                 st.metric("🎫 Admission", user['admission_number'][:10] + "..." if len(user['admission_number']) > 10 else user['admission_number'])
             
+            # Show borrowed books count
             if borrowed_books:
                 active_borrows = len([b for b in borrowed_books if b['status'] == 'borrowed'])
                 st.metric("📚 Books Borrowed", active_borrows)
@@ -4150,6 +4223,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 st.markdown("**📎 Attachment:**")
                                 display_attachment(ann['attachment'])
                         with col2:
+                            # Delete button for admins or author
                             if user['role'] == 'admin' or user['email'] == ann['author_email']:
                                 if st.button("🗑️", key=f"del_ann_{ann['id']}"):
                                     if delete_announcement(school_code, ann['id'], user['email']):
@@ -4315,6 +4389,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 st.rerun()
                 
                 with col5:
+                    # Delete user button (admin only)
                     if user['role'] == 'admin':
                         if st.button("🗑️", key=f"del_user_{member['email']}"):
                             success, message = delete_user(school_code, member['email'], user['email'])
@@ -4356,10 +4431,11 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                         st.rerun()
                             with col4:
                                 if st.button("📞 Call", key=f"call_friend_{friend_email}"):
+                                    # Initiate call to friend
                                     create_call_room(
                                         school_code,
                                         user['email'],
-                                        "audio",
+                                        "audio",  # Default to audio, can add video option
                                         [friend_email],
                                         f"Call with {friend['fullname']}"
                                     )
@@ -4469,6 +4545,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 if other_user:
                     st.markdown(f"### Chat with {other_user['fullname']}")
                     
+                    # Add call buttons
                     col_a, col_b, col_c = st.columns([2, 1, 1])
                     with col_b:
                         if st.button("🎧 Audio Call", use_container_width=True):
@@ -4522,6 +4599,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 with st.expander("📎 Attachment"):
                                     display_attachment(msg['attachment'])
                         
+                        # Delete message button
                         if msg['sender'] == user['email'] or user['role'] == 'admin':
                             with col2:
                                 if st.button("🗑️", key=f"del_msg_{msg['id']}"):
@@ -4537,15 +4615,11 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         with col_b:
                             attachment = st.file_uploader("📎", type=['jpg', 'png', 'pdf', 'docx', 'txt'], label_visibility="collapsed")
                         
-                        if st.form_submit_button("📤 Send", use_container_width=True, disabled=st.session_state.sending_message):
-                            st.session_state.sending_message = True
+                        if st.form_submit_button("📤 Send", use_container_width=True):
                             if message or attachment:
                                 attachment_data = save_attachment(attachment) if attachment else None
                                 send_message(school_code, user['email'], other_email, message, attachment_data)
-                                st.session_state.sending_message = False
                                 st.rerun()
-                            else:
-                                st.session_state.sending_message = False
             else:
                 st.info("Select a chat to start messaging")
     
@@ -4573,12 +4647,10 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     members = st.multiselect("Select Members", 
                                            [f"{u['fullname']} ({u['email']})" for u in users if u['email'] != user['email']])
                     
-                    if st.form_submit_button("➕ Create", disabled=st.session_state.creating_group):
+                    if st.form_submit_button("➕ Create"):
                         if group_name and members:
-                            st.session_state.creating_group = True
                             member_emails = [m.split('(')[1].rstrip(')') for m in members] + [user['email']]
                             group_id = create_group_chat(school_code, group_name, user['email'], member_emails)
-                            st.session_state.creating_group = False
                             st.success(f"Group chat '{group_name}' created!")
                             st.session_state.group_chat_with = group_id
                             st.rerun()
@@ -4598,6 +4670,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 role_badge = " (Admin)" if member_email in current_group.get('admins', []) else ""
                                 st.write(f"{member['fullname']}{role_badge}")
                     
+                    # Add group call button
                     if st.button("📞 Start Group Call", use_container_width=True):
                         create_call_room(
                             school_code,
@@ -4639,6 +4712,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 with st.expander("📎 Attachment"):
                                     display_attachment(msg['attachment'])
                         
+                        # Delete message button
                         if msg['sender'] == user['email'] or user['role'] == 'admin':
                             with col2:
                                 if st.button("🗑️", key=f"del_group_msg_{msg['id']}"):
@@ -4655,15 +4729,11 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             attachment = st.file_uploader("📎", type=['jpg', 'png', 'pdf', 'docx', 'txt'], 
                                                         label_visibility="collapsed", key="group_attach")
                         
-                        if st.form_submit_button("📤 Send", use_container_width=True, disabled=st.session_state.sending_message):
-                            st.session_state.sending_message = True
+                        if st.form_submit_button("📤 Send", use_container_width=True):
                             if message or attachment:
                                 attachment_data = save_attachment(attachment) if attachment else None
                                 send_group_message(school_code, st.session_state.group_chat_with, user['email'], message, attachment_data)
-                                st.session_state.sending_message = False
                                 st.rerun()
-                            else:
-                                st.session_state.sending_message = False
             else:
                 st.info("Select a group to start chatting")
     
@@ -4676,6 +4746,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         else:
             st.markdown("<h2 style='text-align: center; color: white;'>📚 Browse Classes</h2>", unsafe_allow_html=True)
         
+        # Admin: View and create classes
         if user['role'] == 'admin':
             with st.expander("➕ Create New Class"):
                 with st.form("create_class"):
@@ -4704,6 +4775,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             st.success(f"Class {class_name} created!")
                             st.rerun()
             
+            # Display all classes for admin
             if classes:
                 for cls in classes:
                     with st.container():
@@ -4746,6 +4818,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             else:
                 st.info("No classes created yet")
         
+        # Teacher: View their classes
         elif user['role'] == 'teacher':
             my_classes = [c for c in classes if c.get('teacher') == user['email']]
             
@@ -4790,6 +4863,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             else:
                 st.info("You haven't been assigned any classes yet")
         
+        # Student: View classes they're enrolled in
         elif user['role'] == 'student':
             my_classes = [c for c in classes if user['email'] in c.get('students', [])]
             
@@ -4827,6 +4901,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         """, unsafe_allow_html=True)
                         
                         if st.button("📝 Request Enrollment", key=f"enroll_{cls['code']}"):
+                            # Add enrollment request
                             class_requests.append({
                                 "id": generate_id("CLR"),
                                 "class_code": cls['code'],
@@ -4840,6 +4915,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             st.rerun()
                         st.divider()
         
+        # Guardian: View their children's classes
         elif user['role'] == 'guardian':
             linked_adms = user.get('linked_students', [])
             linked_students = [u for u in users if u.get('admission_number') in linked_adms]
@@ -4894,6 +4970,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             st.success(f"Group {group_name} created!")
                             st.rerun()
         
+        # Display all groups
         if groups:
             for grp in groups:
                 with st.container():
@@ -4942,11 +5019,6 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         else:
             st.info("No groups created yet")
     
-    # ============ REQUESTS (Admin full page) ============
-    elif menu == "Requests":
-        st.markdown("<h2 style='text-align: center; color: white;'>📋 Pending Requests</h2>", unsafe_allow_html=True)
-        render_requests_section(sidebar=False)
-    
     # ============ TEACHERS SECTION ============
     elif menu == "Teachers":
         st.markdown("<h2 style='text-align: center; color: white;'>👨‍🏫 Teachers</h2>", unsafe_allow_html=True)
@@ -4960,23 +5032,21 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     
                     if st.form_submit_button("Generate Teacher Code", use_container_width=True):
                         if teacher_name:
-                            if not is_email_global_unique(teacher_email, school_code):
-                                st.error("❌ This email is already registered in another school!")
-                            else:
-                                new_code = generate_teacher_code()
-                                teachers_data.append({
-                                    "code": new_code,
-                                    "name": teacher_name,
-                                    "email": teacher_email,
-                                    "department": department,
-                                    "status": "active",
-                                    "created": datetime.now().strftime("%Y-%m-%d"),
-                                    "used_by_list": []
-                                })
-                                save_school_data(school_code, "teachers.json", teachers_data)
-                                st.success(f"Teacher code generated: {new_code}")
-                                st.info(f"Share this code with {teacher_name} for registration")
+                            new_code = generate_teacher_code()
+                            teachers_data.append({
+                                "code": new_code,
+                                "name": teacher_name,
+                                "email": teacher_email,
+                                "department": department,
+                                "status": "active",
+                                "created": datetime.now().strftime("%Y-%m-%d"),
+                                "used_by_list": []
+                            })
+                            save_school_data(school_code, "teachers.json", teachers_data)
+                            st.success(f"Teacher code generated: {new_code}")
+                            st.info(f"Share this code with {teacher_name} for registration")
         
+        # Display all teachers
         st.subheader("📋 Teacher Directory")
         teacher_users = [u for u in users if u['role'] == 'teacher']
         
@@ -5010,6 +5080,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     elif menu == "Students":
         st.markdown("<h2 style='text-align: center; color: white;'>👨‍🎓 Students</h2>", unsafe_allow_html=True)
         
+        # Display all students
         student_users = [u for u in users if u['role'] == 'student']
         
         if student_users:
@@ -5130,6 +5201,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             st.rerun()
                     with col_b:
                         if st.button("📞 Call Teacher", key=f"call_teacher_{student['email']}"):
+                            # Find class teacher
                             for cls in student_classes:
                                 if cls.get('teacher'):
                                     create_call_room(
@@ -5150,6 +5222,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
         if menu == "Library Management":
             st.markdown("<h2 style='text-align: center; color: white;'>📚 Library Management System</h2>", unsafe_allow_html=True)
             
+            # External links
             st.markdown("### 🔗 External Management Systems")
             col1, col2 = st.columns(2)
             with col1:
@@ -5198,6 +5271,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                     st.success(f"Book '{title}' added successfully!")
                                     st.rerun()
                 
+                # Display books
                 if library_books:
                     search_book = st.text_input("🔍 Search books by title or author", placeholder="Type to search...")
                     
@@ -5219,10 +5293,8 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 st.markdown(f"Available: {book['available']}")
                             with col4:
                                 if book['available'] > 0 and user['role'] in ['student', 'teacher']:
-                                    if st.button("📖 Borrow", key=f"borrow_{book['id']}", disabled=st.session_state.borrowing_book):
-                                        st.session_state.borrowing_book = True
+                                    if st.button("📖 Borrow", key=f"borrow_{book['id']}"):
                                         success, message = borrow_book(school_code, user['email'], book['id'])
-                                        st.session_state.borrowing_book = False
                                         if success:
                                             st.success(message)
                                             st.rerun()
@@ -5285,6 +5357,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         else:
                             st.info("No active borrowings")
                 
+                # Display user's borrowed books
                 if borrowed_books:
                     st.markdown("##### My Borrowed Books")
                     active_borrows = [b for b in borrowed_books if b['status'] == 'borrowed']
@@ -5321,13 +5394,11 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             member_type = st.selectbox("Member Type", ["student", "teacher", "guardian", "librarian"])
                             
                             if st.form_submit_button("Add Member"):
-                                if not is_email_global_unique(member_email, school_code):
-                                    st.error("❌ This email is already registered in another school!")
-                                else:
-                                    add_library_member(school_code, member_email, member_type)
-                                    st.success(f"Member {member_email} added")
-                                    st.rerun()
+                                add_library_member(school_code, member_email, member_type)
+                                st.success(f"Member {member_email} added")
+                                st.rerun()
                 
+                # Display members
                 if library_members:
                     for member in library_members:
                         with st.container():
@@ -5357,6 +5428,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 st.subheader("Transaction History")
                 
                 if library_transactions:
+                    # Create DataFrame for visualization
                     trans_data = []
                     for t in library_transactions[-20:]:
                         trans_data.append({
@@ -5372,6 +5444,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         df = pd.DataFrame(trans_data)
                         st.dataframe(df, use_container_width=True)
                     
+                    # Statistics
                     col1, col2, col3 = st.columns(3)
                     with col1:
                         st.metric("Total Transactions", len(library_transactions))
@@ -5450,10 +5523,8 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                 st.markdown(f"Available: {book['available']}")
                             with col3:
                                 if user['role'] in ['student', 'teacher']:
-                                    if st.button("📖 Borrow", key=f"user_borrow_{book['id']}", disabled=st.session_state.borrowing_book):
-                                        st.session_state.borrowing_book = True
+                                    if st.button("📖 Borrow", key=f"user_borrow_{book['id']}"):
                                         success, message = borrow_book(school_code, user['email'], book['id'])
-                                        st.session_state.borrowing_book = False
                                         if success:
                                             st.success(message)
                                             st.rerun()
@@ -5534,9 +5605,11 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             col1, col2 = st.columns(2)
             
             with col1:
+                # Theme selector
                 selected_theme = st.selectbox("Choose Theme", list(THEMES.keys()), 
                                             index=list(THEMES.keys()).index(st.session_state.theme))
                 
+                # Preview theme
                 st.markdown(f"""
                 <div style="background: {THEMES[selected_theme]['primary']}; padding: 10px; border-radius: 8px; margin: 10px 0;">
                     <p style="color: white;">Primary Color Preview</p>
@@ -5550,6 +5623,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 """, unsafe_allow_html=True)
             
             with col2:
+                # Wallpaper selector
                 st.subheader("Wallpaper")
                 selected_wallpaper = st.selectbox("Choose Wallpaper", list(WALLPAPERS.keys()),
                                                 index=list(WALLPAPERS.keys()).index(st.session_state.wallpaper))
@@ -5629,6 +5703,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                                               ["Daily", "Weekly", "Never"])
                 
                 if st.form_submit_button("💾 Save Notification Settings", use_container_width=True):
+                    # Save notification settings to user profile
                     notification_settings = {
                         "email_announcements": email_announcements,
                         "email_messages": email_messages,
@@ -5648,6 +5723,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     elif menu == "School Management":
         st.markdown("<h2 style='text-align: center; color: white;'>📊 School Management System</h2>", unsafe_allow_html=True)
         
+        # External links
         st.markdown("### 🔗 External Management Systems")
         col1, col2 = st.columns(2)
         with col1:
@@ -5686,6 +5762,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 with st.form("add_academic_record_dash"):
                     if students:
                         if user['role'] == 'teacher' and teacher_classes:
+                            # Teacher can only add grades for students in their classes
                             class_students = []
                             for cls in teacher_classes:
                                 for student_email in cls.get('students', []):
@@ -5708,6 +5785,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                             term = st.selectbox("Term", ["Term 1", "Term 2", "Term 3"])
                             year = st.number_input("Year", value=datetime.now().year, min_value=2020, max_value=2030)
                             
+                            # Get class name if teacher
                             class_name = None
                             if user['role'] == 'teacher' and teacher_classes:
                                 selected_parts = student.split(' - ')
@@ -6108,8 +6186,8 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
     elif menu == "Personal Dashboard":
         st.markdown("<h2 style='text-align: center; color: white;'>👤 Personal Dashboard</h2>", unsafe_allow_html=True)
         
-        personal_tab1, personal_tab2, personal_tab3, personal_tab4, personal_tab5 = st.tabs([
-            "👤 Profile", "📊 My Performance", "⭐ Reviews & Feedback", "🏆 Achievements", "📁 Portfolio"
+        personal_tab1, personal_tab2, personal_tab3, personal_tab4 = st.tabs([
+            "👤 Profile", "📊 My Performance", "⭐ Reviews & Feedback", "🏆 Achievements"
         ])
         
         with personal_tab1:
@@ -6170,6 +6248,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             if user['role'] == 'student':
                 attendance = load_school_data(school_code, "attendance.json", [])
                 
+                # Get performance data from teacher entries
                 performance = calculate_student_performance(academic_records, user['email'])
                 
                 col1, col2 = st.columns(2)
@@ -6184,6 +6263,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     st.markdown(f"<div class='{rank_class}' style='padding:10px; text-align:center;'>{performance['rank']}</div>", 
                                unsafe_allow_html=True)
                     
+                    # Subject-wise performance from teacher data
                     if performance['subject_details']:
                         st.markdown("##### Subject Details")
                         for subject_data in performance['subject_details']:
@@ -6216,6 +6296,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     else:
                         st.info("No attendance records yet")
                 
+                # Class performance comparison
                 my_classes = [c for c in classes if user['email'] in c.get('students', [])]
                 if my_classes:
                     st.markdown("##### Class Performance Comparison")
@@ -6328,6 +6409,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                 with tab_a:
                     st.markdown("##### Give Student Review")
                     
+                    # Get students from teacher's classes
                     my_classes = [c for c in classes if c.get('teacher') == user['email']]
                     class_students = []
                     for cls in my_classes:
@@ -6361,6 +6443,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     st.markdown("##### Parent Feedback")
                     
                     feedback = load_school_data(school_code, "parent_feedback.json", [])
+                    # Filter feedback for students in teacher's classes
                     my_students = []
                     for cls in my_classes:
                         my_students.extend(cls.get('students', []))
@@ -6413,6 +6496,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
             st.markdown("#### 🏆 Achievements & Recognition")
             
             if user['role'] == 'student':
+                # Calculate achievements based on performance
                 performance = calculate_student_performance(academic_records, user['email'])
                 
                 achievements = []
@@ -6429,6 +6513,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     if present_count / len(student_attendance) >= 0.95:
                         achievements.append(("⭐ Perfect Attendance", "95%+ attendance rate", "blue"))
                 
+                # Library achievements
                 if library_transactions:
                     user_transactions = [t for t in library_transactions if t['user_email'] == user['email']]
                     if len(user_transactions) >= 10:
@@ -6447,6 +6532,7 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                     st.info("No achievements yet. Keep working hard!")
             
             else:
+                # Generic achievements for other roles
                 col1, col2, col3 = st.columns(3)
                 with col1:
                     st.markdown("""
@@ -6474,9 +6560,6 @@ elif st.session_state.page == 'dashboard' and st.session_state.current_school an
                         <p>Term 1, 2024</p>
                     </div>
                     """, unsafe_allow_html=True)
-        
-        with personal_tab5:
-            render_portfolio()
     
     elif menu == "Profile":
         st.markdown("<h2 style='text-align: center; color: white;'>👤 My Profile</h2>", unsafe_allow_html=True)
