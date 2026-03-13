@@ -26,7 +26,7 @@ except ImportError:
 
 # ============ PAGE CONFIG ============
 st.set_page_config(
-    page_title="✨ Edwin's School Community Hub ✨",
+    page_title="✨ School Community Hub ✨",
     page_icon="🌟",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -3491,7 +3491,7 @@ if st.session_state.page == 'dashboard' and st.session_state.user:
 
 # ----- WELCOME PAGE -----
 if st.session_state.page == 'welcome':
-    st.markdown('<h1>✨ School Community Hub ✨</h1>', unsafe_allow_html=True)
+    st.markdown('<h1>✨ Edwin School Community Hub ✨</h1>', unsafe_allow_html=True)
     st.markdown('<p style="text-align: center; color: white; font-size: 1.2rem; text-shadow: 1px 1px 2px black;">Connect • Collaborate • Manage • Shine</p>', unsafe_allow_html=True)
     st.divider()
     
